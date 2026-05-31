@@ -18,6 +18,10 @@ class AppSpacing {
   // ── Tamaños de iconos ────────────────────────────────────────
   static const double iconSizeMd = 22.0;
   static const double iconSizeLg = 36.0;
+  static const double iconSm = 18.0;
+  static const double iconMd = 24.0;
+  static const double iconXl = 28.0;
+  static const double iconLg = 32.0;
 
   // ── Alturas de componentes ───────────────────────────────────
   static const double buttonHeight = 54;

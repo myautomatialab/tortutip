@@ -41,9 +41,9 @@ class RoleCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             CircleAvatar(
-              radius: 32,
+              radius: AppSpacing.huge,
               backgroundColor: iconBackgroundColor,
-              child: Icon(icon, color: Colors.white, size: 28),
+              child: Icon(icon, color: AppColors.white, size: AppSpacing.iconXl),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(label, style: AppTypography.h4),

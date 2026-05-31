@@ -37,7 +37,7 @@ class GenderCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 24, color: AppColors.textPrimary),
+            Icon(icon, size: AppSpacing.iconMd, color: AppColors.textPrimary),
             const SizedBox(height: AppSpacing.sm),
             Text(
               label,

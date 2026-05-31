@@ -60,7 +60,7 @@ class CategoryCard extends StatelessWidget {
                 children: [
                   Icon(
                     _iconForCategory(category.name),
-                    size: 32,
+                    size: AppSpacing.iconLg,
                     color: AppColors.primary,
                   ),
                   const SizedBox(height: AppSpacing.sm),
@@ -81,7 +81,7 @@ class CategoryCard extends StatelessWidget {
                 child: Icon(
                   Icons.check_circle,
                   color: AppColors.primary,
-                  size: 18,
+                  size: AppSpacing.iconSm,
                 ),
               ),
           ],

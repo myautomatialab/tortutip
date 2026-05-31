@@ -81,7 +81,7 @@ class _OnboardingRoleScreenState extends State<OnboardingRoleScreen> {
                   selected: _selectedRole == 'writer',
                   onTap: () => setState(() => _selectedRole = 'writer'),
                   icon: Icons.edit_note,
-                  iconBackgroundColor: const Color(0xFFF5A623),
+                  iconBackgroundColor: AppColors.writerAccent,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 RoleCard(
