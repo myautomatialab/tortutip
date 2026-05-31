@@ -28,9 +28,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<DataState<UserEntity?>> checkCurrentAuth() async {
+  Future<DataState<UserEntity>> checkCurrentAuth() async {
     try {
       final user = await _dataSource.checkCurrentUser();
+      if (user == null) return DataFailed(Exception('No active session'));
       return DataSuccess(user);
     } on Exception catch (e) {
       return DataFailed(e);

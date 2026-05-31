@@ -1,7 +1,20 @@
-abstract class AuthEvent {}
+import 'package:equatable/equatable.dart';
 
-class CheckAuthEvent extends AuthEvent {}
+abstract class AuthEvent extends Equatable {
+  const AuthEvent();
 
-class SignInWithGoogleEvent extends AuthEvent {}
+  @override
+  List<Object?> get props => [];
+}
 
-class SignOutEvent extends AuthEvent {}
+class CheckAuthEvent extends AuthEvent {
+  const CheckAuthEvent();
+}
+
+class SignInWithGoogleEvent extends AuthEvent {
+  const SignInWithGoogleEvent();
+}
+
+class SignOutEvent extends AuthEvent {
+  const SignOutEvent();
+}

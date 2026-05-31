@@ -24,8 +24,8 @@ class TortuPrimaryButton extends StatelessWidget {
         onPressed: isLoading ? null : onTap,
         child: isLoading
             ? const SizedBox(
-                width: 22,
-                height: 22,
+                width: AppSpacing.iconSizeMd,
+                height: AppSpacing.iconSizeMd,
                 child: CircularProgressIndicator(
                   color: AppColors.textOnDark,
                   strokeWidth: 2,
@@ -85,16 +85,16 @@ class TortuGoogleButton extends StatelessWidget {
         child: isLoading
             ? const Center(
                 child: SizedBox(
-                  width: 22,
-                  height: 22,
+                  width: AppSpacing.iconSizeMd,
+                  height: AppSpacing.iconSizeMd,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _GoogleLogoIcon(),
-                  const SizedBox(width: 12),
+                  const GoogleLogoIcon(),
+                  const SizedBox(width: AppSpacing.md),
                   Text(
                     'Continuar con Google',
                     style: AppTypography.bodyLg.copyWith(
@@ -109,7 +109,9 @@ class TortuGoogleButton extends StatelessWidget {
   }
 }
 
-class _GoogleLogoIcon extends StatelessWidget {
+class GoogleLogoIcon extends StatelessWidget {
+  const GoogleLogoIcon({super.key});
+
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
@@ -130,22 +132,22 @@ class _GooglePainter extends CustomPainter {
       ..strokeWidth = strokeW
       ..strokeCap = StrokeCap.butt;
 
-    paint.color = const Color(0xFF4285F4);
+    paint.color = AppColors.googleBlue;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - strokeW / 2),
       -1.05, 1.75, false, paint,
     );
-    paint.color = const Color(0xFFEA4335);
+    paint.color = AppColors.googleRed;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - strokeW / 2),
       -2.96, 1.91, false, paint,
     );
-    paint.color = const Color(0xFFFBBC05);
+    paint.color = AppColors.googleYellow;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - strokeW / 2),
       2.27, 0.84, false, paint,
     );
-    paint.color = const Color(0xFF34A853);
+    paint.color = AppColors.googleGreen;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - strokeW / 2),
       0.70, 1.57, false, paint,

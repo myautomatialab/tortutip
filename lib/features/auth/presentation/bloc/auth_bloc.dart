@@ -3,8 +3,8 @@ import 'package:tortutip/core/usecase/usecase.dart';
 import 'package:tortutip/features/auth/domain/use_cases/check_auth_use_case.dart';
 import 'package:tortutip/features/auth/domain/use_cases/sign_in_with_google_use_case.dart';
 import 'package:tortutip/features/auth/domain/use_cases/sign_out_use_case.dart';
-import 'auth_event.dart';
-import 'auth_state.dart';
+import 'package:tortutip/features/auth/presentation/bloc/auth_event.dart';
+import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final CheckAuthUseCase _checkAuth;
@@ -22,7 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       CheckAuthEvent event, Emitter<AuthState> emit) async {
     emit(const AuthLoading());
     final result = await _checkAuth(const NoParams());
-    if (result.isSuccess && result.data != null) {
+    if (result.isSuccess) {
       emit(AuthAuthenticated(result.data!));
     } else {
       emit(const AuthInitial());
@@ -41,15 +41,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {
-    await _signOut(const NoParams());
-    emit(const AuthInitial());
+    final result = await _signOut(const NoParams());
+    if (result.isSuccess) {
+      emit(const AuthInitial());
+    } else {
+      emit(AuthError(_mapSignOutError(result.error!)));
+    }
   }
 
   String _mapSignInError(Exception error) {
-    final msg = error.toString().toLowerCase();
+final msg = error.toString().toLowerCase();
     if (msg.contains('cancelled') || msg.contains('cancel')) {
       return '';
     }
     return 'No se pudo iniciar sesión. Inténtalo de nuevo';
+  }
+
+  String _mapSignOutError(Exception error) {
+    return 'No se pudo cerrar la sesión. Inténtalo de nuevo';
   }
 }
