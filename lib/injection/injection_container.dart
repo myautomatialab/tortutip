@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'auth_injection.dart';
 import 'articles_injection.dart';
 import 'categories_injection.dart';
+import 'explore_injection.dart';
 import 'profile_injection.dart';
 import 'user_injection.dart';
 
@@ -33,4 +34,5 @@ Future<void> initDependencies() async {
   initCategoriesDependencies(); // categories depende de Firebase
   initArticlesDependencies();   // articles depende de Firebase + user
   initProfileDependencies();    // profile depende de user + articles
+  initExploreDependencies();    // explore depende de articles + categories
 }

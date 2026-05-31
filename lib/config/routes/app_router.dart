@@ -10,7 +10,7 @@ import '../../features/articles/config/articles_routes.dart';
 import '../../features/onboarding/config/onboarding_routes.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_cubit.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_state.dart';
-import '../../features/profile/config/profile_routes.dart';
+import '../../features/explore/config/explore_routes.dart';
 import '../../injection/injection_container.dart';
 import 'app_routes.dart';
 import 'app_shell.dart';
@@ -54,7 +54,7 @@ class AppRouter {
           builder: (_, _, child) => AppShell(child: child),
           routes: [
             ...ArticlesRoutes.shellRoutes,
-            ...ProfileRoutes.shellRoutes,
+            ...ExploreRoutes.shellRoutes,
           ],
         ),
       ],
