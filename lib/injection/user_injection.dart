@@ -7,6 +7,7 @@ import '../shared/user/data/data_sources/user_remote_data_source.dart';
 import '../shared/user/data/repository/user_repository_impl.dart';
 import '../shared/user/domain/repository/user_repository.dart';
 import '../shared/user/domain/use_cases/get_current_user_use_case.dart';
+import '../shared/user/domain/use_cases/get_user_category_ids_use_case.dart';
 import '../shared/user/domain/use_cases/select_user_categories_use_case.dart';
 import '../shared/user/domain/use_cases/update_user_profile_use_case.dart';
 import '../shared/user/domain/use_cases/update_user_role_use_case.dart';
@@ -29,6 +30,7 @@ void initUserDependencies() {
   sl.registerLazySingleton(() => UpdateUserRoleUseCase(sl()));
   sl.registerLazySingleton(() => SelectUserCategoriesUseCase(sl()));
   sl.registerLazySingleton(() => UpdateUserProfileUseCase(sl()));
+  sl.registerLazySingleton(() => GetUserCategoryIdsUseCase(sl()));
 
   // Cubit de onboarding vive aquí porque depende de use_cases de user
   sl.registerFactory(() => OnboardingCubit(sl(), sl(), sl()));
