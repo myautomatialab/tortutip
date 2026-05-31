@@ -54,7 +54,7 @@ class LandingScreen extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, AppColors.background],
+                  colors: [AppColors.transparent, AppColors.background],
                   stops: [0.3, 0.7],
                 ),
               ),

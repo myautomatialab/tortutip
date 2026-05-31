@@ -68,7 +68,7 @@ void main() {
       'should_emit_Loading_then_Initial_when_no_active_session',
       build: () {
         when(() => mockCheckAuth(any()))
-            .thenAnswer((_) async => const DataSuccess(null));
+            .thenAnswer((_) async => DataFailed(Exception('No active session')));
         return bloc;
       },
       act: (b) => b.add(const CheckAuthEvent()),

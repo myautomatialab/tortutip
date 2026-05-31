@@ -37,19 +37,19 @@ void main() {
 
       final result = await useCase(const NoParams());
 
-      expect(result, isA<DataSuccess<UserEntity?>>());
+      expect(result, isA<DataSuccess<UserEntity>>());
       expect(result.data, equals(tUser));
       verify(() => mockRepository.checkCurrentAuth()).called(1);
     });
 
-    test('should_return_DataSuccess_null_when_no_active_session', () async {
+    test('should_return_DataFailed_when_no_active_session', () async {
+      final exception = Exception('No active session');
       when(() => mockRepository.checkCurrentAuth())
-          .thenAnswer((_) async => const DataSuccess(null));
+          .thenAnswer((_) async => DataFailed(exception));
 
       final result = await useCase(const NoParams());
 
-      expect(result, isA<DataSuccess<UserEntity?>>());
-      expect(result.data, isNull);
+      expect(result, isA<DataFailed<UserEntity>>());
     });
 
     test('should_return_DataFailed_when_repository_returns_failure', () async {
@@ -59,7 +59,7 @@ void main() {
 
       final result = await useCase(const NoParams());
 
-      expect(result, isA<DataFailed<UserEntity?>>());
+      expect(result, isA<DataFailed<UserEntity>>());
       expect(result.error, equals(exception));
     });
   });

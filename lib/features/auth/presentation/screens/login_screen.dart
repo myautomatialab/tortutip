@@ -35,7 +35,7 @@ class LoginScreen extends StatelessWidget {
                 child: const Icon(
                   Icons.bolt,
                   color: AppColors.primary,
-                  size: 36,
+                  size: AppSpacing.iconSizeLg,
                 ),
               ),
               const SizedBox(height: AppSpacing.xxl),

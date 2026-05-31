@@ -77,19 +77,17 @@ void main() {
 
       final result = await repository.checkCurrentAuth();
 
-      expect(result, isA<DataSuccess<UserEntity?>>());
+      expect(result, isA<DataSuccess<UserEntity>>());
       expect(result.data, equals(tUser));
     });
 
-    test('should_return_DataSuccess_null_when_datasource_returns_null',
-        () async {
+    test('should_return_DataFailed_when_datasource_returns_null', () async {
       when(() => mockDataSource.checkCurrentUser())
           .thenAnswer((_) async => null);
 
       final result = await repository.checkCurrentAuth();
 
-      expect(result, isA<DataSuccess<UserEntity?>>());
-      expect(result.data, isNull);
+      expect(result, isA<DataFailed<UserEntity>>());
     });
 
     test('should_return_DataFailed_when_datasource_throws', () async {
