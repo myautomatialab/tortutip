@@ -11,4 +11,5 @@ abstract class ArticleRepository {
   Future<DataState<List<String>>> getSavedArticleIds(String userId);
   Future<DataState<List<ArticleEntity>>> getFeedArticlesPaged(List<String> categoryIds, int page, int pageSize);
   Future<DataState<bool>> unsaveArticle(String userId, String articleId);
+  Future<DataState<List<ArticleEntity>>> getRelatedArticles(String categoryId, String excludeArticleId);
 }

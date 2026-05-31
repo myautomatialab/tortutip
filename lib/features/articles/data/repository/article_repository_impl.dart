@@ -91,4 +91,16 @@ class ArticleRepositoryImpl implements ArticleRepository {
       return DataFailed(e);
     }
   }
+
+  @override
+  Future<DataState<List<ArticleEntity>>> getRelatedArticles(
+      String categoryId, String excludeArticleId) async {
+    try {
+      final models =
+          await _dataSource.getRelatedArticles(categoryId, excludeArticleId);
+      return DataSuccess(List<ArticleEntity>.from(models));
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
 }

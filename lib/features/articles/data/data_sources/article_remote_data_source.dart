@@ -12,6 +12,7 @@ abstract class ArticleRemoteDataSource {
   Future<List<String>> getSavedArticleIds(String userId);
   Future<List<ArticleModel>> getFeedArticlesPaged(List<String> categoryIds, int page, int pageSize);
   Future<void> unsaveArticle(String userId, String articleId);
+  Future<List<ArticleModel>> getRelatedArticles(String categoryId, String excludeArticleId);
 }
 
 class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
@@ -119,5 +120,21 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
         .collection('saved_articles')
         .doc('${userId}_$articleId')
         .delete();
+  }
+
+  @override
+  Future<List<ArticleModel>> getRelatedArticles(
+      String categoryId, String excludeArticleId) async {
+    final snapshot = await _firestore
+        .collection('articles')
+        .where('category_id', isEqualTo: categoryId)
+        .where('status', isEqualTo: 'published')
+        .limit(6)
+        .get();
+    return snapshot.docs
+        .map((doc) => ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
+        .where((a) => a.id != excludeArticleId)
+        .take(5)
+        .toList();
   }
 }
