@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "560559933172",
+    "project_id": "tortutip-mvp",
+    "storage_bucket": "tortutip-mvp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:560559933172:android:d074879538471a81f480a1",
+        "android_client_info": {
+          "package_name": "com.tortutip.tortutip"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "560559933172-ue4ejk15ld7v5bvv76452ccp37hqtvbv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4hO8fzQbxb4Zy7bBgNsBev-KWuqUGf2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "560559933172-ue4ejk15ld7v5bvv76452ccp37hqtvbv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "560559933172-0886as3vtmhvh13trk7urmlsi1alolif.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tortutip.tortutip"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

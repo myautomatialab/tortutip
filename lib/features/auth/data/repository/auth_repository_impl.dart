@@ -1,0 +1,39 @@
+import 'package:tortutip/core/resources/data_state.dart';
+import 'package:tortutip/features/auth/data/data_sources/auth_remote_data_source.dart';
+import 'package:tortutip/features/auth/domain/repository/auth_repository.dart';
+import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
+
+class AuthRepositoryImpl implements AuthRepository {
+  final AuthRemoteDataSource _dataSource;
+  AuthRepositoryImpl(this._dataSource);
+
+  @override
+  Future<DataState<UserEntity>> signInWithGoogle() async {
+    try {
+      final user = await _dataSource.signInWithGoogle();
+      return DataSuccess(user.toEntity());
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<bool>> signOut() async {
+    try {
+      await _dataSource.signOut();
+      return const DataSuccess(true);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<UserEntity?>> checkCurrentAuth() async {
+    try {
+      final user = await _dataSource.checkCurrentUser();
+      return DataSuccess(user?.toEntity());
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+}

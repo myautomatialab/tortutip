@@ -1,0 +1,62 @@
+import 'package:tortutip/core/resources/data_state.dart';
+import 'package:tortutip/shared/user/data/data_sources/user_remote_data_source.dart';
+import 'package:tortutip/shared/user/data/models/user_model.dart';
+import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
+import 'package:tortutip/shared/user/domain/repository/user_repository.dart';
+
+class UserRepositoryImpl implements UserRepository {
+  final UserRemoteDataSource _dataSource;
+  UserRepositoryImpl(this._dataSource);
+
+  @override
+  Future<DataState<UserEntity>> getCurrentUser() async {
+    try {
+      final user = await _dataSource.getCurrentUser('current_user_id');
+      return DataSuccess(user.toEntity());
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<bool>> updateUserRole(String userId, String role) async {
+    try {
+      await _dataSource.updateUserRole(userId, role);
+      return const DataSuccess(true);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<bool>> selectUserCategories(
+      String userId, List<String> categoryIds) async {
+    try {
+      await _dataSource.selectUserCategories(userId, categoryIds);
+      return const DataSuccess(true);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<UserEntity>> updateUserProfile(UserEntity user) async {
+    try {
+      final model = UserModel(
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+        bio: user.bio,
+        role: user.role,
+        gender: user.gender,
+        ageRange: user.ageRange,
+        createdAt: user.createdAt,
+      );
+      final updated = await _dataSource.updateUserProfile(model);
+      return DataSuccess(updated.toEntity());
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+}
