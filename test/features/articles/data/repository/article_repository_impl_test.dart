@@ -101,4 +101,67 @@ void main() {
       expect(result, isA<DataFailed<List<ArticleEntity>>>());
     });
   });
+
+  group('ArticleRepositoryImpl.getSavedArticleIds', () {
+    test('should_return_DataSuccess_with_ids_when_datasource_succeeds',
+        () async {
+      when(() => mockDataSource.getSavedArticleIds(any()))
+          .thenAnswer((_) async => ['article_1', 'article_2']);
+
+      final result = await repository.getSavedArticleIds('user_1');
+
+      expect(result, isA<DataSuccess<List<String>>>());
+      expect(result.data, equals(['article_1', 'article_2']));
+    });
+
+    test('should_return_DataFailed_when_datasource_throws', () async {
+      when(() => mockDataSource.getSavedArticleIds(any()))
+          .thenThrow(Exception('error'));
+
+      final result = await repository.getSavedArticleIds('user_1');
+
+      expect(result, isA<DataFailed<List<String>>>());
+    });
+  });
+
+  group('ArticleRepositoryImpl.getFeedArticlesPaged', () {
+    test('should_return_DataSuccess_with_entities_when_datasource_succeeds',
+        () async {
+      when(() => mockDataSource.getFeedArticlesPaged(any(), any(), any()))
+          .thenAnswer((_) async => <ArticleModel>[]);
+
+      final result = await repository.getFeedArticlesPaged(['cat_1'], 0, 10);
+
+      expect(result, isA<DataSuccess<List<ArticleEntity>>>());
+    });
+
+    test('should_return_DataFailed_when_datasource_throws', () async {
+      when(() => mockDataSource.getFeedArticlesPaged(any(), any(), any()))
+          .thenThrow(Exception('error'));
+
+      final result = await repository.getFeedArticlesPaged(['cat_1'], 0, 10);
+
+      expect(result, isA<DataFailed<List<ArticleEntity>>>());
+    });
+  });
+
+  group('ArticleRepositoryImpl.unsaveArticle', () {
+    test('should_return_DataSuccess_when_datasource_succeeds', () async {
+      when(() => mockDataSource.unsaveArticle(any(), any()))
+          .thenAnswer((_) async {});
+
+      final result = await repository.unsaveArticle('user_1', 'article_1');
+
+      expect(result, isA<DataSuccess<bool>>());
+    });
+
+    test('should_return_DataFailed_when_datasource_throws', () async {
+      when(() => mockDataSource.unsaveArticle(any(), any()))
+          .thenThrow(Exception('error'));
+
+      final result = await repository.unsaveArticle('user_1', 'article_1');
+
+      expect(result, isA<DataFailed<bool>>());
+    });
+  });
 }

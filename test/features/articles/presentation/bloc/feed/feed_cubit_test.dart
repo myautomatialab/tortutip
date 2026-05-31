@@ -3,36 +3,97 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tortutip/core/resources/data_state.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
-import 'package:tortutip/features/articles/domain/use_cases/get_feed_articles_use_case.dart';
+import 'package:tortutip/features/articles/domain/use_cases/get_feed_articles_paged_use_case.dart';
+import 'package:tortutip/features/articles/domain/use_cases/get_saved_article_ids_use_case.dart';
+import 'package:tortutip/features/articles/domain/use_cases/save_article_use_case.dart';
+import 'package:tortutip/features/articles/domain/use_cases/unsave_article_use_case.dart';
 import 'package:tortutip/features/articles/presentation/bloc/feed/feed_cubit.dart';
 import 'package:tortutip/features/articles/presentation/bloc/feed/feed_state.dart';
+import 'package:tortutip/shared/user/domain/use_cases/get_user_category_ids_use_case.dart';
 
-class MockGetFeedArticlesUseCase extends Mock
-    implements GetFeedArticlesUseCase {}
+class MockGetFeedArticlesPagedUseCase extends Mock
+    implements GetFeedArticlesPagedUseCase {}
+
+class MockGetSavedArticleIdsUseCase extends Mock
+    implements GetSavedArticleIdsUseCase {}
+
+class MockSaveArticleUseCase extends Mock implements SaveArticleUseCase {}
+
+class MockUnsaveArticleUseCase extends Mock implements UnsaveArticleUseCase {}
+
+class MockGetUserCategoryIdsUseCase extends Mock
+    implements GetUserCategoryIdsUseCase {}
 
 void main() {
   late FeedCubit cubit;
-  late MockGetFeedArticlesUseCase mockGetFeedArticles;
+  late MockGetFeedArticlesPagedUseCase mockGetFeedArticlesPaged;
+  late MockGetSavedArticleIdsUseCase mockGetSavedArticleIds;
+  late MockSaveArticleUseCase mockSaveArticle;
+  late MockUnsaveArticleUseCase mockUnsaveArticle;
+  late MockGetUserCategoryIdsUseCase mockGetUserCategoryIds;
+
+  const userId = 'user_1';
+  const categoryIds = ['cat_1'];
+  final articles = <ArticleEntity>[
+    ArticleEntity(
+      id: 'art_1',
+      authorId: userId,
+      categoryId: 'cat_1',
+      title: 'Title',
+      body: 'Body',
+      coverVerticalUrl: '',
+      coverHorizontalUrl: '',
+      status: 'published',
+      readTimeMinutes: 5,
+      saveCount: 0,
+      createdAt: DateTime(2024),
+    ),
+  ];
 
   setUp(() {
-    mockGetFeedArticles = MockGetFeedArticlesUseCase();
-    cubit = FeedCubit(mockGetFeedArticles);
+    mockGetFeedArticlesPaged = MockGetFeedArticlesPagedUseCase();
+    mockGetSavedArticleIds = MockGetSavedArticleIdsUseCase();
+    mockSaveArticle = MockSaveArticleUseCase();
+    mockUnsaveArticle = MockUnsaveArticleUseCase();
+    mockGetUserCategoryIds = MockGetUserCategoryIdsUseCase();
+
+    cubit = FeedCubit(
+      mockGetFeedArticlesPaged,
+      mockGetSavedArticleIds,
+      mockSaveArticle,
+      mockUnsaveArticle,
+      mockGetUserCategoryIds,
+    );
+
+    registerFallbackValue(
+        const GetFeedArticlesPagedParams(categoryIds: [], page: 0, pageSize: 10));
+    registerFallbackValue(const GetSavedArticleIdsParams(userId: ''));
+    registerFallbackValue(
+        const SaveArticleParams(userId: '', articleId: ''));
+    registerFallbackValue(
+        const UnsaveArticleParams(userId: '', articleId: ''));
+    registerFallbackValue(const GetUserCategoryIdsParams(userId: ''));
   });
 
   tearDown(() => cubit.close());
 
-  group('FeedCubit.loadFeed', () {
-    final categoryIds = ['cat_1'];
-    final articles = <ArticleEntity>[];
+  void stubSuccess() {
+    when(() => mockGetUserCategoryIds(any()))
+        .thenAnswer((_) async => DataSuccess(categoryIds));
+    when(() => mockGetFeedArticlesPaged(any()))
+        .thenAnswer((_) async => DataSuccess(articles));
+    when(() => mockGetSavedArticleIds(any()))
+        .thenAnswer((_) async => const DataSuccess(<String>[]));
+  }
 
+  group('FeedCubit.loadFeed', () {
     blocTest<FeedCubit, FeedState>(
-      'should_emit_Loading_then_Loaded_when_use_case_succeeds',
+      'should_emit_loading_then_loaded_when_loadFeed_succeeds',
       build: () {
-        when(() => mockGetFeedArticles(categoryIds))
-            .thenAnswer((_) async => DataSuccess(articles));
+        stubSuccess();
         return cubit;
       },
-      act: (c) => c.loadFeed(categoryIds),
+      act: (c) => c.loadFeed(userId),
       expect: () => [
         isA<FeedLoading>(),
         isA<FeedLoaded>(),
@@ -40,16 +101,124 @@ void main() {
     );
 
     blocTest<FeedCubit, FeedState>(
-      'should_emit_Loading_then_Error_when_use_case_fails',
+      'should_emit_loading_then_error_when_loadFeed_fails_categories',
       build: () {
-        when(() => mockGetFeedArticles(categoryIds))
+        when(() => mockGetUserCategoryIds(any()))
             .thenAnswer((_) async => DataFailed(Exception('error')));
         return cubit;
       },
-      act: (c) => c.loadFeed(categoryIds),
+      act: (c) => c.loadFeed(userId),
       expect: () => [
         isA<FeedLoading>(),
         isA<FeedError>(),
+      ],
+    );
+
+    blocTest<FeedCubit, FeedState>(
+      'should_emit_loading_then_error_when_loadFeed_fails_articles',
+      build: () {
+        when(() => mockGetUserCategoryIds(any()))
+            .thenAnswer((_) async => DataSuccess(categoryIds));
+        when(() => mockGetFeedArticlesPaged(any()))
+            .thenAnswer((_) async => DataFailed(Exception('error')));
+        when(() => mockGetSavedArticleIds(any()))
+            .thenAnswer((_) async => const DataSuccess(<String>[]));
+        return cubit;
+      },
+      act: (c) => c.loadFeed(userId),
+      expect: () => [
+        isA<FeedLoading>(),
+        isA<FeedError>(),
+      ],
+    );
+  });
+
+  group('FeedCubit.onSwipe', () {
+    blocTest<FeedCubit, FeedState>(
+      'should_update_currentIndex_when_onSwipe_called',
+      build: () {
+        stubSuccess();
+        return cubit;
+      },
+      act: (c) async {
+        await c.loadFeed(userId);
+        c.onSwipe();
+      },
+      expect: () => [
+        isA<FeedLoading>(),
+        isA<FeedLoaded>(),
+        // no further emit because index >= articles.length after swipe
+      ],
+    );
+  });
+
+  group('FeedCubit.toggleBookmark', () {
+    blocTest<FeedCubit, FeedState>(
+      'should_add_articleId_to_savedArticleIds_when_toggleBookmark_on_unsaved',
+      build: () {
+        stubSuccess();
+        when(() => mockSaveArticle(any()))
+            .thenAnswer((_) async => const DataSuccess(true));
+        return cubit;
+      },
+      act: (c) async {
+        await c.loadFeed(userId);
+        await c.toggleBookmark('art_1');
+      },
+      expect: () => [
+        isA<FeedLoading>(),
+        isA<FeedLoaded>(),
+        isA<FeedLoaded>(),
+      ],
+      verify: (_) {
+        verify(() => mockSaveArticle(any())).called(1);
+      },
+    );
+
+    blocTest<FeedCubit, FeedState>(
+      'should_remove_articleId_from_savedArticleIds_when_toggleBookmark_on_saved',
+      build: () {
+        when(() => mockGetUserCategoryIds(any()))
+            .thenAnswer((_) async => DataSuccess(categoryIds));
+        when(() => mockGetFeedArticlesPaged(any()))
+            .thenAnswer((_) async => DataSuccess(articles));
+        when(() => mockGetSavedArticleIds(any()))
+            .thenAnswer((_) async => const DataSuccess(['art_1']));
+        when(() => mockUnsaveArticle(any()))
+            .thenAnswer((_) async => const DataSuccess(true));
+        return cubit;
+      },
+      act: (c) async {
+        await c.loadFeed(userId);
+        await c.toggleBookmark('art_1');
+      },
+      expect: () => [
+        isA<FeedLoading>(),
+        isA<FeedLoaded>(),
+        isA<FeedLoaded>(),
+      ],
+      verify: (_) {
+        verify(() => mockUnsaveArticle(any())).called(1);
+      },
+    );
+
+    blocTest<FeedCubit, FeedState>(
+      'should_revert_savedArticleIds_when_SaveArticleUseCase_fails',
+      build: () {
+        stubSuccess();
+        when(() => mockSaveArticle(any()))
+            .thenAnswer((_) async => DataFailed(Exception('error')));
+        return cubit;
+      },
+      act: (c) async {
+        await c.loadFeed(userId);
+        await c.toggleBookmark('art_1');
+      },
+      expect: () => [
+        isA<FeedLoading>(),
+        isA<FeedLoaded>(),
+        isA<FeedLoaded>(),
+        isA<FeedLoaded>(),
       ],
     );
   });
