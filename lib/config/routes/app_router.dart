@@ -16,7 +16,7 @@ class AppRouter {
 
   static GoRouter createRouter(BuildContext context) {
     return GoRouter(
-      initialLocation: AppRoutes.login,
+      initialLocation: AppRoutes.landing,
       debugLogDiagnostics: true,
       refreshListenable: _AuthNotifier(context.read<AuthBloc>()),
       redirect: (context, state) => _redirect(context, state),
@@ -45,21 +45,26 @@ class AppRouter {
   static String? _redirect(BuildContext context, GoRouterState state) {
     final authState = context.read<AuthBloc>().state;
     final location = state.matchedLocation;
+
+    final isOnLanding = location == AppRoutes.landing;
     final isOnLogin = location == AppRoutes.login;
     final isOnboarding = location.startsWith('/onboarding');
 
-    if (authState is! AuthAuthenticated) {
-      return (!isOnLogin && !isOnboarding) ? AppRoutes.login : null;
+    final isAuthenticated = authState is AuthAuthenticated;
+
+    if (authState is AuthLoading) return null;
+
+    if (!isAuthenticated && !isOnLanding && !isOnLogin && !isOnboarding) {
+      return AppRoutes.landing;
     }
 
-    final user = authState.user;
-
-    if (isOnLogin) {
+    if (authState is AuthAuthenticated && (isOnLogin || isOnLanding)) {
+      final user = authState.user;
       return user.role.isEmpty ? AppRoutes.onboardingCategories : AppRoutes.feed;
     }
 
-    if (!isOnboarding && user.role.isEmpty) {
-      return AppRoutes.onboardingCategories;
+    if (authState is AuthAuthenticated && !isOnboarding) {
+      if (authState.user.role.isEmpty) return AppRoutes.onboardingCategories;
     }
 
     return null;
