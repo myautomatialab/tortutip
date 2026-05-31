@@ -16,6 +16,7 @@ class AppSpacing {
   static const double screenHorizontalWide = 28;
 
   // ── Tamaños de iconos ────────────────────────────────────────
+  static const double iconSizeMd = 22.0;
   static const double iconSizeLg = 36.0;
 
   // ── Alturas de componentes ───────────────────────────────────

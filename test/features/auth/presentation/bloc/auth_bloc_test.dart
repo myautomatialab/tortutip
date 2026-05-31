@@ -158,5 +158,18 @@ void main() {
         isA<AuthInitial>(),
       ],
     );
+
+    blocTest<AuthBloc, AuthState>(
+      'should_emit_Error_when_sign_out_fails',
+      build: () {
+        when(() => mockSignOut(any()))
+            .thenAnswer((_) async => DataFailed(Exception('sign out error')));
+        return bloc;
+      },
+      act: (b) => b.add(const SignOutEvent()),
+      expect: () => [
+        isA<AuthError>(),
+      ],
+    );
   });
 }

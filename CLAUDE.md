@@ -22,7 +22,6 @@ Estas reglas no son sugerencias — son requisitos.
 ---
 
 ## Stack
-
 - Flutter + Dart
 - Firebase (Auth, Firestore, Storage)
 - flutter_bloc (Blocs y Cubits)
@@ -1003,7 +1002,7 @@ refactor(articles): extract article card to shared widgets
 
 ```bash
 flutter test          # cero fallos
-flutter analyze lib/  # cero errores
+flutter analyze      # cero errores
 ```
 
 - Si añadiste lógica nueva, añadiste su test

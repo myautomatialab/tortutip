@@ -41,15 +41,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {
-    await _signOut(const NoParams());
-    emit(const AuthInitial());
+    final result = await _signOut(const NoParams());
+    if (result.isSuccess) {
+      emit(const AuthInitial());
+    } else {
+      emit(AuthError(_mapSignOutError(result.error!)));
+    }
   }
 
   String _mapSignInError(Exception error) {
-    final msg = error.toString().toLowerCase();
+final msg = error.toString().toLowerCase();
     if (msg.contains('cancelled') || msg.contains('cancel')) {
       return '';
     }
     return 'No se pudo iniciar sesión. Inténtalo de nuevo';
+  }
+
+  String _mapSignOutError(Exception error) {
+    return 'No se pudo cerrar la sesión. Inténtalo de nuevo';
   }
 }
