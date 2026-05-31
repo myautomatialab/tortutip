@@ -31,5 +31,5 @@ void initUserDependencies() {
   sl.registerLazySingleton(() => UpdateUserProfileUseCase(sl()));
 
   // Cubit de onboarding vive aquí porque depende de use_cases de user
-  sl.registerFactory(() => OnboardingCubit(sl(), sl()));
+  sl.registerFactory(() => OnboardingCubit(sl(), sl(), sl()));
 }
