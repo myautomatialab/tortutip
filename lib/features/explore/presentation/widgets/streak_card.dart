@@ -30,6 +30,26 @@ class StreakCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Day $streakDays streak',
+                  style: AppTypography.h2.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  '🔥 Keep it up!',
+                  style: AppTypography.body.copyWith(
+                    color: AppColors.primaryDark,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
           SizedBox(
             width: 36,
             height: 36,
@@ -48,26 +68,6 @@ class StreakCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
                     fontSize: 8,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Day $streakDays streak',
-                  style: AppTypography.h2.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '🔥 Keep it up!',
-                  style: AppTypography.body.copyWith(
-                    color: AppColors.primaryDark,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
