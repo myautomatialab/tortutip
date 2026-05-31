@@ -93,7 +93,7 @@ class TortuGoogleButton extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _GoogleLogoIcon(),
+                  const GoogleLogoIcon(),
                   const SizedBox(width: 12),
                   Text(
                     'Continuar con Google',
@@ -109,7 +109,9 @@ class TortuGoogleButton extends StatelessWidget {
   }
 }
 
-class _GoogleLogoIcon extends StatelessWidget {
+class GoogleLogoIcon extends StatelessWidget {
+  const GoogleLogoIcon({super.key});
+
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
