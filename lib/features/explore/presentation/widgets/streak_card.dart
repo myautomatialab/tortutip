@@ -14,41 +14,53 @@ class StreakCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: const Color(0xFFEDF7ED),
+        // Pink to match the turtle image background
+        color: const Color(0xFFFAE8E0),
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
       ),
       child: Row(
         children: [
           SizedBox(
-            width: 80,
-            height: 80,
+            width: 90,
+            height: 90,
             child: Stack(
               children: [
-                CircularProgressIndicator(
-                  value: 0.01,
-                  color: AppColors.primary,
-                  strokeWidth: 4,
-                  backgroundColor: AppColors.surface,
-                ),
                 Center(
                   child: Image.asset(
-                    'assets/images/turtle.png',
-                    width: 48,
-                    height: 48,
-                    errorBuilder: (_, __, ___) => Text(
+                    'assets/images/tortuga.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, _) => const Text(
                       '🐢',
-                      style: AppTypography.hero,
+                      style: TextStyle(fontSize: 48),
                     ),
                   ),
                 ),
                 Positioned(
                   top: 0,
                   right: 0,
-                  child: Text(
-                    '1%',
-                    style: AppTypography.caption.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                  child: SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          value: 0.01,
+                          color: AppColors.primary,
+                          strokeWidth: 3,
+                          backgroundColor: AppColors.primary.withValues(alpha: 0.2),
+                        ),
+                        Text(
+                          '1%',
+                          style: AppTypography.caption.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                            fontSize: 8,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -66,6 +78,7 @@ class StreakCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   '🔥 Keep it up!',
                   style: AppTypography.body.copyWith(
