@@ -27,6 +27,7 @@ void main() {
     mockRepository = MockUserRepository();
     useCase = UpdateUserProfileUseCase(mockRepository);
     registerFallbackValue(user);
+    registerFallbackValue(UpdateUserProfileParams(user: user));
   });
 
   group('UpdateUserProfileUseCase', () {
@@ -35,7 +36,7 @@ void main() {
       when(() => mockRepository.updateUserProfile(any()))
           .thenAnswer((_) async => DataSuccess(user));
 
-      final result = await useCase(user);
+      final result = await useCase(UpdateUserProfileParams(user: user));
 
       expect(result, isA<DataSuccess<UserEntity>>());
       expect(result.data, equals(user));
@@ -45,7 +46,7 @@ void main() {
       when(() => mockRepository.updateUserProfile(any()))
           .thenAnswer((_) async => DataFailed(Exception('error')));
 
-      final result = await useCase(user);
+      final result = await useCase(UpdateUserProfileParams(user: user));
 
       expect(result, isA<DataFailed<UserEntity>>());
     });

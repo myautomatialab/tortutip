@@ -3,24 +3,20 @@ import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 
-class RoleCard extends StatelessWidget {
-  final String role;
+class GenderCard extends StatelessWidget {
+  final String value;
   final String label;
-  final String description;
+  final IconData icon;
   final bool selected;
   final VoidCallback onTap;
-  final IconData icon;
-  final Color iconBackgroundColor;
 
-  const RoleCard({
+  const GenderCard({
     super.key,
-    required this.role,
+    required this.value,
     required this.label,
-    required this.description,
+    required this.icon,
     required this.selected,
     required this.onTap,
-    required this.icon,
-    required this.iconBackgroundColor,
   });
 
   @override
@@ -28,9 +24,9 @@ class RoleCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           border: Border.all(
             color: selected ? AppColors.primary : AppColors.border,
@@ -38,20 +34,16 @@ class RoleCard extends StatelessWidget {
           ),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: AppSpacing.huge,
-              backgroundColor: iconBackgroundColor,
-              child: Icon(icon, color: AppColors.white, size: AppSpacing.iconXl),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(label, style: AppTypography.h4),
-            const SizedBox(height: AppSpacing.xs),
+            Icon(icon, size: AppSpacing.iconMd, color: AppColors.textPrimary),
+            const SizedBox(height: AppSpacing.sm),
             Text(
-              description,
-              style: AppTypography.bodySm,
-              textAlign: TextAlign.center,
+              label,
+              style: AppTypography.label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
