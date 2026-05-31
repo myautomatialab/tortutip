@@ -25,30 +25,14 @@ class AppShell extends StatelessWidget {
   void _onTabTap(BuildContext context, int index) {
     switch (index) {
       case 0:
-        // Lápiz: create if writer, placeholder otherwise
-        final authState = context.read<AuthBloc>().state;
-        if (authState is AuthAuthenticated &&
-            authState.user.role == 'writer') {
-          context.push(AppRoutes.create);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Función disponible para escritores')),
-          );
-        }
+        context.go(AppRoutes.feed);
       case 1:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Guardados próximamente')),
-        );
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticated && authState.user.role == 'writer') {
+          context.push(AppRoutes.create);
+        }
       case 2:
         context.go(AppRoutes.explore);
-      case 3:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cámara próximamente')),
-        );
-      case 4:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Más opciones próximamente')),
-        );
     }
   }
 
