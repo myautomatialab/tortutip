@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../config/app_config.dart';
 import '../features/onboarding/presentation/bloc/onboarding_cubit.dart';
+import '../shared/user/data/data_sources/mock_user_remote_data_source.dart';
 import '../shared/user/data/data_sources/user_remote_data_source.dart';
 import '../shared/user/data/repository/user_repository_impl.dart';
 import '../shared/user/domain/repository/user_repository.dart';
@@ -16,9 +18,18 @@ final sl = GetIt.instance;
 
 void initUserDependencies() {
   // DataSource
-  sl.registerLazySingleton<UserRemoteDataSource>(
-    () => UserRemoteDataSourceImpl(sl<FirebaseFirestore>(), sl<FirebaseAuth>()),
-  );
+  if (AppConfig.kUseMockData) {
+    sl.registerLazySingleton<UserRemoteDataSource>(
+      () => MockUserRemoteDataSource(),
+    );
+  } else {
+    sl.registerLazySingleton<UserRemoteDataSource>(
+      () => UserRemoteDataSourceImpl(
+        sl<FirebaseFirestore>(),
+        sl<FirebaseAuth>(),
+      ),
+    );
+  }
 
   // Repository
   sl.registerLazySingleton<UserRepository>(
