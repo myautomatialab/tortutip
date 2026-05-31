@@ -1,17 +1,33 @@
+import 'package:equatable/equatable.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 
-abstract class CreateArticleState {}
+abstract class CreateArticleState extends Equatable {
+  const CreateArticleState();
 
-class CreateArticleInitial extends CreateArticleState {}
+  @override
+  List<Object?> get props => [];
+}
 
-class CreateArticleLoading extends CreateArticleState {}
+class CreateArticleInitial extends CreateArticleState {
+  const CreateArticleInitial();
+}
+
+class CreateArticleLoading extends CreateArticleState {
+  const CreateArticleLoading();
+}
 
 class CreateArticleSuccess extends CreateArticleState {
   final ArticleEntity article;
-  CreateArticleSuccess(this.article);
+  const CreateArticleSuccess(this.article);
+
+  @override
+  List<Object?> get props => [article];
 }
 
 class CreateArticleError extends CreateArticleState {
   final String message;
-  CreateArticleError(this.message);
+  const CreateArticleError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

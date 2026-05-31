@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 
 class TortuTipTabBar extends StatelessWidget {
   final int currentIndex;
@@ -13,12 +15,14 @@ class TortuTipTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 28),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xxl, 0, AppSpacing.xxl, AppSpacing.xxxl,
+      ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.huge, vertical: AppSpacing.md),
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1C1E),
-          borderRadius: BorderRadius.circular(40),
+          color: AppColors.dark,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -58,10 +62,10 @@ class _TabIcon extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         child: Icon(
           icon,
-          color: selected ? Colors.white : Colors.white54,
+          color: selected ? AppColors.textOnDark : AppColors.textOnDark.withValues(alpha: 0.54),
           size: 26,
         ),
       ),
@@ -81,12 +85,12 @@ class _TabIconCenter extends StatelessWidget {
         width: 50,
         height: 50,
         decoration: const BoxDecoration(
-          color: Color(0xFF5B8A3C),
+          color: AppColors.primaryDark,
           shape: BoxShape.circle,
         ),
         child: const Icon(
           Icons.edit_outlined,
-          color: Colors.white,
+          color: AppColors.textOnDark,
           size: 22,
         ),
       ),

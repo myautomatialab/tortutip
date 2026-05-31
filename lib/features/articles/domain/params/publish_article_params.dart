@@ -1,4 +1,6 @@
-class PublishArticleParams {
+import 'package:equatable/equatable.dart';
+
+class PublishArticleParams extends Equatable {
   final String authorId;
   final String categoryId;
   final String title;
@@ -14,4 +16,14 @@ class PublishArticleParams {
     required this.coverVerticalUrl,
     required this.coverHorizontalUrl,
   });
+
+  @override
+  List<Object?> get props => [
+        authorId,
+        categoryId,
+        title,
+        body,
+        coverVerticalUrl,
+        coverHorizontalUrl,
+      ];
 }

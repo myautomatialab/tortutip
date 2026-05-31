@@ -1,4 +1,6 @@
-class ArticleEntity {
+import 'package:equatable/equatable.dart';
+
+class ArticleEntity extends Equatable {
   final String id;
   final String authorId;
   final String categoryId;
@@ -26,4 +28,20 @@ class ArticleEntity {
     this.publishedAt,
     required this.createdAt,
   });
+
+  @override
+  List<Object?> get props => [
+        id,
+        authorId,
+        categoryId,
+        title,
+        body,
+        coverVerticalUrl,
+        coverHorizontalUrl,
+        status,
+        readTimeMinutes,
+        saveCount,
+        publishedAt,
+        createdAt,
+      ];
 }

@@ -1,17 +1,36 @@
-abstract class OnboardingState {}
+import 'package:equatable/equatable.dart';
 
-class OnboardingInitial extends OnboardingState {}
+abstract class OnboardingState extends Equatable {
+  const OnboardingState();
 
-class OnboardingLoading extends OnboardingState {}
+  @override
+  List<Object?> get props => [];
+}
+
+class OnboardingInitial extends OnboardingState {
+  const OnboardingInitial();
+}
+
+class OnboardingLoading extends OnboardingState {
+  const OnboardingLoading();
+}
 
 class OnboardingRoleSelected extends OnboardingState {
   final String role;
-  OnboardingRoleSelected(this.role);
+  const OnboardingRoleSelected(this.role);
+
+  @override
+  List<Object?> get props => [role];
 }
 
-class OnboardingComplete extends OnboardingState {}
+class OnboardingComplete extends OnboardingState {
+  const OnboardingComplete();
+}
 
 class OnboardingError extends OnboardingState {
   final String message;
-  OnboardingError(this.message);
+  const OnboardingError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

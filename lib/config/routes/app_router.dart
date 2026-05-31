@@ -9,6 +9,7 @@ import '../../features/articles/config/articles_routes.dart';
 import '../../features/onboarding/config/onboarding_routes.dart';
 import '../../features/profile/config/profile_routes.dart';
 import 'app_routes.dart';
+import 'app_shell.dart';
 
 class AppRouter {
   AppRouter._();
@@ -23,8 +24,15 @@ class AppRouter {
         ...AuthRoutes.routes,
         ...OnboardingRoutes.routes,
         ...ArticlesRoutes.routes,
-        ...ProfileRoutes.routes,
-        // Futuro: ...CommentsRoutes.routes,
+
+        // Un único ShellRoute que mantiene AppShell vivo entre tabs
+        ShellRoute(
+          builder: (_, _, child) => AppShell(child: child),
+          routes: [
+            ...ArticlesRoutes.shellRoutes,
+            ...ProfileRoutes.shellRoutes,
+          ],
+        ),
       ],
       errorBuilder: (_, state) => Scaffold(
         body: Center(
@@ -36,15 +44,14 @@ class AppRouter {
 
   static String? _redirect(BuildContext context, GoRouterState state) {
     final authState = context.read<AuthBloc>().state;
-    final location  = state.matchedLocation;
-    final isOnLogin    = location == AppRoutes.login;
+    final location = state.matchedLocation;
+    final isOnLogin = location == AppRoutes.login;
     final isOnboarding = location.startsWith('/onboarding');
 
     if (authState is! AuthAuthenticated) {
       return (!isOnLogin && !isOnboarding) ? AppRoutes.login : null;
     }
 
-    // A partir de aquí Dart sabe que authState es AuthAuthenticated
     final user = authState.user;
 
     if (isOnLogin) {

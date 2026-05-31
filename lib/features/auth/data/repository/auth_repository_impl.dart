@@ -11,7 +11,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<DataState<UserEntity>> signInWithGoogle() async {
     try {
       final user = await _dataSource.signInWithGoogle();
-      return DataSuccess(user.toEntity());
+      return DataSuccess(user);
     } on Exception catch (e) {
       return DataFailed(e);
     }
@@ -31,7 +31,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<DataState<UserEntity?>> checkCurrentAuth() async {
     try {
       final user = await _dataSource.checkCurrentUser();
-      return DataSuccess(user?.toEntity());
+      return DataSuccess(user);
     } on Exception catch (e) {
       return DataFailed(e);
     }

@@ -1,0 +1,104 @@
+import 'package:flutter/material.dart';
+import '../../config/theme/app_colors.dart';
+import '../../config/theme/app_spacing.dart';
+import '../../config/theme/app_typography.dart';
+
+class TortuCategoryChip extends StatelessWidget {
+  final String label;
+  final Color backgroundColor;
+  final Color textColor;
+
+  const TortuCategoryChip({
+    super.key,
+    required this.label,
+    required this.backgroundColor,
+    required this.textColor,
+  });
+
+  factory TortuCategoryChip.healthyFood() => const TortuCategoryChip(
+        label: 'Healthy Food',
+        backgroundColor: AppColors.categoryHealthyFood,
+        textColor: AppColors.textOnYellow,
+      );
+
+  factory TortuCategoryChip.fitness() => const TortuCategoryChip(
+        label: 'Fitness',
+        backgroundColor: AppColors.categoryFitness,
+        textColor: AppColors.textOnGreen,
+      );
+
+  factory TortuCategoryChip.mentalHealth() => const TortuCategoryChip(
+        label: 'Mental Health',
+        backgroundColor: AppColors.categoryMentalHealth,
+        textColor: AppColors.textOnPurple,
+      );
+
+  factory TortuCategoryChip.fromName(String name) {
+    final colors = _chipColorForName(name);
+    return TortuCategoryChip(
+      label: name,
+      backgroundColor: colors.$1,
+      textColor: colors.$2,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: AppTypography.labelSm.copyWith(color: textColor),
+      ),
+    );
+  }
+}
+
+class TortuOutlineChip extends StatelessWidget {
+  final String label;
+
+  const TortuOutlineChip({super.key, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.white.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+        border: Border.all(color: AppColors.borderStrong, width: 1),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: AppTypography.labelSm.copyWith(color: AppColors.textPrimary),
+      ),
+    );
+  }
+}
+
+(Color, Color) _chipColorForName(String name) {
+  final lower = name.toLowerCase();
+  if (lower.contains('food') || lower.contains('comida')) {
+    return (AppColors.categoryHealthyFood, AppColors.textOnYellow);
+  }
+  if (lower.contains('fitness') || lower.contains('ejercicio')) {
+    return (AppColors.categoryFitness, AppColors.textOnGreen);
+  }
+  if (lower.contains('mental') || lower.contains('salud')) {
+    return (AppColors.categoryMentalHealth, AppColors.textOnPurple);
+  }
+  if (lower.contains('sueño') || lower.contains('bienestar')) {
+    return (AppColors.categorySueno, AppColors.textOnBlue);
+  }
+  return (AppColors.surface, AppColors.textPrimary);
+}

@@ -2,12 +2,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tortutip/shared/user/data/models/user_model.dart';
+import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> signInWithGoogle();
+  Future<UserEntity> signInWithGoogle();
   Future<void> signOut();
-  Future<UserModel?> checkCurrentUser();
+  Future<UserEntity?> checkCurrentUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -18,7 +18,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this._auth, this._googleSignIn, this._firestore);
 
   @override
-  Future<UserModel> signInWithGoogle() async {
+  Future<UserEntity> signInWithGoogle() async {
     // google_sign_in 7.x: authenticate() reemplaza a signIn()
     final googleUser = await _googleSignIn.authenticate();
     final idToken = googleUser.authentication.idToken;
@@ -42,7 +42,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       });
     }
     final fresh = await _firestore.collection('users').doc(user.uid).get();
-    return UserModel.fromRawData({'id': user.uid, ...?fresh.data()});
+    final data = {'id': user.uid, ...?fresh.data()};
+    return _toEntity(data);
   }
 
   @override
@@ -52,11 +53,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel?> checkCurrentUser() async {
+  Future<UserEntity?> checkCurrentUser() async {
     final user = _auth.currentUser;
     if (user == null) return null;
     final doc = await _firestore.collection('users').doc(user.uid).get();
     if (!doc.exists) return null;
-    return UserModel.fromRawData({'id': user.uid, ...?doc.data()});
+    return _toEntity({'id': user.uid, ...?doc.data()});
+  }
+
+  UserEntity _toEntity(Map<String, dynamic> data) {
+    return UserEntity(
+      id: data['id'] ?? '',
+      name: data['name'] ?? '',
+      email: data['email'] ?? '',
+      avatarUrl: data['avatar_url'] ?? '',
+      bio: data['bio'] ?? '',
+      role: data['role'] ?? 'reader',
+      gender: data['gender'] ?? '',
+      ageRange: data['age_range'] ?? '',
+      createdAt: DateTime.tryParse(data['created_at'] ?? '') ?? DateTime.now(),
+    );
   }
 }

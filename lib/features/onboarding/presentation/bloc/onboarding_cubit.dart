@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tortutip/shared/user/domain/use_cases/update_user_role_use_case.dart';
 import 'package:tortutip/shared/user/domain/use_cases/select_user_categories_use_case.dart';
@@ -8,29 +9,40 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   final SelectUserCategoriesUseCase _selectCategories;
 
   OnboardingCubit(this._updateUserRole, this._selectCategories)
-      : super(OnboardingInitial());
+      : super(const OnboardingInitial());
 
   Future<void> selectRole(String userId, String role) async {
     if (state is OnboardingLoading) return;
-    emit(OnboardingLoading());
+    emit(const OnboardingLoading());
     final result = await _updateUserRole(
         UpdateUserRoleParams(userId: userId, role: role));
-    if (result.data == true) {
+    if (result.isSuccess) {
       emit(OnboardingRoleSelected(role));
     } else {
-      emit(OnboardingError(result.error.toString()));
+      emit(OnboardingError(_mapErrorToMessage(result.error!)));
     }
   }
 
   Future<void> selectCategories(String userId, List<String> categoryIds) async {
     if (state is OnboardingLoading || state is OnboardingComplete) return;
-    emit(OnboardingLoading());
+    emit(const OnboardingLoading());
     final result = await _selectCategories(
         SelectUserCategoriesParams(userId: userId, categoryIds: categoryIds));
-    if (result.data == true) {
-      emit(OnboardingComplete());
+    if (result.isSuccess) {
+      emit(const OnboardingComplete());
     } else {
-      emit(OnboardingError(result.error.toString()));
+      emit(OnboardingError(_mapErrorToMessage(result.error!)));
     }
+  }
+
+  String _mapErrorToMessage(Exception error) {
+    if (error is FirebaseException) {
+      return switch (error.code) {
+        'permission-denied' => 'No tienes permiso para realizar esta acción',
+        'unavailable'       => 'Sin conexión. Inténtalo de nuevo',
+        _                   => 'Algo salió mal. Inténtalo de nuevo',
+      };
+    }
+    return 'Algo salió mal. Inténtalo de nuevo';
   }
 }

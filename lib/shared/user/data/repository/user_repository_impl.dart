@@ -11,7 +11,7 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<DataState<UserEntity>> getCurrentUser() async {
     try {
-      final user = await _dataSource.getCurrentUser('current_user_id');
+      final user = await _dataSource.getCurrentUser();
       return DataSuccess(user.toEntity());
     } on Exception catch (e) {
       return DataFailed(e);

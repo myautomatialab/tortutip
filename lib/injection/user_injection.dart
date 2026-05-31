@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
 import '../features/onboarding/presentation/bloc/onboarding_cubit.dart';
@@ -15,7 +16,7 @@ final sl = GetIt.instance;
 void initUserDependencies() {
   // DataSource
   sl.registerLazySingleton<UserRemoteDataSource>(
-    () => UserRemoteDataSourceImpl(sl<FirebaseFirestore>()),
+    () => UserRemoteDataSourceImpl(sl<FirebaseFirestore>(), sl<FirebaseAuth>()),
   );
 
   // Repository

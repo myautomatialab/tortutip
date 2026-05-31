@@ -1,7 +1,16 @@
-abstract class DataState<T> {
+import 'package:equatable/equatable.dart';
+
+abstract class DataState<T> extends Equatable {
   final T? data;
   final Exception? error;
+
   const DataState({this.data, this.error});
+
+  bool get isSuccess => this is DataSuccess<T>;
+  bool get isFailure => this is DataFailed<T>;
+
+  @override
+  List<Object?> get props => [data, error];
 }
 
 class DataSuccess<T> extends DataState<T> {

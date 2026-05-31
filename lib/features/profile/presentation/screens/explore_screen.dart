@@ -6,7 +6,6 @@ class ExploreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Color(0xFFF5F3EE),
       body: Center(child: Text('Explorar')),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'config/routes/app_router.dart';
+import 'config/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'firebase_options.dart';
@@ -33,10 +34,7 @@ class TortuTipApp extends StatelessWidget {
           return MaterialApp.router(
             title: 'TortuTip',
             debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              colorSchemeSeed: Colors.green,
-              useMaterial3: true,
-            ),
+            theme: AppTheme.light,
             routerConfig: router,
           );
         },
