@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../config/routes/app_routes.dart';
 import '../../../../config/theme/app_colors.dart';
 import '../../../../config/theme/app_spacing.dart';
 import '../../../../config/theme/app_typography.dart';
 import '../../../../shared/widgets/tortutip_button.dart';
+import '../bloc/auth_bloc.dart';
+import '../widgets/auth_bottom_sheet.dart';
 
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
@@ -47,6 +48,20 @@ class LandingScreen extends StatelessWidget {
             ],
           ),
 
+          // Layer 0.5: WELLNESS text centered over collage
+          Positioned.fill(
+            child: Center(
+              child: Text(
+                'WELLNESS ⊙',
+                style: AppTypography.h2.copyWith(
+                  color: AppColors.white,
+                  letterSpacing: 2.0,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+
           // Layer 1: Gradient overlay bottom to top
           const Positioned.fill(
             child: DecoratedBox(
@@ -73,13 +88,21 @@ class LandingScreen extends StatelessWidget {
                   vertical: AppSpacing.xxl,
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.bolt,
-                      color: AppColors.primary,
-                      size: AppSpacing.huge,
+                    Container(
+                      width: AppSpacing.avatarSizeLg,
+                      height: AppSpacing.avatarSizeLg,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primary.withValues(alpha: 0.12),
+                      ),
+                      child: const Icon(
+                        Icons.bolt,
+                        color: AppColors.primary,
+                        size: AppSpacing.iconSizeLg,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     const Text(
@@ -92,15 +115,52 @@ class LandingScreen extends StatelessWidget {
                       style: AppTypography.subtitle,
                     ),
                     const SizedBox(height: AppSpacing.xl),
-                    TortuPrimaryButton(
-                      label: 'Acceder',
-                      onTap: () => context.push(AppRoutes.login),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TortuPrimaryButton(
+                            label: 'Acceder',
+                            onTap: () => _showAuthBottomSheet(context),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        _GoogleCircleButton(
+                          onTap: () => _showAuthBottomSheet(context),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    const Text(
-                      'Al continuar aceptas los Términos y la Política de privacidad.',
-                      style: AppTypography.caption,
+                    RichText(
                       textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: AppTypography.caption,
+                        children: [
+                          const TextSpan(
+                            text: 'Si continuas, aceptas los ',
+                          ),
+                          TextSpan(
+                            text: 'Terminos del servicio',
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.primary,
+                              decoration: TextDecoration.underline,
+                              decorationColor: AppColors.primary,
+                            ),
+                          ),
+                          const TextSpan(
+                            text:
+                                ' de TortuTip y confirmas que has leido nuestra ',
+                          ),
+                          TextSpan(
+                            text: 'Politica de privacidad',
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.primary,
+                              decoration: TextDecoration.underline,
+                              decorationColor: AppColors.primary,
+                            ),
+                          ),
+                          const TextSpan(text: '.'),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -108,6 +168,48 @@ class LandingScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+void _showAuthBottomSheet(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppColors.background,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(AppSpacing.radiusXl),
+      ),
+    ),
+    builder: (_) => BlocProvider.value(
+      value: context.read<AuthBloc>(),
+      child: const AuthBottomSheet(),
+    ),
+  );
+}
+
+class _GoogleCircleButton extends StatelessWidget {
+  final VoidCallback? onTap;
+
+  const _GoogleCircleButton({this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: AppSpacing.buttonHeight,
+        height: AppSpacing.buttonHeight,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.border, width: 1.5),
+        ),
+        child: Center(
+          child: const GoogleLogoIcon(),
+        ),
       ),
     );
   }
