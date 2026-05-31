@@ -6,4 +6,5 @@ abstract class UserRepository {
   Future<DataState<bool>> updateUserRole(String userId, String role);
   Future<DataState<bool>> selectUserCategories(String userId, List<String> categoryIds);
   Future<DataState<UserEntity>> updateUserProfile(UserEntity user);
+  Future<DataState<List<String>>> getUserCategoryIds(String userId);
 }
