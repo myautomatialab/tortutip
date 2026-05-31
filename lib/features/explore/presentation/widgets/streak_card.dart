@@ -14,7 +14,7 @@ class StreakCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: const Color(0xFFFAE8E0),
+        color: AppColors.streakBackground,
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
       ),
       child: Row(
@@ -26,7 +26,7 @@ class StreakCard extends StatelessWidget {
             fit: BoxFit.contain,
             errorBuilder: (context, error, _) => const Text(
               '🐢',
-              style: TextStyle(fontSize: 48),
+              style: AppTypography.hero,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -51,8 +51,8 @@ class StreakCard extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.md),
           SizedBox(
-            width: 36,
-            height: 36,
+            width: AppSpacing.iconSizeLg,
+            height: AppSpacing.iconSizeLg,
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -64,10 +64,9 @@ class StreakCard extends StatelessWidget {
                 ),
                 Text(
                   '1%',
-                  style: AppTypography.caption.copyWith(
+                  style: AppTypography.micro.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
-                    fontSize: 8,
                   ),
                 ),
               ],

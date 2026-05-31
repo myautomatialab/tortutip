@@ -59,6 +59,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Widget _buildLoaded(BuildContext context, ExploreLoaded state) {
     return SingleChildScrollView(
+      // 100 = floating tab bar total height (tabBarHeight 76 + bottom padding 24)
       padding: const EdgeInsets.only(bottom: 100),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,6 +118,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               },
             ),
           ),
+          // 100 = floating tab bar total height (tabBarHeight 76 + bottom padding 24)
           const SizedBox(height: 100),
         ],
       ),

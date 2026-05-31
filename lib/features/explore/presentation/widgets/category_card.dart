@@ -23,7 +23,7 @@ class CategoryCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
         child: SizedBox(
-          height: 160,
+          height: AppSpacing.categoryCardHeight,
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -39,7 +39,7 @@ class CategoryCard extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Color(0xB3000000)],
+                    colors: [Colors.transparent, AppColors.overlayDark],
                     stops: [0.3, 1.0],
                   ),
                 ),
@@ -53,14 +53,14 @@ class CategoryCard extends StatelessWidget {
                     CircleAvatar(
                       radius: 16,
                       backgroundColor: style.$1,
-                      child: Icon(style.$2, color: Colors.white, size: 16),
+                      child: Icon(style.$2, color: AppColors.white, size: 16),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         category.name,
                         style: AppTypography.bodyLg.copyWith(
-                          color: Colors.white,
+                          color: AppColors.white,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 2,

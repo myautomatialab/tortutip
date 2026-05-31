@@ -45,11 +45,11 @@ class ArticleListCard extends StatelessWidget {
                 ),
                 child: Image.network(
                   article.coverHorizontalUrl,
-                  height: 180,
+                  height: AppSpacing.articleListCardImageHeight,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    height: 180,
+                  errorBuilder: (context, error, _) => Container(
+                    height: AppSpacing.articleListCardImageHeight,
                     width: double.infinity,
                     color: AppColors.surface,
                   ),
@@ -62,7 +62,7 @@ class ArticleListCard extends StatelessWidget {
                   onTap: onBookmarkTap,
                   child: CircleAvatar(
                     radius: 16,
-                    backgroundColor: Colors.white.withValues(alpha: 0.9),
+                    backgroundColor: AppColors.white.withValues(alpha: 0.9),
                     child: Icon(
                       isSaved ? Icons.bookmark : Icons.bookmark_border,
                       color: isSaved

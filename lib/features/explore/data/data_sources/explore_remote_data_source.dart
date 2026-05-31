@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tortutip/features/articles/data/models/article_model.dart';
+import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 
 abstract class ExploreRemoteDataSource {
-  Future<List<ArticleModel>> getArticlesByCategory(
+  Future<List<ArticleEntity>> getArticlesByCategory(
     String categoryId,
     int page,
     int pageSize,
@@ -15,7 +16,7 @@ class ExploreRemoteDataSourceImpl implements ExploreRemoteDataSource {
   ExploreRemoteDataSourceImpl(this._firestore);
 
   @override
-  Future<List<ArticleModel>> getArticlesByCategory(
+  Future<List<ArticleEntity>> getArticlesByCategory(
     String categoryId,
     int page,
     int pageSize,
