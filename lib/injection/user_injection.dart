@@ -13,6 +13,7 @@ import '../shared/user/domain/use_cases/get_user_category_ids_use_case.dart';
 import '../shared/user/domain/use_cases/select_user_categories_use_case.dart';
 import '../shared/user/domain/use_cases/update_user_profile_use_case.dart';
 import '../shared/user/domain/use_cases/update_user_role_use_case.dart';
+import '../shared/user/domain/use_cases/get_user_by_id_use_case.dart';
 
 final sl = GetIt.instance;
 
@@ -42,6 +43,7 @@ void initUserDependencies() {
   sl.registerLazySingleton(() => SelectUserCategoriesUseCase(sl()));
   sl.registerLazySingleton(() => UpdateUserProfileUseCase(sl()));
   sl.registerLazySingleton(() => GetUserCategoryIdsUseCase(sl()));
+  sl.registerLazySingleton(() => GetUserByIdUseCase(sl()));
 
   // Cubit de onboarding vive aquí porque depende de use_cases de user
   sl.registerFactory(() => OnboardingCubit(sl(), sl(), sl()));

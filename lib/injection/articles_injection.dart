@@ -8,6 +8,7 @@ import '../features/articles/data/data_sources/mock_article_remote_data_source.d
 import '../features/articles/data/repository/article_repository_impl.dart';
 import '../features/articles/domain/repository/article_repository.dart';
 import '../features/articles/domain/use_cases/get_article_detail_use_case.dart';
+import '../features/articles/domain/use_cases/get_related_articles_use_case.dart';
 import '../features/articles/domain/use_cases/get_feed_articles_paged_use_case.dart';
 import '../features/articles/domain/use_cases/get_feed_articles_use_case.dart';
 import '../features/articles/domain/use_cases/get_saved_article_ids_use_case.dart';
@@ -19,6 +20,7 @@ import '../features/articles/presentation/bloc/article_detail/article_detail_cub
 import '../features/articles/presentation/bloc/create_article/create_article_cubit.dart';
 import '../features/articles/presentation/bloc/feed/feed_cubit.dart';
 import '../shared/user/domain/use_cases/get_user_category_ids_use_case.dart';
+import '../shared/user/domain/use_cases/get_user_by_id_use_case.dart';
 
 final sl = GetIt.instance;
 
@@ -51,6 +53,7 @@ void initArticlesDependencies() {
   sl.registerLazySingleton(() => GetFeedArticlesPagedUseCase(sl()));
   sl.registerLazySingleton(() => GetSavedArticleIdsUseCase(sl()));
   sl.registerLazySingleton(() => UnsaveArticleUseCase(sl()));
+  sl.registerLazySingleton(() => GetRelatedArticlesUseCase(sl()));
 
   // Cubits — factory, uno nuevo por pantalla
   sl.registerFactory(() => FeedCubit(
@@ -60,6 +63,13 @@ void initArticlesDependencies() {
         sl<UnsaveArticleUseCase>(),
         sl<GetUserCategoryIdsUseCase>(),
       ));
-  sl.registerFactory(() => ArticleDetailCubit(sl()));
+  sl.registerFactory(() => ArticleDetailCubit(
+        sl<GetArticleDetailUseCase>(),
+        sl<GetRelatedArticlesUseCase>(),
+        sl<SaveArticleUseCase>(),
+        sl<UnsaveArticleUseCase>(),
+        sl<GetUserByIdUseCase>(),
+        sl<GetSavedArticleIdsUseCase>(),
+      ));
   sl.registerFactory(() => CreateArticleCubit(sl()));
 }
