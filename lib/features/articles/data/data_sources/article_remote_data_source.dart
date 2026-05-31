@@ -9,6 +9,9 @@ abstract class ArticleRemoteDataSource {
   Future<ArticleModel> publishArticle(PublishArticleParams params);
   Future<void> saveArticle(String userId, String articleId);
   Future<List<ArticleModel>> getUserArticles(String userId);
+  Future<List<String>> getSavedArticleIds(String userId);
+  Future<List<ArticleModel>> getFeedArticlesPaged(List<String> categoryIds, int page, int pageSize);
+  Future<void> unsaveArticle(String userId, String articleId);
 }
 
 class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
@@ -78,5 +81,43 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
         .map((doc) =>
             ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
         .toList();
+  }
+
+  @override
+  Future<List<String>> getSavedArticleIds(String userId) async {
+    final snapshot = await _firestore
+        .collection('saved_articles')
+        .where('user_id', isEqualTo: userId)
+        .get();
+    return snapshot.docs
+        .map((doc) => doc.data()['article_id'] as String)
+        .toList();
+  }
+
+  @override
+  Future<List<ArticleModel>> getFeedArticlesPaged(
+      List<String> categoryIds, int page, int pageSize) async {
+    final limit = (page + 1) * pageSize;
+    final snapshot = await _firestore
+        .collection('articles')
+        .where('category_id', whereIn: categoryIds)
+        .where('status', isEqualTo: 'published')
+        .orderBy('published_at', descending: true)
+        .limit(limit)
+        .get();
+    final all = snapshot.docs
+        .map((doc) => ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
+        .toList();
+    final start = page * pageSize;
+    if (start >= all.length) return [];
+    return all.sublist(start);
+  }
+
+  @override
+  Future<void> unsaveArticle(String userId, String articleId) async {
+    await _firestore
+        .collection('saved_articles')
+        .doc('${userId}_$articleId')
+        .delete();
   }
 }

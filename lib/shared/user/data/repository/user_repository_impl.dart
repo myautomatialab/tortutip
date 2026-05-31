@@ -59,4 +59,14 @@ class UserRepositoryImpl implements UserRepository {
       return DataFailed(e);
     }
   }
+
+  @override
+  Future<DataState<List<String>>> getUserCategoryIds(String userId) async {
+    try {
+      final ids = await _dataSource.getUserCategoryIds(userId);
+      return DataSuccess(ids);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
 }

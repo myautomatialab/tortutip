@@ -59,4 +59,36 @@ class ArticleRepositoryImpl implements ArticleRepository {
       return DataFailed(e);
     }
   }
+
+  @override
+  Future<DataState<List<String>>> getSavedArticleIds(String userId) async {
+    try {
+      final ids = await _dataSource.getSavedArticleIds(userId);
+      return DataSuccess(ids);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<List<ArticleEntity>>> getFeedArticlesPaged(
+      List<String> categoryIds, int page, int pageSize) async {
+    try {
+      final models =
+          await _dataSource.getFeedArticlesPaged(categoryIds, page, pageSize);
+      return DataSuccess(models.map((m) => m.toEntity()).toList());
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<bool>> unsaveArticle(String userId, String articleId) async {
+    try {
+      await _dataSource.unsaveArticle(userId, articleId);
+      return const DataSuccess(true);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
 }
