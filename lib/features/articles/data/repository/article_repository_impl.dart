@@ -13,7 +13,7 @@ class ArticleRepositoryImpl implements ArticleRepository {
       List<String> categoryIds) async {
     try {
       final models = await _dataSource.getFeedArticles(categoryIds);
-      return DataSuccess(models.map((m) => m.toEntity()).toList());
+      return DataSuccess(List<ArticleEntity>.from(models));
     } on Exception catch (e) {
       return DataFailed(e);
     }
@@ -23,7 +23,7 @@ class ArticleRepositoryImpl implements ArticleRepository {
   Future<DataState<ArticleEntity>> getArticleDetail(String articleId) async {
     try {
       final model = await _dataSource.getArticleDetail(articleId);
-      return DataSuccess(model.toEntity());
+      return DataSuccess(model);
     } on Exception catch (e) {
       return DataFailed(e);
     }
@@ -34,7 +34,7 @@ class ArticleRepositoryImpl implements ArticleRepository {
       PublishArticleParams params) async {
     try {
       final model = await _dataSource.publishArticle(params);
-      return DataSuccess(model.toEntity());
+      return DataSuccess(model);
     } on Exception catch (e) {
       return DataFailed(e);
     }
@@ -54,7 +54,39 @@ class ArticleRepositoryImpl implements ArticleRepository {
   Future<DataState<List<ArticleEntity>>> getUserArticles(String userId) async {
     try {
       final models = await _dataSource.getUserArticles(userId);
-      return DataSuccess(models.map((m) => m.toEntity()).toList());
+      return DataSuccess(List<ArticleEntity>.from(models));
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<List<String>>> getSavedArticleIds(String userId) async {
+    try {
+      final ids = await _dataSource.getSavedArticleIds(userId);
+      return DataSuccess(ids);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<List<ArticleEntity>>> getFeedArticlesPaged(
+      List<String> categoryIds, int page, int pageSize) async {
+    try {
+      final models =
+          await _dataSource.getFeedArticlesPaged(categoryIds, page, pageSize);
+      return DataSuccess(List<ArticleEntity>.from(models));
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<bool>> unsaveArticle(String userId, String articleId) async {
+    try {
+      await _dataSource.unsaveArticle(userId, articleId);
+      return const DataSuccess(true);
     } on Exception catch (e) {
       return DataFailed(e);
     }

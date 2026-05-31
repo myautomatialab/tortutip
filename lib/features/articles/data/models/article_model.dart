@@ -35,18 +35,4 @@ class ArticleModel extends ArticleEntity {
     );
   }
 
-  ArticleEntity toEntity() => ArticleEntity(
-        id: id,
-        authorId: authorId,
-        categoryId: categoryId,
-        title: title,
-        body: body,
-        coverVerticalUrl: coverVerticalUrl,
-        coverHorizontalUrl: coverHorizontalUrl,
-        status: status,
-        readTimeMinutes: readTimeMinutes,
-        saveCount: saveCount,
-        publishedAt: publishedAt,
-        createdAt: createdAt,
-      );
 }

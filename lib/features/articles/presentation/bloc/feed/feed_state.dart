@@ -18,10 +18,29 @@ class FeedLoading extends FeedState {
 
 class FeedLoaded extends FeedState {
   final List<ArticleEntity> articles;
-  const FeedLoaded(this.articles);
+  final int currentIndex;
+  final bool hasMore;
+  final Set<String> savedArticleIds;
+
+  const FeedLoaded({
+    required this.articles,
+    required this.currentIndex,
+    required this.hasMore,
+    required this.savedArticleIds,
+  });
 
   @override
-  List<Object?> get props => [articles];
+  List<Object?> get props => [articles, currentIndex, hasMore, savedArticleIds.toList()];
+}
+
+class FeedLoadingMore extends FeedState {
+  final List<ArticleEntity> articles;
+  final int currentIndex;
+
+  const FeedLoadingMore({required this.articles, required this.currentIndex});
+
+  @override
+  List<Object?> get props => [articles, currentIndex];
 }
 
 class FeedError extends FeedState {

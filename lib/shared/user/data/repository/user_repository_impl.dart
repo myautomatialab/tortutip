@@ -12,7 +12,7 @@ class UserRepositoryImpl implements UserRepository {
   Future<DataState<UserEntity>> getCurrentUser() async {
     try {
       final user = await _dataSource.getCurrentUser();
-      return DataSuccess(user.toEntity());
+      return DataSuccess(user);
     } on Exception catch (e) {
       return DataFailed(e);
     }
@@ -54,7 +54,17 @@ class UserRepositoryImpl implements UserRepository {
         createdAt: user.createdAt,
       );
       final updated = await _dataSource.updateUserProfile(model);
-      return DataSuccess(updated.toEntity());
+      return DataSuccess(updated);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<List<String>>> getUserCategoryIds(String userId) async {
+    try {
+      final ids = await _dataSource.getUserCategoryIds(userId);
+      return DataSuccess(ids);
     } on Exception catch (e) {
       return DataFailed(e);
     }

@@ -35,7 +35,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'email': user.email ?? '',
         'avatar_url': user.photoURL ?? '',
         'bio': '',
-        'role': 'reader',
+        'role': '',
         'gender': '',
         'age_range': '',
         'created_at': DateTime.now().toIso8601String(),
@@ -56,9 +56,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserEntity?> checkCurrentUser() async {
     final user = _auth.currentUser;
     if (user == null) return null;
-    final doc = await _firestore.collection('users').doc(user.uid).get();
+    await user.reload(); // lanza si la cuenta fue eliminada
+    final refreshed = _auth.currentUser;
+    if (refreshed == null) return null;
+    final doc = await _firestore.collection('users').doc(refreshed.uid).get();
     if (!doc.exists) return null;
-    return _toEntity({'id': user.uid, ...?doc.data()});
+    return _toEntity({'id': refreshed.uid, ...?doc.data()});
   }
 
   UserEntity _toEntity(Map<String, dynamic> data) {
