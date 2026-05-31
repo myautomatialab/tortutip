@@ -40,7 +40,7 @@ void main() {
         const UpdateUserRoleParams(userId: '', role: ''));
     registerFallbackValue(
         const SelectUserCategoriesParams(userId: '', categoryIds: []));
-    registerFallbackValue(testUser);
+    registerFallbackValue(UpdateUserProfileParams(user: testUser));
   });
 
   setUp(() {

@@ -12,7 +12,7 @@ import 'package:tortutip/features/categories/presentation/bloc/category_state.da
 import 'package:tortutip/features/onboarding/presentation/bloc/onboarding_cubit.dart';
 import 'package:tortutip/features/onboarding/presentation/bloc/onboarding_state.dart';
 import 'package:tortutip/features/onboarding/presentation/widgets/category_card.dart';
-import 'package:tortutip/injection/user_injection.dart';
+import 'package:tortutip/injection/injection_container.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/shared/widgets/tortutip_progress_dots.dart';
 

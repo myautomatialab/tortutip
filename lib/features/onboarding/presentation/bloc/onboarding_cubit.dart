@@ -44,7 +44,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   Future<void> completeOnboarding(UserEntity user) async {
     if (state is OnboardingLoading) return;
     emit(const OnboardingLoading());
-    final result = await _updateUserProfile(user);
+    final result = await _updateUserProfile(UpdateUserProfileParams(user: user));
     if (result.isSuccess) {
       emit(const OnboardingComplete());
     } else {
