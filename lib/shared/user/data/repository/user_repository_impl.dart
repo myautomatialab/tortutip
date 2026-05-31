@@ -69,4 +69,14 @@ class UserRepositoryImpl implements UserRepository {
       return DataFailed(e);
     }
   }
+
+  @override
+  Future<DataState<UserEntity>> getUserById(String userId) async {
+    try {
+      final model = await _dataSource.getUserById(userId);
+      return DataSuccess(model);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
 }

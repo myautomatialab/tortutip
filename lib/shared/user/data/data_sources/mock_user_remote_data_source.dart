@@ -41,4 +41,19 @@ class MockUserRemoteDataSource implements UserRemoteDataSource {
   @override
   Future<List<String>> getUserCategoryIds(String userId) async =>
       _mockCategoryIds;
+
+  @override
+  Future<UserModel> getUserById(String userId) async {
+    return UserModel(
+      id: userId,
+      name: 'Autor Mock',
+      email: '$userId@tortutip.com',
+      avatarUrl: 'https://i.pravatar.cc/150?u=$userId',
+      bio: 'Escritor apasionado por el bienestar y la salud.',
+      role: 'writer',
+      gender: '',
+      ageRange: '',
+      createdAt: DateTime(2024, 1, 1),
+    );
+  }
 }

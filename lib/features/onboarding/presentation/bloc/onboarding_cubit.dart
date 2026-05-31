@@ -11,6 +11,8 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   final SelectUserCategoriesUseCase _selectCategories;
   final UpdateUserProfileUseCase _updateUserProfile;
 
+  UserEntity? currentUser;
+
   OnboardingCubit(
     this._updateUserRole,
     this._selectCategories,

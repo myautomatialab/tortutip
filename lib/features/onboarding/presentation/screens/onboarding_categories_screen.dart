@@ -5,8 +5,6 @@ import 'package:tortutip/config/routes/app_routes.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
-import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/features/categories/presentation/bloc/category_cubit.dart';
 import 'package:tortutip/features/categories/presentation/bloc/category_state.dart';
 import 'package:tortutip/features/onboarding/presentation/bloc/onboarding_cubit.dart';
@@ -29,11 +27,11 @@ class _OnboardingCategoriesScreenState
   final Set<String> _selectedCategoryIds = {};
 
   void _onNext() {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is! AuthAuthenticated) return;
+    final userId = context.read<OnboardingCubit>().currentUser?.id;
+    if (userId == null) return;
     context
         .read<OnboardingCubit>()
-        .selectCategories(authState.user.id, _selectedCategoryIds.toList());
+        .selectCategories(userId, _selectedCategoryIds.toList());
   }
 
   @override

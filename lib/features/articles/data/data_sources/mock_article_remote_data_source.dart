@@ -142,6 +142,15 @@ class MockArticleRemoteDataSource implements ArticleRemoteDataSource {
   }
 
   @override
+  Future<List<ArticleModel>> getRelatedArticles(
+      String categoryId, String excludeArticleId) async {
+    return _articles
+        .where((a) => a.categoryId == categoryId && a.id != excludeArticleId)
+        .take(5)
+        .toList();
+  }
+
+  @override
   Future<ArticleModel> publishArticle(PublishArticleParams params) async {
     final first = _articles.first;
     return ArticleModel(

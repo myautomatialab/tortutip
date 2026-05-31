@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tortutip/config/routes/app_routes.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
-import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/features/onboarding/presentation/bloc/onboarding_cubit.dart';
 import 'package:tortutip/features/onboarding/presentation/bloc/onboarding_state.dart';
 import 'package:tortutip/features/onboarding/presentation/widgets/age_range_chip.dart';
@@ -30,9 +27,8 @@ class _OnboardingDetailsScreenState extends State<OnboardingDetailsScreen> {
   bool get _canFinish => _selectedGender != null && _selectedAgeRange != null;
 
   void _onFinish() {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is! AuthAuthenticated) return;
-    final user = authState.user;
+    final user = context.read<OnboardingCubit>().currentUser;
+    if (user == null) return;
     final updatedUser = UserEntity(
       id: user.id,
       name: user.name,
@@ -51,9 +47,7 @@ class _OnboardingDetailsScreenState extends State<OnboardingDetailsScreen> {
   Widget build(BuildContext context) {
     return BlocListener<OnboardingCubit, OnboardingState>(
       listener: (context, state) {
-        if (state is OnboardingComplete) {
-          context.go(AppRoutes.feed);
-        } else if (state is OnboardingError) {
+        if (state is OnboardingError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
           );

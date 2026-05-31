@@ -114,4 +114,25 @@ void main() {
       expect(result, isA<DataFailed<UserEntity>>());
     });
   });
+
+  group('UserRepositoryImpl.getUserById', () {
+    test('should_return_DataSuccess_with_user_when_getUserById_datasource_succeeds',
+        () async {
+      when(() => mockDataSource.getUserById(any()))
+          .thenAnswer((_) async => userModel);
+
+      final result = await repository.getUserById('user_1');
+
+      expect(result, isA<DataSuccess<UserEntity>>());
+    });
+
+    test('should_return_DataFailed_when_getUserById_datasource_throws', () async {
+      when(() => mockDataSource.getUserById(any()))
+          .thenThrow(Exception('not found'));
+
+      final result = await repository.getUserById('user_1');
+
+      expect(result, isA<DataFailed<UserEntity>>());
+    });
+  });
 }
