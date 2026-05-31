@@ -22,21 +22,19 @@ class CategoryCard extends StatelessWidget {
       onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-        child: Stack(
-          children: [
-            Image.network(
-              category.iconUrl,
-              height: 160,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                height: 160,
-                width: double.infinity,
-                color: AppColors.surface,
+        child: SizedBox(
+          height: 160,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.network(
+                category.iconUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, _) => Container(
+                  color: AppColors.surface,
+                ),
               ),
-            ),
-            Positioned.fill(
-              child: Container(
+              Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
@@ -46,33 +44,34 @@ class CategoryCard extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: AppSpacing.md,
-              left: AppSpacing.md,
-              right: AppSpacing.md,
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: style.$1,
-                    child: Icon(style.$2, color: Colors.white, size: 16),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      category.name,
-                      style: AppTypography.bodyLg.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+              Positioned(
+                bottom: AppSpacing.md,
+                left: AppSpacing.md,
+                right: AppSpacing.md,
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: style.$1,
+                      child: Icon(style.$2, color: Colors.white, size: 16),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        category.name,
+                        style: AppTypography.bodyLg.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -82,16 +81,16 @@ class CategoryCard extends StatelessWidget {
   // represent brand identities for individual content categories, not UI states.
   (Color, IconData) _getCategoryStyle(String name) {
     final lower = name.toLowerCase();
-    if (lower.contains('food') || lower.contains('comida')) {
+    if (lower.contains('food') || lower.contains('nutrition')) {
       return (const Color(0xFFF5C842), Icons.restaurant);
     }
-    if (lower.contains('fitness') || lower.contains('ejercicio')) {
+    if (lower.contains('fitness') || lower.contains('movement')) {
       return (const Color(0xFF5B8A3C), Icons.fitness_center);
     }
-    if (lower.contains('meditation') || lower.contains('meditacion')) {
+    if (lower.contains('meditation') || lower.contains('mindfulness')) {
       return (const Color(0xFF5B7FD4), Icons.self_improvement);
     }
-    if (lower.contains('mental') || lower.contains('salud')) {
+    if (lower.contains('mental') || lower.contains('sleep')) {
       return (const Color(0xFFE87844), Icons.psychology);
     }
     return (AppColors.primaryDark, Icons.article);
