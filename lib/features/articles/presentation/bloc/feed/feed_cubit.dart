@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tortutip/features/articles/domain/use_cases/get_feed_articles_paged_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/get_saved_article_ids_use_case.dart';
@@ -167,14 +166,6 @@ class FeedCubit extends Cubit<FeedState> {
   }
 
   String _mapErrorToMessage(Exception error) {
-    if (error is FirebaseException) {
-      return switch (error.code) {
-        'permission-denied' => 'No tienes permiso para realizar esta acción',
-        'not-found' => 'El contenido no existe',
-        'unavailable' => 'Sin conexión. Inténtalo de nuevo',
-        _ => 'Algo salió mal. Inténtalo de nuevo',
-      };
-    }
     return 'Algo salió mal. Inténtalo de nuevo';
   }
 }

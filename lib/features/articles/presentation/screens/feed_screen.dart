@@ -12,6 +12,8 @@ import 'package:tortutip/features/articles/presentation/widgets/feed_card_stack.
 import 'package:tortutip/features/articles/presentation/widgets/feed_para_ti_chip.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
+import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
+import 'package:tortutip/shared/widgets/tortutip_button.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -49,14 +51,8 @@ class _FeedScreenState extends State<FeedScreen> {
       value: _cubit,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: Text(
-            'TortuTip',
-            style: AppTypography.h1.copyWith(color: AppColors.primary),
-          ),
-          centerTitle: true,
-          backgroundColor: AppColors.background,
-          elevation: 0,
+        appBar: TortuAppBar(
+          title: 'TortuTip',
           leading: const SizedBox.shrink(),
           actions: [
             IconButton(
@@ -72,7 +68,9 @@ class _FeedScreenState extends State<FeedScreen> {
               const Center(child: FeedParaTiChip()),
               const SizedBox(height: AppSpacing.md),
               Expanded(
-                child: BlocBuilder<FeedCubit, FeedState>(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+                  child: BlocBuilder<FeedCubit, FeedState>(
                   builder: (context, state) {
                     if (state is FeedInitial || state is FeedLoading) {
                       return const Center(
@@ -128,15 +126,11 @@ class _FeedScreenState extends State<FeedScreen> {
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: AppSpacing.md),
-                            TextButton(
-                              onPressed: _userId != null
+                            TortuSecondaryButton(
+                              label: 'Reintentar',
+                              onTap: _userId != null
                                   ? () => _cubit.loadFeed(_userId!)
                                   : null,
-                              child: Text(
-                                'Reintentar',
-                                style: AppTypography.label
-                                    .copyWith(color: AppColors.primary),
-                              ),
                             ),
                           ],
                         ),
@@ -145,6 +139,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
                     return const SizedBox.shrink();
                   },
+                ),
                 ),
               ),
             ],

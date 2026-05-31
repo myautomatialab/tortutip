@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:tortutip/config/routes/app_routes.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
@@ -24,6 +26,9 @@ class FeedCard extends StatefulWidget {
 }
 
 class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
+  static const double _dragAngleDivisor = 1000;
+  static const double _swipeThreshold = 100;
+  static const double _swipeVelocityThreshold = 800;
   bool _isExpanded = false;
   late AnimationController _expandController;
   late Animation<double> _imageHeightFactor;
@@ -66,18 +71,29 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
   void _onPanUpdate(DragUpdateDetails details) {
     setState(() {
       _dragOffset += details.delta.dx;
-      _dragAngle = _dragOffset / 1000;
+      _dragAngle = _dragOffset / _dragAngleDivisor;
     });
   }
 
   void _onPanEnd(DragEndDetails details) {
-    final velocity = details.velocity.pixelsPerSecond.dx.abs();
-    if (_dragOffset.abs() > 100 || velocity > 800) {
-      widget.onSwipe();
-      setState(() {
-        _dragOffset = 0.0;
-        _dragAngle = 0.0;
-      });
+    final velocity = details.velocity.pixelsPerSecond.dx;
+    final isSwipeRight = _dragOffset > 0;
+    final isSwipeCompleted = _dragOffset.abs() > _swipeThreshold || velocity.abs() > _swipeVelocityThreshold;
+
+    if (isSwipeCompleted) {
+      if (isSwipeRight) {
+        setState(() {
+          _dragOffset = 0.0;
+          _dragAngle = 0.0;
+        });
+        context.push(AppRoutes.articleDetailPath(widget.article.id));
+      } else {
+        widget.onSwipe();
+        setState(() {
+          _dragOffset = 0.0;
+          _dragAngle = 0.0;
+        });
+      }
     } else {
       _animateSpringBack();
     }
@@ -197,8 +213,8 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
       child: GestureDetector(
         onTap: () => widget.onBookmark(widget.article.id),
         child: Container(
-          width: 40,
-          height: 40,
+          width: AppSpacing.avatarSizeSm + AppSpacing.sm,
+          height: AppSpacing.avatarSizeSm + AppSpacing.sm,
           decoration: BoxDecoration(
             color: AppColors.dark.withValues(alpha: 0.5),
             shape: BoxShape.circle,

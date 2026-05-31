@@ -4,6 +4,8 @@ import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/articles/presentation/widgets/feed_card.dart';
 
 class FeedCardStack extends StatelessWidget {
+  static const double _backCardScale = 0.95;
+  static const double _cardHeightFactor = 0.78;
   final List<ArticleEntity> articles;
   final int currentIndex;
   final Set<String> savedArticleIds;
@@ -25,7 +27,7 @@ class FeedCardStack extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     final cardWidth = screenWidth - AppSpacing.lg * 2;
-    final cardHeight = screenHeight * 0.78;
+    final cardHeight = screenHeight * _cardHeightFactor;
 
     final hasNext = currentIndex + 1 < articles.length;
 
@@ -37,9 +39,9 @@ class FeedCardStack extends StatelessWidget {
         children: [
           if (hasNext)
             Transform.translate(
-              offset: const Offset(0, 16),
+              offset: const Offset(0, AppSpacing.lg),
               child: Transform.scale(
-                scale: 0.95,
+                scale: _backCardScale,
                 child: FeedCard(
                   article: articles[currentIndex + 1],
                   isSaved: savedArticleIds.contains(articles[currentIndex + 1].id),

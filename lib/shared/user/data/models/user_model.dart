@@ -27,15 +27,4 @@ class UserModel extends UserEntity {
     );
   }
 
-  UserEntity toEntity() => UserEntity(
-        id: id,
-        name: name,
-        email: email,
-        avatarUrl: avatarUrl,
-        bio: bio,
-        role: role,
-        gender: gender,
-        ageRange: ageRange,
-        createdAt: createdAt,
-      );
 }

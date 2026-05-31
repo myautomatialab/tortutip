@@ -8,6 +8,8 @@ import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 
 class FeedCardDetail extends StatelessWidget {
+  static const double _authorAvatarRadius = 18;
+
   final ArticleEntity article;
 
   const FeedCardDetail({super.key, required this.article});
@@ -42,7 +44,7 @@ class FeedCardDetail extends StatelessWidget {
           Row(
             children: [
               const CircleAvatar(
-                radius: 18,
+                radius: _authorAvatarRadius,
                 backgroundColor: AppColors.surface,
                 child: Icon(
                   Icons.person,
