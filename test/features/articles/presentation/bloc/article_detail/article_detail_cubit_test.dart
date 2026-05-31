@@ -78,6 +78,8 @@ void main() {
     registerFallbackValue(
         const GetSavedArticleIdsParams(userId: 'u'));
     registerFallbackValue(
+        const GetUserByIdParams(userId: 'u'));
+    registerFallbackValue(
         const SaveArticleParams(userId: 'u', articleId: 'a'));
     registerFallbackValue(
         const UnsaveArticleParams(userId: 'u', articleId: 'a'));
@@ -97,7 +99,7 @@ void main() {
   void stubHappyPath({bool articleInSaved = false}) {
     when(() => mockGetArticleDetail('art_1'))
         .thenAnswer((_) async => DataSuccess(article));
-    when(() => mockGetUserById('user_1'))
+    when(() => mockGetUserById(const GetUserByIdParams(userId: 'user_1')))
         .thenAnswer((_) async => DataSuccess(author));
     when(() => mockGetSavedArticleIds(any()))
         .thenAnswer((_) async => DataSuccess(
@@ -179,7 +181,7 @@ void main() {
       build: () {
         when(() => mockGetArticleDetail('art_1'))
             .thenAnswer((_) async => DataSuccess(article));
-        when(() => mockGetUserById('user_1'))
+        when(() => mockGetUserById(const GetUserByIdParams(userId: 'user_1')))
             .thenAnswer((_) async => DataSuccess(author));
         when(() => mockGetSavedArticleIds(any()))
             .thenAnswer((_) async => DataSuccess(<String>[]));
@@ -200,7 +202,7 @@ void main() {
       build: () {
         when(() => mockGetArticleDetail('art_1'))
             .thenAnswer((_) async => DataSuccess(article));
-        when(() => mockGetUserById('user_1'))
+        when(() => mockGetUserById(const GetUserByIdParams(userId: 'user_1')))
             .thenAnswer((_) async => DataFailed(Exception('user not found')));
         when(() => mockGetSavedArticleIds(any()))
             .thenAnswer((_) async => DataSuccess(<String>[]));

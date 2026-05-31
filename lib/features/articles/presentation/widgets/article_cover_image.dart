@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
+import 'package:tortutip/config/theme/app_spacing.dart';
 
 class ArticleCoverImage extends StatelessWidget {
   final String imageUrl;
@@ -9,7 +10,7 @@ class ArticleCoverImage extends StatelessWidget {
   const ArticleCoverImage({
     super.key,
     required this.imageUrl,
-    this.height = 260,
+    this.height = AppSpacing.coverImageHeight,
   });
 
   @override

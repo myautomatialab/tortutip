@@ -40,7 +40,7 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
 
     // Parallel calls that don't depend on each other
     final results = await Future.wait([
-      _getUserById(article.authorId),
+      _getUserById(GetUserByIdParams(userId: article.authorId)),
       _getSavedArticleIds(GetSavedArticleIdsParams(userId: currentUserId)),
       _getRelatedArticles(GetRelatedArticlesParams(
         categoryId: article.categoryId,

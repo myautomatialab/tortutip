@@ -17,6 +17,7 @@ import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/injection/injection_container.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
+import 'package:tortutip/shared/widgets/tortutip_button.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
   final String articleId;
@@ -92,12 +93,9 @@ class ArticleDetailScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.lg),
-              TextButton(
-                onPressed: () => cubit.loadArticle(articleId, userId),
-                child: Text(
-                  'Reintentar',
-                  style: AppTypography.body.copyWith(color: AppColors.primary),
-                ),
+              TortuSecondaryButton(
+                label: 'Reintentar',
+                onTap: () => cubit.loadArticle(articleId, userId),
               ),
             ],
           ),

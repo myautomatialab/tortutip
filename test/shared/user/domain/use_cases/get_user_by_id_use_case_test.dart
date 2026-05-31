@@ -34,7 +34,7 @@ void main() {
       when(() => mockRepository.getUserById('user_1'))
           .thenAnswer((_) async => DataSuccess(user));
 
-      final result = await useCase('user_1');
+      final result = await useCase(const GetUserByIdParams(userId: 'user_1'));
 
       expect(result, isA<DataSuccess<UserEntity>>());
       expect(result.data, equals(user));
@@ -46,7 +46,7 @@ void main() {
       when(() => mockRepository.getUserById('user_1'))
           .thenAnswer((_) async => DataFailed(exception));
 
-      final result = await useCase('user_1');
+      final result = await useCase(const GetUserByIdParams(userId: 'user_1'));
 
       expect(result, isA<DataFailed<UserEntity>>());
       expect(result.error, equals(exception));

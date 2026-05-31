@@ -29,8 +29,8 @@ class RelatedArticleCard extends StatelessWidget {
           children: [
             CachedNetworkImage(
               imageUrl: article.coverHorizontalUrl,
-              width: 120,
-              height: 80,
+              width: AppSpacing.relatedCardImageWidth,
+              height: AppSpacing.relatedCardImageHeight,
               fit: BoxFit.cover,
               placeholder: (_, _) => Container(
                 width: 120,

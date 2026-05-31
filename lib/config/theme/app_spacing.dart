@@ -32,6 +32,11 @@ class AppSpacing {
   static const double avatarSizeMd = 48;
   static const double avatarSizeLg = 72;
 
+  // ── Tamaños de componentes de artículo ──────────────────────
+  static const double coverImageHeight = 260;
+  static const double relatedCardImageWidth = 120;
+  static const double relatedCardImageHeight = 80;
+
   // ── Border radius ────────────────────────────────────────────
   static const double radiusXs = 4;
   static const double radiusSm = 8;
