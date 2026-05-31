@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
+import 'package:tortutip/shared/user/domain/use_cases/update_user_profile_use_case.dart';
 import 'package:tortutip/shared/user/domain/use_cases/update_user_role_use_case.dart';
 import 'package:tortutip/shared/user/domain/use_cases/select_user_categories_use_case.dart';
 import 'onboarding_state.dart';
@@ -7,9 +9,13 @@ import 'onboarding_state.dart';
 class OnboardingCubit extends Cubit<OnboardingState> {
   final UpdateUserRoleUseCase _updateUserRole;
   final SelectUserCategoriesUseCase _selectCategories;
+  final UpdateUserProfileUseCase _updateUserProfile;
 
-  OnboardingCubit(this._updateUserRole, this._selectCategories)
-      : super(const OnboardingInitial());
+  OnboardingCubit(
+    this._updateUserRole,
+    this._selectCategories,
+    this._updateUserProfile,
+  ) : super(const OnboardingInitial());
 
   Future<void> selectRole(String userId, String role) async {
     if (state is OnboardingLoading) return;
@@ -28,6 +34,17 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     emit(const OnboardingLoading());
     final result = await _selectCategories(
         SelectUserCategoriesParams(userId: userId, categoryIds: categoryIds));
+    if (result.isSuccess) {
+      emit(const OnboardingComplete());
+    } else {
+      emit(OnboardingError(_mapErrorToMessage(result.error!)));
+    }
+  }
+
+  Future<void> completeOnboarding(UserEntity user) async {
+    if (state is OnboardingLoading) return;
+    emit(const OnboardingLoading());
+    final result = await _updateUserProfile(user);
     if (result.isSuccess) {
       emit(const OnboardingComplete());
     } else {
