@@ -9,6 +9,7 @@ abstract class UserRemoteDataSource {
   Future<void> selectUserCategories(String userId, List<String> categoryIds);
   Future<UserModel> updateUserProfile(UserModel user);
   Future<List<String>> getUserCategoryIds(String userId);
+  Future<UserModel> getUserById(String userId);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -60,5 +61,11 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     return snapshot.docs
         .map((doc) => doc.data()['category_id'] as String)
         .toList();
+  }
+
+  @override
+  Future<UserModel> getUserById(String userId) async {
+    final doc = await _firestore.collection('users').doc(userId).get();
+    return UserModel.fromRawData({'id': doc.id, ...?doc.data()});
   }
 }
