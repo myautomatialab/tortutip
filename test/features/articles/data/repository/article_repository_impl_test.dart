@@ -164,4 +164,27 @@ void main() {
       expect(result, isA<DataFailed<bool>>());
     });
   });
+
+  group('ArticleRepositoryImpl.getRelatedArticles', () {
+    test(
+        'should_return_DataSuccess_with_entities_when_getRelatedArticles_datasource_succeeds',
+        () async {
+      when(() => mockDataSource.getRelatedArticles(any(), any()))
+          .thenAnswer((_) async => <ArticleModel>[]);
+
+      final result = await repository.getRelatedArticles('cat_1', 'art_1');
+
+      expect(result, isA<DataSuccess<List<ArticleEntity>>>());
+    });
+
+    test('should_return_DataFailed_when_getRelatedArticles_datasource_throws',
+        () async {
+      when(() => mockDataSource.getRelatedArticles(any(), any()))
+          .thenThrow(Exception('error'));
+
+      final result = await repository.getRelatedArticles('cat_1', 'art_1');
+
+      expect(result, isA<DataFailed<List<ArticleEntity>>>());
+    });
+  });
 }
