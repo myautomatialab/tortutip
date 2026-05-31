@@ -5,8 +5,6 @@ import 'package:tortutip/config/routes/app_routes.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
-import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/features/onboarding/presentation/bloc/onboarding_cubit.dart';
 import 'package:tortutip/features/onboarding/presentation/bloc/onboarding_state.dart';
 import 'package:tortutip/features/onboarding/presentation/widgets/role_card.dart';
@@ -24,11 +22,9 @@ class _OnboardingRoleScreenState extends State<OnboardingRoleScreen> {
   String? _selectedRole;
 
   void _onNext() {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is! AuthAuthenticated) return;
-    context
-        .read<OnboardingCubit>()
-        .selectRole(authState.user.id, _selectedRole!);
+    final userId = context.read<OnboardingCubit>().currentUser?.id;
+    if (userId == null) return;
+    context.read<OnboardingCubit>().selectRole(userId, _selectedRole!);
   }
 
   @override

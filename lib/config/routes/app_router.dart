@@ -4,10 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/config/auth_routes.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/bloc/auth_event.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../features/articles/config/articles_routes.dart';
 import '../../features/onboarding/config/onboarding_routes.dart';
+import '../../features/onboarding/presentation/bloc/onboarding_cubit.dart';
+import '../../features/onboarding/presentation/bloc/onboarding_state.dart';
 import '../../features/profile/config/profile_routes.dart';
+import '../../injection/injection_container.dart';
 import 'app_routes.dart';
 import 'app_shell.dart';
 
@@ -22,8 +26,28 @@ class AppRouter {
       redirect: (context, state) => _redirect(context, state),
       routes: [
         ...AuthRoutes.routes,
-        ...OnboardingRoutes.routes,
         ...ArticlesRoutes.routes,
+
+        // ShellRoute de onboarding — provee OnboardingCubit a las 3 pantallas
+        ShellRoute(
+          builder: (context, state, child) => BlocProvider(
+            create: (_) {
+              final authState = context.read<AuthBloc>().state;
+              return sl<OnboardingCubit>()
+                ..currentUser =
+                    authState is AuthAuthenticated ? authState.user : null;
+            },
+            child: BlocListener<OnboardingCubit, OnboardingState>(
+              listener: (context, onboardingState) {
+                if (onboardingState is OnboardingComplete) {
+                  context.read<AuthBloc>().add(const CheckAuthEvent());
+                }
+              },
+              child: child,
+            ),
+          ),
+          routes: OnboardingRoutes.routes,
+        ),
 
         // Un único ShellRoute que mantiene AppShell vivo entre tabs
         ShellRoute(
@@ -61,6 +85,10 @@ class AppRouter {
     if (authState is AuthAuthenticated && (isOnLogin || isOnLanding)) {
       final user = authState.user;
       return user.role.isEmpty ? AppRoutes.onboardingCategories : AppRoutes.feed;
+    }
+
+    if (authState is AuthAuthenticated && isOnboarding) {
+      if (authState.user.role.isNotEmpty) return AppRoutes.feed;
     }
 
     if (authState is AuthAuthenticated && !isOnboarding) {
