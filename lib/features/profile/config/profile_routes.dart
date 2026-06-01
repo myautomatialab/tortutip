@@ -1,5 +1,14 @@
-// Profile routes are handled within ExploreRoutes (explore/edit is a sub-route
-// of /explore). This file is kept for future profile-specific routes.
+import 'package:go_router/go_router.dart';
+import 'package:tortutip/config/routes/app_routes.dart';
+import 'package:tortutip/features/profile/presentation/screens/profile_screen.dart';
+
 class ProfileRoutes {
   ProfileRoutes._();
+
+  static final routes = <RouteBase>[
+    GoRoute(
+      path: AppRoutes.profile,
+      builder: (context, state) => const ProfileScreen(),
+    ),
+  ];
 }
