@@ -4,7 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
@@ -15,8 +17,6 @@ import 'package:tortutip/features/articles/presentation/screens/preview_article_
 import 'package:tortutip/features/articles/presentation/widgets/cover_upload_widget.dart';
 import 'package:tortutip/features/articles/presentation/widgets/rich_text_toolbar.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
-import 'package:tortutip/features/categories/presentation/bloc/category_cubit.dart';
-import 'package:tortutip/features/categories/presentation/bloc/category_state.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/shared/widgets/tortutip_chip.dart';
 
@@ -28,29 +28,32 @@ class CreateArticleScreen extends StatefulWidget {
 }
 
 class _CreateArticleScreenState extends State<CreateArticleScreen> {
+  late final CreateArticleCubit _cubit;
   late final QuillController _quillController;
   late final TextEditingController _titleController;
   final _imagePicker = ImagePicker();
 
   bool _isUploadingVertical = false;
   bool _isUploadingHorizontal = false;
-  String? _coverVerticalUrl;
-  String? _coverHorizontalUrl;
+  // imageSource can be File (local, post-crop) or String (remote URL from cubit)
+  Object? _coverVerticalSource;
+  Object? _coverHorizontalSource;
 
   @override
   void initState() {
     super.initState();
+    _cubit = GetIt.instance<CreateArticleCubit>();
     _quillController = QuillController.basic();
     _titleController = TextEditingController();
 
     _quillController.addListener(_onBodyChanged);
 
-    context.read<CategoryCubit>().loadCategories();
+    _cubit.loadCategories();
   }
 
   void _onBodyChanged() {
     final json = jsonEncode(_quillController.document.toDelta().toJson());
-    context.read<CreateArticleCubit>().updateBody(json);
+    _cubit.updateBody(json);
   }
 
   @override
@@ -58,13 +61,14 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
     _quillController.removeListener(_onBodyChanged);
     _quillController.dispose();
     _titleController.dispose();
+    _cubit.close();
     super.dispose();
   }
 
   bool _hasContent() {
     return _titleController.text.trim().isNotEmpty ||
-        _coverVerticalUrl != null ||
-        _coverHorizontalUrl != null ||
+        _coverVerticalSource != null ||
+        _coverHorizontalSource != null ||
         _quillController.document.length > 1;
   }
 
@@ -120,8 +124,8 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
           children: [
             const SizedBox(height: AppSpacing.sm),
             Container(
-              width: AppSpacing.huge,
-              height: AppSpacing.xs,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
                 color: AppColors.borderStrong,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -152,15 +156,41 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
         await _imagePicker.pickImage(source: source, imageQuality: 85);
     if (picked == null || !mounted) return;
 
-    if (isVertical) {
-      setState(() => _isUploadingVertical = true);
-    } else {
-      setState(() => _isUploadingHorizontal = true);
-    }
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: picked.path,
+      aspectRatio: isVertical
+          ? const CropAspectRatio(ratioX: 3, ratioY: 4)
+          : const CropAspectRatio(ratioX: 16, ratioY: 9),
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: isVertical ? 'Vertical Cover' : 'Horizontal Cover',
+          toolbarColor: AppColors.primary,
+          toolbarWidgetColor: Colors.white,
+          lockAspectRatio: true,
+        ),
+        IOSUiSettings(
+          title: isVertical ? 'Vertical Cover' : 'Horizontal Cover',
+          aspectRatioLockEnabled: true,
+          resetAspectRatioEnabled: false,
+        ),
+      ],
+    );
 
-    await context
-        .read<CreateArticleCubit>()
-        .uploadCoverImage(File(picked.path), isVertical);
+    if (croppedFile == null || !mounted) return;
+
+    final croppedLocalFile = File(croppedFile.path);
+
+    setState(() {
+      if (isVertical) {
+        _isUploadingVertical = true;
+        _coverVerticalSource = croppedLocalFile;
+      } else {
+        _isUploadingHorizontal = true;
+        _coverHorizontalSource = croppedLocalFile;
+      }
+    });
+
+    await _cubit.uploadCoverImage(croppedLocalFile, isVertical);
 
     if (mounted) {
       setState(() {
@@ -170,25 +200,88 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
     }
   }
 
+  void _onCoverUrlsUpdated(String? vertical, String? horizontal) {
+    setState(() {
+      if (vertical != null) _coverVerticalSource = vertical;
+      if (horizontal != null) _coverHorizontalSource = horizontal;
+    });
+  }
+
   void _onPreview() {
     final bodyJson =
         jsonEncode(_quillController.document.toDelta().toJson());
+    final verticalUrl =
+        _coverVerticalSource is String ? _coverVerticalSource as String : null;
+    final horizontalUrl = _coverHorizontalSource is String
+        ? _coverHorizontalSource as String
+        : null;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => PreviewArticleScreen(
           title: _titleController.text,
           categoryId: '',
           bodyJson: bodyJson,
-          coverVerticalUrl: _coverVerticalUrl,
-          coverHorizontalUrl: _coverHorizontalUrl,
+          coverVerticalUrl: verticalUrl,
+          coverHorizontalUrl: horizontalUrl,
         ),
       ),
     );
   }
 
   void _onPublish() {
-    context.read<CreateArticleCubit>().publishFromForm('current_user');
+    _cubit.publishFromForm('current_user');
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _cubit,
+      child: _CreateArticleView(
+        quillController: _quillController,
+        titleController: _titleController,
+        isUploadingVertical: _isUploadingVertical,
+        isUploadingHorizontal: _isUploadingHorizontal,
+        coverVerticalSource: _coverVerticalSource,
+        coverHorizontalSource: _coverHorizontalSource,
+        onClose: _onClose,
+        onPickImage: _pickImage,
+        onPreview: _onPreview,
+        onPublish: _onPublish,
+        onTitleChanged: (t) => _cubit.updateTitle(t),
+        onCoverUrlsUpdated: _onCoverUrlsUpdated,
+      ),
+    );
+  }
+}
+
+class _CreateArticleView extends StatelessWidget {
+  final QuillController quillController;
+  final TextEditingController titleController;
+  final bool isUploadingVertical;
+  final bool isUploadingHorizontal;
+  final Object? coverVerticalSource;
+  final Object? coverHorizontalSource;
+  final VoidCallback onClose;
+  final Future<void> Function(bool isVertical) onPickImage;
+  final VoidCallback onPreview;
+  final VoidCallback onPublish;
+  final ValueChanged<String> onTitleChanged;
+  final void Function(String? vertical, String? horizontal) onCoverUrlsUpdated;
+
+  const _CreateArticleView({
+    required this.quillController,
+    required this.titleController,
+    required this.isUploadingVertical,
+    required this.isUploadingHorizontal,
+    required this.coverVerticalSource,
+    required this.coverHorizontalSource,
+    required this.onClose,
+    required this.onPickImage,
+    required this.onPreview,
+    required this.onPublish,
+    required this.onTitleChanged,
+    required this.onCoverUrlsUpdated,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -201,8 +294,7 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
               backgroundColor: AppColors.success,
               content: Text(
                 'Article published successfully!',
-                style:
-                    AppTypography.body.copyWith(color: AppColors.textOnDark),
+                style: AppTypography.body.copyWith(color: AppColors.textOnDark),
               ),
             ),
           );
@@ -212,16 +304,15 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
               backgroundColor: AppColors.error,
               content: Text(
                 state.message,
-                style:
-                    AppTypography.body.copyWith(color: AppColors.textOnDark),
+                style: AppTypography.body.copyWith(color: AppColors.textOnDark),
               ),
             ),
           );
         } else if (state is CreateArticleFormUpdated) {
-          setState(() {
-            _coverVerticalUrl = state.coverVerticalUrl;
-            _coverHorizontalUrl = state.coverHorizontalUrl;
-          });
+          onCoverUrlsUpdated(
+            state.coverVerticalUrl,
+            state.coverHorizontalUrl,
+          );
         }
       },
       child: Scaffold(
@@ -231,7 +322,7 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.close, color: AppColors.textPrimary),
-            onPressed: _onClose,
+            onPressed: onClose,
           ),
           title: Text('Create Article', style: AppTypography.h4),
           centerTitle: true,
@@ -244,48 +335,52 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CoverUploadWidget(
-                      coverVerticalUrl: _coverVerticalUrl,
-                      coverHorizontalUrl: _coverHorizontalUrl,
-                      isUploadingVertical: _isUploadingVertical,
-                      isUploadingHorizontal: _isUploadingHorizontal,
-                      onTapVertical: () => _pickImage(true),
-                      onTapHorizontal: () => _pickImage(false),
+                      coverVerticalSource: coverVerticalSource,
+                      coverHorizontalSource: coverHorizontalSource,
+                      isUploadingVertical: isUploadingVertical,
+                      isUploadingHorizontal: isUploadingHorizontal,
+                      onTapVertical: () => onPickImage(true),
+                      onTapHorizontal: () => onPickImage(false),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.screenHorizontal,
                       ),
                       child: TextField(
-                        controller: _titleController,
-                        style: AppTypography.h2,
+                        controller: titleController,
+                        style: AppTypography.h1
+                            .copyWith(color: AppColors.textPrimary),
                         maxLines: 3,
                         minLines: 1,
                         decoration: InputDecoration(
-                          hintText: 'Article title...',
-                          hintStyle: AppTypography.h2.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
+                          hintText: 'Write your title...',
+                          hintStyle: AppTypography.h1
+                              .copyWith(color: AppColors.textTertiary),
+                          filled: false,
                           border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          focusedErrorBorder: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          isDense: true,
                         ),
-                        onChanged: (v) =>
-                            context.read<CreateArticleCubit>().updateTitle(v),
+                        onChanged: onTitleChanged,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     _CategorySelector(),
                     const SizedBox(height: AppSpacing.sm),
-                    RichTextToolbar(controller: _quillController),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.screenHorizontal,
-                        vertical: AppSpacing.lg,
-                      ),
-                      child: QuillEditor.basic(
-                        controller: _quillController,
-                        config: const QuillEditorConfig(
-                          placeholder: 'Write your article here...',
-                          minHeight: 200,
-                          padding: EdgeInsets.zero,
+                    RichTextToolbar(controller: quillController),
+                    QuillEditor.basic(
+                      controller: quillController,
+                      config: const QuillEditorConfig(
+                        placeholder:
+                            'Start your journey here... share your wisdom with the world.',
+                        minHeight: 200,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.screenHorizontal,
+                          vertical: AppSpacing.lg,
                         ),
                       ),
                     ),
@@ -293,7 +388,7 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
                 ),
               ),
             ),
-            _BottomBar(onPreview: _onPreview, onPublish: _onPublish),
+            _BottomBar(onPreview: onPreview, onPublish: onPublish),
           ],
         ),
       ),
@@ -311,31 +406,50 @@ class _CategorySelectorState extends State<_CategorySelector> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CategoryCubit, CategoryState>(
+    return BlocBuilder<CreateArticleCubit, CreateArticleState>(
       builder: (ctx, state) {
-        if (state is! CategoryLoaded) return const SizedBox.shrink();
-        return SizedBox(
-          height: AppSpacing.buttonHeight,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.screenHorizontal,
+        final categories = state is CreateArticleFormUpdated
+            ? state.categories
+            : <CategoryEntity>[];
+        if (categories.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenHorizontal,
+              ),
+              child: Text(
+                'Choose Category',
+                style:
+                    AppTypography.label.copyWith(color: AppColors.textSecondary),
+              ),
             ),
-            itemCount: state.categories.length,
-            separatorBuilder: (ctx, i) =>
-                const SizedBox(width: AppSpacing.sm),
-            itemBuilder: (_, i) {
-              final cat = state.categories[i];
-              return _SelectableCategoryChip(
-                category: cat,
-                isSelected: _selectedId == cat.id,
-                onTap: () {
-                  setState(() => _selectedId = cat.id);
-                  context.read<CreateArticleCubit>().selectCategory(cat.id);
+            const SizedBox(height: AppSpacing.xs),
+            SizedBox(
+              height: 36,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenHorizontal,
+                ),
+                itemCount: categories.length,
+                separatorBuilder: (ctx, i) =>
+                    const SizedBox(width: AppSpacing.sm),
+                itemBuilder: (_, i) {
+                  final cat = categories[i];
+                  return _SelectableCategoryChip(
+                    category: cat,
+                    isSelected: _selectedId == cat.id,
+                    onTap: () {
+                      setState(() => _selectedId = cat.id);
+                      context.read<CreateArticleCubit>().selectCategory(cat.id);
+                    },
+                  );
                 },
-              );
-            },
-          ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -355,18 +469,25 @@ class _SelectableCategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = chipColorForCategoryName(category.name);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.borderStrong,
-            width: isSelected ? 2 : 1,
-          ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs,
         ),
-        child: TortuCategoryChip.fromName(category.name),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colors.$1
+              : colors.$1.withValues(alpha: 0.45),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+        ),
+        child: Text(
+          category.name.toUpperCase(),
+          style: AppTypography.labelSm.copyWith(color: colors.$2),
+        ),
       ),
     );
   }
