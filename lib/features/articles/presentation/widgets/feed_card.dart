@@ -5,7 +5,10 @@ import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tortutip/features/articles/presentation/widgets/feed_card_detail.dart';
+import 'package:tortutip/shared/widgets/tortutip_chip.dart';
+import 'package:tortutip/shared/widgets/tortutip_skeleton.dart';
 
 class FeedCard extends StatefulWidget {
   final ArticleEntity article;
@@ -120,7 +123,12 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Transform(
+    final opacity = (1.0 - (_dragOffset.abs() / _swipeThreshold))
+        .clamp(0.3, 1.0);
+
+    return Opacity(
+      opacity: opacity,
+      child: Transform(
       transform: Matrix4.identity()
         ..rotateZ(_dragAngle)
         ..translateByDouble(_dragOffset, 0.0, 0.0, 1.0),
@@ -143,15 +151,17 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildBackground() {
     final imageWidget = widget.article.coverVerticalUrl.isNotEmpty
-        ? Image.network(
-            widget.article.coverVerticalUrl,
+        ? CachedNetworkImage(
+            imageUrl: widget.article.coverVerticalUrl,
             fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => _buildPlaceholderImage(),
+            placeholder: (_, _) => const TortuSkeletonImage(),
+            errorWidget: (_, _, _) => _buildPlaceholderImage(),
           )
         : _buildPlaceholderImage();
 
@@ -204,20 +214,7 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
     return Positioned(
       top: AppSpacing.lg,
       left: AppSpacing.lg,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.dark.withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-        ),
-        child: Text(
-          widget.categoryName,
-          style: AppTypography.caption.copyWith(color: AppColors.white),
-        ),
-      ),
+      child: TortuCategoryChip.fromName(widget.categoryName),
     );
   }
 
@@ -236,7 +233,7 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
           ),
           child: Icon(
             widget.isSaved ? Icons.bookmark : Icons.bookmark_border,
-            color: widget.isSaved ? AppColors.primary : AppColors.white,
+            color: widget.isSaved ? AppColors.white : AppColors.white,
             size: AppSpacing.iconMd,
           ),
         ),

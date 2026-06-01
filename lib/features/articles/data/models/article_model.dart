@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 
 class ArticleModel extends ArticleEntity {
@@ -14,6 +15,8 @@ class ArticleModel extends ArticleEntity {
     required super.saveCount,
     super.publishedAt,
     required super.createdAt,
+    super.authorName,
+    super.authorAvatarUrl,
   });
 
   factory ArticleModel.fromRawData(Map<String, dynamic> data) {
@@ -28,11 +31,17 @@ class ArticleModel extends ArticleEntity {
       status: data['status'] ?? 'draft',
       readTimeMinutes: data['read_time_minutes'] ?? 0,
       saveCount: data['save_count'] ?? 0,
-      publishedAt: data['published_at'] != null
-          ? DateTime.tryParse(data['published_at'])
-          : null,
-      createdAt: DateTime.tryParse(data['created_at'] ?? '') ?? DateTime.now(),
+      publishedAt: _parseDate(data['published_at']),
+      createdAt: _parseDate(data['created_at']) ?? DateTime.now(),
+      authorName: data['author_name'] ?? '',
+      authorAvatarUrl: data['author_avatar_url'] ?? '',
     );
   }
 
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    if (value is Timestamp) return value.toDate();
+    if (value is String) return DateTime.tryParse(value);
+    return null;
+  }
 }

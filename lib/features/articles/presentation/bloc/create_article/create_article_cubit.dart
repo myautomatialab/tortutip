@@ -3,9 +3,12 @@ import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tortutip/core/usecase/usecase.dart';
+import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/articles/domain/params/publish_article_params.dart';
+import 'package:tortutip/features/articles/domain/params/update_article_params.dart';
 import 'package:tortutip/features/articles/domain/params/upload_article_image_params.dart';
 import 'package:tortutip/features/articles/domain/use_cases/publish_article_use_case.dart';
+import 'package:tortutip/features/articles/domain/use_cases/update_article_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/upload_article_image_use_case.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
 import 'package:tortutip/features/categories/domain/use_cases/get_all_categories_use_case.dart';
@@ -14,6 +17,7 @@ import 'create_article_state.dart';
 
 class CreateArticleCubit extends Cubit<CreateArticleState> {
   final PublishArticleUseCase _publishArticle;
+  final UpdateArticleUseCase _updateArticle;
   final UploadArticleImageUseCase _uploadArticleImage;
   final GetAllCategoriesUseCase _getAllCategories;
 
@@ -24,9 +28,13 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
   String _categoryId = '';
   String _bodyJson = '';
   List<CategoryEntity> _categories = [];
+  String? _editingArticleId;
+
+  bool get isEditing => _editingArticleId != null;
 
   CreateArticleCubit(
     this._publishArticle,
+    this._updateArticle,
     this._uploadArticleImage,
     this._getAllCategories,
   ) : super(const CreateArticleInitial());
@@ -56,8 +64,7 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
       }
       emit(_currentFormState);
     } else {
-      // Show the raw error for debugging — replace with _mapErrorToMessage after fix
-      emit(CreateArticleError('Upload error: ${result.error}'));
+      emit(CreateArticleError(_mapErrorToMessage(result.error!)));
       emit(_currentFormState);
     }
   }
@@ -77,6 +84,20 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
     emit(_currentFormState);
   }
 
+  void initForEdit(ArticleEntity article) {
+    _editingArticleId = article.id;
+    _title = article.title;
+    _categoryId = article.categoryId;
+    _bodyJson = article.body;
+    _coverVerticalUrl = article.coverVerticalUrl.isNotEmpty
+        ? article.coverVerticalUrl
+        : null;
+    _coverHorizontalUrl = article.coverHorizontalUrl.isNotEmpty
+        ? article.coverHorizontalUrl
+        : null;
+    emit(_currentFormState);
+  }
+
   Future<void> publish(PublishArticleParams params) async {
     emit(const CreateArticleLoading());
     final result = await _publishArticle(params);
@@ -87,23 +108,47 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
     }
   }
 
-  Future<void> publishFromForm(String authorId) async {
+  Future<void> publishFromForm(
+      String authorId, {
+      String authorName = '',
+      String authorAvatarUrl = '',
+  }) async {
     emit(const CreateArticlePublishing());
     final readTime = _calculateReadTime(_bodyJson);
-    final params = PublishArticleParams(
-      authorId: authorId,
-      categoryId: _categoryId,
-      title: _title,
-      body: _extractPlainText(_bodyJson),
-      coverVerticalUrl: _coverVerticalUrl ?? '',
-      coverHorizontalUrl: _coverHorizontalUrl ?? '',
-      readTimeMinutes: readTime,
-    );
-    final result = await _publishArticle(params);
-    if (result.isSuccess) {
-      emit(CreateArticlePublished(result.data!));
+    if (_editingArticleId != null) {
+      final params = UpdateArticleParams(
+        articleId: _editingArticleId!,
+        categoryId: _categoryId,
+        title: _title,
+        body: _extractPlainText(_bodyJson),
+        coverVerticalUrl: _coverVerticalUrl ?? '',
+        coverHorizontalUrl: _coverHorizontalUrl ?? '',
+        readTimeMinutes: readTime,
+      );
+      final result = await _updateArticle(params);
+      if (result.isSuccess) {
+        emit(CreateArticlePublished(result.data!));
+      } else {
+        emit(CreateArticleError(_mapErrorToMessage(result.error!)));
+      }
     } else {
-      emit(CreateArticleError(_mapErrorToMessage(result.error!)));
+      final params = PublishArticleParams(
+        authorId: authorId,
+        authorName: authorName,
+        authorAvatarUrl: authorAvatarUrl,
+        categoryId: _categoryId,
+        title: _title,
+        body: _extractPlainText(_bodyJson),
+        coverVerticalUrl: _coverVerticalUrl ?? '',
+        coverHorizontalUrl: _coverHorizontalUrl ?? '',
+        readTimeMinutes: readTime,
+      );
+      final result = await _publishArticle(params);
+      if (result.isSuccess) {
+        emit(CreateArticlePublished(result.data!));
+      } else {
+        emit(CreateArticleError(_mapErrorToMessage(result.error!)));
+      }
     }
   }
 

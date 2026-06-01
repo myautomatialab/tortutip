@@ -5,6 +5,7 @@ import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/shared/widgets/tortutip_chip.dart';
+import 'package:tortutip/shared/widgets/tortutip_skeleton.dart';
 
 class SavedArticleThumbnail extends StatelessWidget {
   final ArticleEntity article;
@@ -41,7 +42,7 @@ class SavedArticleThumbnail extends StatelessWidget {
                   ? CachedNetworkImage(
                       imageUrl: _imageUrl!,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(color: AppColors.surface),
+                      placeholder: (context, url) => const TortuSkeletonImage(),
                       errorWidget: (context, url, error) => Container(color: AppColors.surface),
                     )
                   : Container(color: AppColors.surface),

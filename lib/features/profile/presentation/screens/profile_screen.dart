@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tortutip/config/routes/app_routes.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
+import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
+import 'package:tortutip/features/articles/presentation/bloc/create_article/create_article_cubit.dart';
+import 'package:tortutip/features/articles/presentation/screens/create_article_screen.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
@@ -14,7 +17,7 @@ import 'package:tortutip/features/profile/presentation/bloc/profile_state.dart';
 import 'package:tortutip/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:tortutip/features/profile/presentation/widgets/profile_header_card.dart';
 import 'package:tortutip/features/profile/presentation/widgets/published_article_row.dart';
-import 'package:tortutip/injection/injection_container.dart';
+import 'package:get_it/get_it.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 
@@ -46,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       isScrollControlled: true,
       backgroundColor: AppColors.transparent,
       builder: (_) => BlocProvider(
-        create: (_) => sl<EditProfileCubit>(),
+        create: (_) => GetIt.instance<EditProfileCubit>(),
         child: BlocListener<EditProfileCubit, EditProfileState>(
           listener: (ctx, editState) {
             if (editState is EditProfileSuccess) {
@@ -81,6 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: AppColors.background,
       appBar: TortuAppBar(
         title: 'Mi Perfil',
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -161,6 +165,19 @@ class _ProfileBody extends StatelessWidget {
     required this.onViewArticle,
   });
 
+  void _openEditArticle(BuildContext context, ArticleEntity article) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.transparent,
+      barrierColor: AppColors.dark.withValues(alpha: 0.5),
+      builder: (_) => BlocProvider(
+        create: (_) => GetIt.instance<CreateArticleCubit>(),
+        child: _EditArticleModal(article: article),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -197,7 +214,7 @@ class _ProfileBody extends StatelessWidget {
                   article: article,
                   categoryName: category?.name ?? article.categoryId,
                   onTapView: () => onViewArticle(article.id),
-                  onTapEdit: () {},
+                  onTapEdit: () => _openEditArticle(context, article),
                   onTapDelete: () => onDeleteArticle(article.id),
                 );
               },
@@ -218,6 +235,73 @@ class _ProfileBody extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxl),
         ],
       ),
+    );
+  }
+}
+
+class _EditArticleModal extends StatelessWidget {
+  final ArticleEntity article;
+
+  const _EditArticleModal({required this.article});
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.9,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      snap: true,
+      snapSizes: const [0.9],
+      builder: (context, scrollController) {
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.radiusXl),
+          ),
+          child: Scaffold(
+            backgroundColor: AppColors.background,
+            body: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        child: Center(
+                          child: SizedBox(
+                            width: AppSpacing.dragHandleWidth,
+                            height: AppSpacing.xs,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: AppColors.borderStrong,
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(AppSpacing.radiusFull),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: const Icon(
+                          Icons.close,
+                          size: AppSpacing.iconMd,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(child: CreateArticleScreen(article: article)),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

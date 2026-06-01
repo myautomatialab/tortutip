@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
@@ -8,6 +9,7 @@ import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
 import 'package:tortutip/shared/widgets/tortutip_chip.dart';
+import 'package:tortutip/shared/widgets/tortutip_skeleton.dart';
 
 class TortuArticleListCard extends StatelessWidget {
   final ArticleEntity article;
@@ -33,22 +35,30 @@ class TortuArticleListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(AppSpacing.radiusLg),
-                  topRight: Radius.circular(AppSpacing.radiusLg),
-                ),
-                child: Image.network(
-                  article.coverHorizontalUrl,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.border, width: 1),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppSpacing.radiusLg),
+                    topRight: Radius.circular(AppSpacing.radiusLg),
+                  ),
+                child: CachedNetworkImage(
+                  imageUrl: article.coverHorizontalUrl,
                   height: AppSpacing.articleListCardImageHeight,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, _) => Container(
+                  placeholder: (context, url) => TortuSkeletonImage(
+                    height: AppSpacing.articleListCardImageHeight,
+                  ),
+                  errorWidget: (context, url, error) => Container(
                     height: AppSpacing.articleListCardImageHeight,
                     width: double.infinity,
                     color: AppColors.surface,
@@ -83,8 +93,10 @@ class TortuArticleListCard extends StatelessWidget {
                 Row(
                   children: [
                     if (category != null) ...[
-                      TortuCategoryChip.fromName(category!.name),
-                      const SizedBox(width: AppSpacing.sm),
+                      Padding(
+                        padding: const EdgeInsets.only(right: AppSpacing.xs, bottom: AppSpacing.xs),
+                        child: TortuCategoryChip.fromName(category!.name),
+                      ),
                     ],
                     Text(
                       '${article.readTimeMinutes} min read',
@@ -113,35 +125,37 @@ class TortuArticleListCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 14,
-                      backgroundImage: authorAvatarUrl != null
-                          ? NetworkImage(authorAvatarUrl!)
-                          : null,
-                      child: authorAvatarUrl == null
-                          ? const Icon(Icons.person, size: 14)
-                          : null,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      authorName ?? '',
-                      style: AppTypography.caption,
-                    ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.arrow_forward,
-                      color: AppColors.textSecondary,
-                      size: 16,
-                    ),
-                  ],
-                ),
+                if (authorName != null || authorAvatarUrl != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 14,
+                        backgroundImage: (authorAvatarUrl != null && authorAvatarUrl!.isNotEmpty)
+                            ? NetworkImage(authorAvatarUrl!)
+                            : null,
+                        child: (authorAvatarUrl == null || authorAvatarUrl!.isEmpty)
+                            ? Text(
+                                (authorName != null && authorName!.isNotEmpty)
+                                    ? authorName![0].toUpperCase()
+                                    : '?',
+                                style: AppTypography.caption,
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(
+                        (authorName != null && authorName!.isNotEmpty) ? authorName! : 'Unknown author',
+                        style: AppTypography.caption,
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
         ],
+      ),
       ),
     );
   }

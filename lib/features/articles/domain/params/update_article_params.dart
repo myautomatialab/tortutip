@@ -1,9 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-class PublishArticleParams extends Equatable {
-  final String authorId;
-  final String authorName;
-  final String authorAvatarUrl;
+class UpdateArticleParams extends Equatable {
+  final String articleId;
   final String categoryId;
   final String title;
   final String body;
@@ -11,23 +9,19 @@ class PublishArticleParams extends Equatable {
   final String coverHorizontalUrl;
   final int readTimeMinutes;
 
-  const PublishArticleParams({
-    required this.authorId,
-    this.authorName = '',
-    this.authorAvatarUrl = '',
+  const UpdateArticleParams({
+    required this.articleId,
     required this.categoryId,
     required this.title,
     required this.body,
     required this.coverVerticalUrl,
     required this.coverHorizontalUrl,
-    this.readTimeMinutes = 1,
+    required this.readTimeMinutes,
   });
 
   @override
   List<Object?> get props => [
-        authorId,
-        authorName,
-        authorAvatarUrl,
+        articleId,
         categoryId,
         title,
         body,

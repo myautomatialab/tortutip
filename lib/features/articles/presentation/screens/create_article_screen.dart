@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
+import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/articles/presentation/bloc/create_article/create_article_cubit.dart';
 import 'package:tortutip/features/articles/presentation/bloc/create_article/create_article_state.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
@@ -21,7 +22,9 @@ import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/shared/widgets/tortutip_chip.dart';
 
 class CreateArticleScreen extends StatefulWidget {
-  const CreateArticleScreen({super.key});
+  final ArticleEntity? article;
+
+  const CreateArticleScreen({super.key, this.article});
 
   @override
   State<CreateArticleScreen> createState() => _CreateArticleScreenState();
@@ -33,6 +36,8 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
   late final TextEditingController _titleController;
   final _imagePicker = ImagePicker();
   String _userId = '';
+  String _authorName = '';
+  String _authorAvatarUrl = '';
 
   bool _isUploadingVertical = false;
   bool _isUploadingHorizontal = false;
@@ -51,9 +56,24 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _userId = authState.user.id;
+      _authorName = authState.user.name;
+      _authorAvatarUrl = authState.user.avatarUrl;
     }
 
     _cubit.loadCategories();
+
+    if (widget.article != null) {
+      final article = widget.article!;
+      _titleController.text = article.title;
+
+      // Pre-populate the Quill editor with the article's body text
+      if (article.body.isNotEmpty) {
+        final doc = Document()..insert(0, article.body);
+        _quillController.document = doc;
+      }
+
+      _cubit.initForEdit(article);
+    }
   }
 
   void _onBodyChanged() {
@@ -66,7 +86,6 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
     _quillController.removeListener(_onBodyChanged);
     _quillController.dispose();
     _titleController.dispose();
-    _cubit.close();
     super.dispose();
   }
 
@@ -129,8 +148,8 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
           children: [
             const SizedBox(height: AppSpacing.sm),
             Container(
-              width: 40,
-              height: 4,
+              width: AppSpacing.dragHandleWidth,
+              height: AppSpacing.xs,
               decoration: BoxDecoration(
                 color: AppColors.borderStrong,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -229,7 +248,11 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
   }
 
   void _onPublish() {
-    _cubit.publishFromForm(_userId);
+    _cubit.publishFromForm(
+      _userId,
+      authorName: _authorName,
+      authorAvatarUrl: _authorAvatarUrl,
+    );
   }
 
   @override
@@ -249,6 +272,7 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
         onPublish: _onPublish,
         onTitleChanged: (t) => _cubit.updateTitle(t),
         onCoverUrlsUpdated: _onCoverUrlsUpdated,
+        isEditing: widget.article != null,
       ),
     );
   }
@@ -267,6 +291,7 @@ class _CreateArticleView extends StatelessWidget {
   final VoidCallback onPublish;
   final ValueChanged<String> onTitleChanged;
   final void Function(String? vertical, String? horizontal) onCoverUrlsUpdated;
+  final bool isEditing;
 
   const _CreateArticleView({
     required this.quillController,
@@ -281,6 +306,7 @@ class _CreateArticleView extends StatelessWidget {
     required this.onPublish,
     required this.onTitleChanged,
     required this.onCoverUrlsUpdated,
+    required this.isEditing,
   });
 
   @override
@@ -380,7 +406,11 @@ class _CreateArticleView extends StatelessWidget {
                 ),
               ),
             ),
-            _BottomBar(onPreview: onPreview, onPublish: onPublish),
+            _BottomBar(
+              onPreview: onPreview,
+              onPublish: onPublish,
+              isEditing: isEditing,
+            ),
           ],
         ),
       ),
@@ -404,6 +434,12 @@ class _CategorySelectorState extends State<_CategorySelector> {
             ? state.categories
             : <CategoryEntity>[];
         if (categories.isEmpty) return const SizedBox.shrink();
+
+        // Sync selection with cubit state (handles pre-loaded edit mode)
+        if (state is CreateArticleFormUpdated && _selectedId == null && state.categoryId.isNotEmpty) {
+          _selectedId = state.categoryId;
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -484,8 +520,13 @@ class _SelectableCategoryChip extends StatelessWidget {
 class _BottomBar extends StatelessWidget {
   final VoidCallback onPreview;
   final VoidCallback onPublish;
+  final bool isEditing;
 
-  const _BottomBar({required this.onPreview, required this.onPublish});
+  const _BottomBar({
+    required this.onPreview,
+    required this.onPublish,
+    required this.isEditing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -516,7 +557,7 @@ class _BottomBar extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: TortuPrimaryButton(
-                    label: 'Publish',
+                    label: isEditing ? 'Update' : 'Publish',
                     onTap: canPublish ? onPublish : null,
                     isLoading: isPublishing,
                   ),

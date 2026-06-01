@@ -44,14 +44,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TortuAppBar.detail(
-        title: widget.category.name,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined,
-                color: AppColors.textPrimary),
-            onPressed: () {},
-          ),
-        ],
+        title: 'Category',
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,6 +173,8 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
       onBookmarkTap: () => context
           .read<CategoryListCubit>()
           .toggleBookmark(article.id, _userId),
+      authorName: article.authorName,
+      authorAvatarUrl: article.authorAvatarUrl,
     );
   }
 

@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
+import 'package:tortutip/shared/widgets/tortutip_skeleton.dart';
 
 class CategoryCard extends StatelessWidget {
   final CategoryEntity category;
@@ -27,10 +29,11 @@ class CategoryCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.network(
-                category.iconUrl,
+              CachedNetworkImage(
+                imageUrl: category.iconUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, _) => Container(
+                placeholder: (_, _) => const TortuSkeletonImage(),
+                errorWidget: (context, url, error) => Container(
                   color: AppColors.surface,
                 ),
               ),
