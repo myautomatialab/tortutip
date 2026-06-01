@@ -79,4 +79,14 @@ class UserRepositoryImpl implements UserRepository {
       return DataFailed(e);
     }
   }
+
+  @override
+  Future<DataState<UserEntity>> recordFeedSwipe(String userId) async {
+    try {
+      final model = await _dataSource.recordFeedSwipe(userId);
+      return DataSuccess(model);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
 }

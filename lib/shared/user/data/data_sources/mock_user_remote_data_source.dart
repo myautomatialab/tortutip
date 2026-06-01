@@ -56,4 +56,27 @@ class MockUserRemoteDataSource implements UserRemoteDataSource {
       createdAt: DateTime(2024, 1, 1),
     );
   }
+
+  @override
+  Future<UserModel> recordFeedSwipe(String userId) async {
+    return UserModel(
+      id: userId,
+      name: 'Mock User',
+      email: '$userId@tortutip.com',
+      avatarUrl: '',
+      bio: '',
+      role: 'reader',
+      gender: '',
+      ageRange: '',
+      createdAt: DateTime(2024, 1, 1),
+      streakDays: 1,
+      lastFeedDate: _todayDate(),
+      overallProgress: 0.01,
+    );
+  }
+
+  String _todayDate() {
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+  }
 }
