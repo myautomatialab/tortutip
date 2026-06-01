@@ -60,7 +60,7 @@ class _FeedScreenState extends State<FeedScreen> {
           actions: [
             IconButton(
               icon: const Icon(Icons.person_outline),
-              onPressed: () => context.push(AppRoutes.editProfile),
+              onPressed: () => context.push(AppRoutes.profile),
             ),
           ],
         ),

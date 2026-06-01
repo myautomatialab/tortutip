@@ -36,7 +36,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline, color: AppColors.textPrimary),
-            onPressed: () => context.push(AppRoutes.editProfile),
+            onPressed: () => context.push(AppRoutes.profile),
           ),
         ],
       ),
