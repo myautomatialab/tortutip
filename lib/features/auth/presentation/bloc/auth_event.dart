@@ -18,3 +18,11 @@ class SignInWithGoogleEvent extends AuthEvent {
 class SignOutEvent extends AuthEvent {
   const SignOutEvent();
 }
+
+class RefreshUserEvent extends AuthEvent {
+  const RefreshUserEvent();
+}
+
+class EnterHardcoreModeEvent extends AuthEvent {
+  const EnterHardcoreModeEvent();
+}
