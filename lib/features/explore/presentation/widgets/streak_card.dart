@@ -5,8 +5,13 @@ import 'package:tortutip/config/theme/app_typography.dart';
 
 class StreakCard extends StatelessWidget {
   final int streakDays;
+  final double categoryProgress;
 
-  const StreakCard({super.key, required this.streakDays});
+  const StreakCard({
+    super.key,
+    required this.streakDays,
+    required this.categoryProgress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,13 +62,13 @@ class StreakCard extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 CircularProgressIndicator(
-                  value: 0.01,
+                  value: categoryProgress,
                   color: AppColors.primary,
                   strokeWidth: 3,
                   backgroundColor: AppColors.primary.withValues(alpha: 0.2),
                 ),
                 Text(
-                  '1%',
+                  '${(categoryProgress * 100).toStringAsFixed(0)}%',
                   style: AppTypography.micro.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,

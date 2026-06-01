@@ -25,7 +25,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ExploreCubit>().loadExplore();
+    final authState = context.read<AuthBloc>().state;
+    final userId =
+        authState is AuthAuthenticated ? authState.user.id : '';
+    context.read<ExploreCubit>().loadExplore(userId: userId);
   }
 
   @override
@@ -72,7 +75,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          StreakCard(streakDays: state.streakDays),
+          StreakCard(
+            streakDays: state.streakDays,
+            categoryProgress: state.categoryProgress,
+          ),
           const SizedBox(height: AppSpacing.xl),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
