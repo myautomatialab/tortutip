@@ -4,23 +4,42 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tortutip/core/resources/data_state.dart';
 import 'package:tortutip/core/usecase/usecase.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
-import 'package:tortutip/features/articles/domain/use_cases/get_user_articles_use_case.dart';
+import 'package:tortutip/features/profile/domain/use_cases/delete_article_use_case.dart';
+import 'package:tortutip/features/profile/domain/use_cases/get_published_articles_use_case.dart';
+import 'package:tortutip/features/profile/domain/use_cases/get_saved_articles_use_case.dart';
 import 'package:tortutip/features/profile/presentation/bloc/profile_cubit.dart';
 import 'package:tortutip/features/profile/presentation/bloc/profile_state.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
+import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
+import 'package:tortutip/features/categories/domain/use_cases/get_all_categories_use_case.dart';
 import 'package:tortutip/shared/user/domain/use_cases/get_current_user_use_case.dart';
 
 class MockGetCurrentUserUseCase extends Mock implements GetCurrentUserUseCase {}
+class MockGetSavedArticlesUseCase extends Mock implements GetSavedArticlesUseCase {}
+class MockGetPublishedArticlesUseCase extends Mock implements GetPublishedArticlesUseCase {}
+class MockDeleteArticleUseCase extends Mock implements DeleteArticleUseCase {}
+class MockGetAllCategoriesUseCase extends Mock implements GetAllCategoriesUseCase {}
 
-class MockGetUserArticlesUseCase extends Mock
-    implements GetUserArticlesUseCase {}
+class FakeNoParams extends Fake implements NoParams {}
+class FakeGetSavedArticlesParams extends Fake implements GetSavedArticlesParams {}
+class FakeGetPublishedArticlesParams extends Fake implements GetPublishedArticlesParams {}
+class FakeDeleteArticleParams extends Fake implements DeleteArticleParams {}
 
 void main() {
-  late ProfileCubit cubit;
   late MockGetCurrentUserUseCase mockGetCurrentUser;
-  late MockGetUserArticlesUseCase mockGetUserArticles;
+  late MockGetSavedArticlesUseCase mockGetSavedArticles;
+  late MockGetPublishedArticlesUseCase mockGetPublishedArticles;
+  late MockDeleteArticleUseCase mockDeleteArticle;
+  late MockGetAllCategoriesUseCase mockGetAllCategories;
 
-  final user = UserEntity(
+  setUpAll(() {
+    registerFallbackValue(FakeNoParams());
+    registerFallbackValue(FakeGetSavedArticlesParams());
+    registerFallbackValue(FakeGetPublishedArticlesParams());
+    registerFallbackValue(FakeDeleteArticleParams());
+  });
+
+  final testUser = UserEntity(
     id: 'user_1',
     name: 'Test User',
     email: 'test@test.com',
@@ -32,64 +51,123 @@ void main() {
     createdAt: DateTime(2024),
   );
 
-  final articles = <ArticleEntity>[];
+  final testArticle = ArticleEntity(
+    id: 'article_1',
+    authorId: 'user_1',
+    categoryId: 'cat_1',
+    title: 'Test Article',
+    body: '',
+    coverVerticalUrl: '',
+    coverHorizontalUrl: '',
+    status: 'published',
+    readTimeMinutes: 2,
+    saveCount: 0,
+    createdAt: DateTime(2024),
+  );
 
   setUp(() {
     mockGetCurrentUser = MockGetCurrentUserUseCase();
-    mockGetUserArticles = MockGetUserArticlesUseCase();
-    cubit = ProfileCubit(mockGetCurrentUser, mockGetUserArticles);
+    mockGetSavedArticles = MockGetSavedArticlesUseCase();
+    mockGetPublishedArticles = MockGetPublishedArticlesUseCase();
+    mockDeleteArticle = MockDeleteArticleUseCase();
+    mockGetAllCategories = MockGetAllCategoriesUseCase();
+    when(() => mockGetAllCategories(any()))
+        .thenAnswer((_) async => const DataSuccess(<CategoryEntity>[]));
   });
 
-  tearDown(() => cubit.close());
+  ProfileCubit buildCubit() => ProfileCubit(
+        mockGetCurrentUser,
+        mockGetSavedArticles,
+        mockGetPublishedArticles,
+        mockDeleteArticle,
+        mockGetAllCategories,
+      );
 
-  group('ProfileCubit.loadProfile', () {
+  group('ProfileCubit', () {
     blocTest<ProfileCubit, ProfileState>(
-      'should_emit_Loading_then_Loaded_when_both_use_cases_succeed',
+      'should_emit_Loading_then_Loaded_when_loadProfile_succeeds',
       build: () {
-        when(() => mockGetCurrentUser(const NoParams()))
-            .thenAnswer((_) async => DataSuccess(user));
-        when(() => mockGetUserArticles('user_1'))
-            .thenAnswer((_) async => DataSuccess(articles));
-        return cubit;
+        when(() => mockGetCurrentUser(any()))
+            .thenAnswer((_) async => DataSuccess(testUser));
+        when(() => mockGetSavedArticles(any()))
+            .thenAnswer((_) async => const DataSuccess([]));
+        when(() => mockGetPublishedArticles(any()))
+            .thenAnswer((_) async => DataSuccess([testArticle]));
+        return buildCubit();
       },
       act: (c) => c.loadProfile('user_1'),
-      expect: () => [
-        isA<ProfileLoading>(),
-        isA<ProfileLoaded>(),
-      ],
+      expect: () => [isA<ProfileLoading>(), isA<ProfileLoaded>()],
     );
 
     blocTest<ProfileCubit, ProfileState>(
       'should_emit_Loading_then_Error_when_getCurrentUser_fails',
       build: () {
-        when(() => mockGetCurrentUser(const NoParams()))
+        when(() => mockGetCurrentUser(any()))
             .thenAnswer((_) async => DataFailed(Exception('error')));
-        return cubit;
+        when(() => mockGetSavedArticles(any()))
+            .thenAnswer((_) async => const DataSuccess([]));
+        when(() => mockGetPublishedArticles(any()))
+            .thenAnswer((_) async => const DataSuccess([]));
+        return buildCubit();
       },
       act: (c) => c.loadProfile('user_1'),
-      expect: () => [
-        isA<ProfileLoading>(),
-        isA<ProfileError>(),
-      ],
-      verify: (_) {
-        verifyNever(() => mockGetUserArticles(any()));
+      expect: () => [isA<ProfileLoading>(), isA<ProfileError>()],
+    );
+
+    blocTest<ProfileCubit, ProfileState>(
+      'should_emit_Loading_then_Error_when_getSavedArticles_fails',
+      build: () {
+        when(() => mockGetCurrentUser(any()))
+            .thenAnswer((_) async => DataSuccess(testUser));
+        when(() => mockGetSavedArticles(any()))
+            .thenAnswer((_) async => DataFailed(Exception('error')));
+        when(() => mockGetPublishedArticles(any()))
+            .thenAnswer((_) async => const DataSuccess([]));
+        return buildCubit();
+      },
+      act: (c) => c.loadProfile('user_1'),
+      expect: () => [isA<ProfileLoading>(), isA<ProfileError>()],
+    );
+
+    blocTest<ProfileCubit, ProfileState>(
+      'should_emit_ArticleDeleted_then_Loaded_without_deleted_article_when_deleteArticle_succeeds',
+      build: () {
+        when(() => mockDeleteArticle(any()))
+            .thenAnswer((_) async => const DataSuccess(true));
+        final cubit = buildCubit();
+        cubit.emit(ProfileLoaded(
+          user: testUser,
+          savedArticles: const [],
+          publishedArticles: [testArticle],
+          totalPublishedCount: 1,
+        ));
+        return cubit;
+      },
+      act: (c) => c.deleteArticle('article_1', 'user_1'),
+      expect: () => [isA<ProfileArticleDeleted>(), isA<ProfileLoaded>()],
+      verify: (c) {
+        final loaded = c.state as ProfileLoaded;
+        expect(loaded.publishedArticles, isEmpty);
+        expect(loaded.totalPublishedCount, 0);
       },
     );
 
     blocTest<ProfileCubit, ProfileState>(
-      'should_emit_Loading_then_Error_when_getUserArticles_fails',
+      'should_emit_Error_when_deleteArticle_fails',
       build: () {
-        when(() => mockGetCurrentUser(const NoParams()))
-            .thenAnswer((_) async => DataSuccess(user));
-        when(() => mockGetUserArticles('user_1'))
+        when(() => mockDeleteArticle(any()))
             .thenAnswer((_) async => DataFailed(Exception('error')));
+        final cubit = buildCubit();
+        cubit.emit(ProfileLoaded(
+          user: testUser,
+          savedArticles: const [],
+          publishedArticles: [testArticle],
+          totalPublishedCount: 1,
+        ));
         return cubit;
       },
-      act: (c) => c.loadProfile('user_1'),
-      expect: () => [
-        isA<ProfileLoading>(),
-        isA<ProfileError>(),
-      ],
+      act: (c) => c.deleteArticle('article_1', 'user_1'),
+      expect: () => [isA<ProfileError>()],
     );
   });
 }

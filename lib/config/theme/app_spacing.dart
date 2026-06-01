@@ -33,6 +33,7 @@ class AppSpacing {
   static const double avatarSizeLg = 72;
 
   // ── Tamaños de componentes de artículo ──────────────────────
+  static const double thumbnailSm = 60.0;
   static const double coverImageHeight = 260;
   static const double relatedCardImageWidth = 120;
   static const double relatedCardImageHeight = 80;
@@ -50,4 +51,8 @@ class AppSpacing {
   static const double radiusLg = 14;
   static const double radiusXl = 16;
   static const double radiusFull = 100;
+
+  // ── Componentes de modal ─────────────────────────────────────
+  static const double dragHandleWidth = 40.0;
+  static const double floatingTabBarClearance = 100.0;
 }

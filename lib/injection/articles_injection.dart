@@ -58,11 +58,12 @@ void initArticlesDependencies() {
   sl.registerLazySingleton(() => UploadArticleImageUseCase(sl()));
 
   // Cubits — factory, uno nuevo por pantalla
-  sl.registerLazySingleton(() => FeedCubit(
+  sl.registerFactory(() => FeedCubit(
         sl<GetFeedArticlesPagedUseCase>(),
         sl<GetSavedArticleIdsUseCase>(),
         sl<SaveArticleUseCase>(),
         sl<UnsaveArticleUseCase>(),
+        sl<GetAllCategoriesUseCase>(),
       ));
   sl.registerFactory(() => ArticleDetailCubit(
         sl<GetArticleDetailUseCase>(),

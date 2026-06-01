@@ -105,6 +105,14 @@ class AppTypography {
     height: 1.5,
   );
 
+  // ── Brand ────────────────────────────────────────────────────
+  static const TextStyle brand = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w800,
+    color: AppColors.primary,
+    height: 1.3,
+  );
+
   // ── Subtítulo hero ───────────────────────────────────────────
   static const TextStyle subtitle = TextStyle(
     fontSize: 15,

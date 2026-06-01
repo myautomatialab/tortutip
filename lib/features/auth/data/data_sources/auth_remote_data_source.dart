@@ -8,6 +8,7 @@ abstract class AuthRemoteDataSource {
   Future<UserEntity> signInWithGoogle();
   Future<void> signOut();
   Future<UserEntity?> checkCurrentUser();
+  Future<void> deleteCurrentUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -62,6 +63,51 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final doc = await _firestore.collection('users').doc(refreshed.uid).get();
     if (!doc.exists) return null;
     return _toEntity({'id': refreshed.uid, ...?doc.data()});
+  }
+
+  @override
+  Future<void> deleteCurrentUser() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No hay sesión activa');
+    final uid = user.uid;
+
+    // 1. Obtener todos los artículos del autor
+    final articlesSnap = await _firestore
+        .collection('articles')
+        .where('author_id', isEqualTo: uid)
+        .get();
+
+    // 2. Para cada artículo, eliminar sus saved_articles y el artículo mismo
+    for (final articleDoc in articlesSnap.docs) {
+      final savedSnap = await _firestore
+          .collection('saved_articles')
+          .where('article_id', isEqualTo: articleDoc.id)
+          .get();
+
+      final batch = _firestore.batch();
+      for (final saved in savedSnap.docs) {
+        batch.delete(saved.reference);
+      }
+      batch.delete(articleDoc.reference);
+      await batch.commit();
+    }
+
+    // 3. Eliminar los saved_articles donde el usuario guardó artículos de otros
+    final userSavedSnap = await _firestore
+        .collection('saved_articles')
+        .where('user_id', isEqualTo: uid)
+        .get();
+    if (userSavedSnap.docs.isNotEmpty) {
+      final batch = _firestore.batch();
+      for (final doc in userSavedSnap.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    }
+
+    // 4. Eliminar el documento del usuario y la cuenta Firebase Auth
+    await _firestore.collection('users').doc(uid).delete();
+    await user.delete();
   }
 
   UserEntity _toEntity(Map<String, dynamic> data) {

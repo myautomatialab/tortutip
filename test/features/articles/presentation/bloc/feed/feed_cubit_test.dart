@@ -9,6 +9,8 @@ import 'package:tortutip/features/articles/domain/use_cases/save_article_use_cas
 import 'package:tortutip/features/articles/domain/use_cases/unsave_article_use_case.dart';
 import 'package:tortutip/features/articles/presentation/bloc/feed/feed_cubit.dart';
 import 'package:tortutip/features/articles/presentation/bloc/feed/feed_state.dart';
+import 'package:tortutip/features/categories/domain/use_cases/get_all_categories_use_case.dart';
+import 'package:tortutip/core/usecase/usecase.dart';
 
 class MockGetFeedArticlesPagedUseCase extends Mock
     implements GetFeedArticlesPagedUseCase {}
@@ -20,12 +22,25 @@ class MockSaveArticleUseCase extends Mock implements SaveArticleUseCase {}
 
 class MockUnsaveArticleUseCase extends Mock implements UnsaveArticleUseCase {}
 
+class MockGetAllCategoriesUseCase extends Mock
+    implements GetAllCategoriesUseCase {}
+
 void main() {
   late FeedCubit cubit;
   late MockGetFeedArticlesPagedUseCase mockGetFeedArticlesPaged;
   late MockGetSavedArticleIdsUseCase mockGetSavedArticleIds;
   late MockSaveArticleUseCase mockSaveArticle;
   late MockUnsaveArticleUseCase mockUnsaveArticle;
+  late MockGetAllCategoriesUseCase mockGetAllCategories;
+
+  setUpAll(() {
+    registerFallbackValue(const NoParams());
+    registerFallbackValue(
+        const GetFeedArticlesPagedParams(categoryIds: [], page: 0, pageSize: 10));
+    registerFallbackValue(const GetSavedArticleIdsParams(userId: ''));
+    registerFallbackValue(const SaveArticleParams(userId: '', articleId: ''));
+    registerFallbackValue(const UnsaveArticleParams(userId: '', articleId: ''));
+  });
 
   const userId = 'user_1';
   final articles = <ArticleEntity>[
@@ -49,21 +64,19 @@ void main() {
     mockGetSavedArticleIds = MockGetSavedArticleIdsUseCase();
     mockSaveArticle = MockSaveArticleUseCase();
     mockUnsaveArticle = MockUnsaveArticleUseCase();
+    mockGetAllCategories = MockGetAllCategoriesUseCase();
+
+    when(() => mockGetAllCategories(any()))
+        .thenAnswer((_) async => const DataSuccess([]));
 
     cubit = FeedCubit(
       mockGetFeedArticlesPaged,
       mockGetSavedArticleIds,
       mockSaveArticle,
       mockUnsaveArticle,
+      mockGetAllCategories,
     );
 
-    registerFallbackValue(
-        const GetFeedArticlesPagedParams(categoryIds: [], page: 0, pageSize: 10));
-    registerFallbackValue(const GetSavedArticleIdsParams(userId: ''));
-    registerFallbackValue(
-        const SaveArticleParams(userId: '', articleId: ''));
-    registerFallbackValue(
-        const UnsaveArticleParams(userId: '', articleId: ''));
   });
 
   tearDown(() => cubit.close());

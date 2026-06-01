@@ -6,7 +6,6 @@ import 'package:tortutip/features/explore/presentation/bloc/explore_cubit.dart';
 import 'package:tortutip/features/explore/presentation/bloc/category_list_cubit.dart';
 import 'package:tortutip/features/explore/presentation/screens/explore_screen.dart';
 import 'package:tortutip/features/explore/presentation/screens/category_list_screen.dart';
-import 'package:tortutip/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:tortutip/injection/injection_container.dart';
 
 class ExploreRoutes {
@@ -23,10 +22,6 @@ class ExploreRoutes {
         ),
       ),
       routes: [
-        GoRoute(
-          path: 'edit',
-          builder: (context, _) => const EditProfileScreen(),
-        ),
         GoRoute(
           path: 'category/:categoryId',
           builder: (context, state) => BlocProvider(

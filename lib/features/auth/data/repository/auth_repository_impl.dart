@@ -28,6 +28,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<DataState<bool>> deleteAccount() async {
+    try {
+      await _dataSource.deleteCurrentUser();
+      return const DataSuccess(true);
+    } catch (e) {
+      return DataFailed(e is Exception ? e : Exception(e.toString()));
+    }
+  }
+
+  @override
   Future<DataState<UserEntity>> checkCurrentAuth() async {
     try {
       final user = await _dataSource.checkCurrentUser();

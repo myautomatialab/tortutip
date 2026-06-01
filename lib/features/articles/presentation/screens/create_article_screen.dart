@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
@@ -18,7 +17,6 @@ import 'package:tortutip/features/articles/presentation/screens/preview_article_
 import 'package:tortutip/features/articles/presentation/widgets/cover_upload_widget.dart';
 import 'package:tortutip/features/articles/presentation/widgets/rich_text_toolbar.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
-import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/shared/widgets/tortutip_chip.dart';
 
@@ -44,7 +42,7 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
   @override
   void initState() {
     super.initState();
-    _cubit = GetIt.instance<CreateArticleCubit>();
+    _cubit = context.read<CreateArticleCubit>();
     _quillController = QuillController.basic();
     _titleController = TextEditingController();
 
@@ -319,13 +317,7 @@ class _CreateArticleView extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: TortuAppBar(
-          title: 'Create Article',
-          leading: IconButton(
-            icon: const Icon(Icons.close, color: AppColors.textPrimary),
-            onPressed: onClose,
-          ),
-        ),
+        resizeToAvoidBottomInset: true,
         body: Column(
           children: [
             Expanded(
@@ -500,6 +492,9 @@ class _BottomBar extends StatelessWidget {
     return BlocBuilder<CreateArticleCubit, CreateArticleState>(
       builder: (ctx, state) {
         final isPublishing = state is CreateArticlePublishing;
+        final canPublish = !isPublishing &&
+            state is CreateArticleFormUpdated &&
+            state.isValid;
         return SafeArea(
           child: Container(
             padding: const EdgeInsets.symmetric(
@@ -522,7 +517,7 @@ class _BottomBar extends StatelessWidget {
                 Expanded(
                   child: TortuPrimaryButton(
                     label: 'Publish',
-                    onTap: isPublishing ? null : onPublish,
+                    onTap: canPublish ? onPublish : null,
                     isLoading: isPublishing,
                   ),
                 ),

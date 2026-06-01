@@ -54,6 +54,7 @@ class AppColors {
   // ── Overlay ──────────────────────────────────────────────────
   static const streakBackground = Color(0xFFFAE8E0);
   static const overlayDark = Color(0xB3000000);
+  static const shadowLight = Color(0x14000000);
 
   // ── Third-party brand colors ─────────────────────────────────
   static const googleBlue = Color(0xFF4285F4);

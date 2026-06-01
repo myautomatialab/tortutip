@@ -1,41 +1,93 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tortutip/core/usecase/usecase.dart';
-import 'package:tortutip/features/articles/domain/use_cases/get_user_articles_use_case.dart';
+import 'package:tortutip/features/categories/domain/use_cases/get_all_categories_use_case.dart';
+import 'package:tortutip/features/profile/domain/use_cases/delete_article_use_case.dart';
+import 'package:tortutip/features/profile/domain/use_cases/get_published_articles_use_case.dart';
+import 'package:tortutip/features/profile/domain/use_cases/get_saved_articles_use_case.dart';
 import 'package:tortutip/shared/user/domain/use_cases/get_current_user_use_case.dart';
 import 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final GetCurrentUserUseCase _getCurrentUser;
-  final GetUserArticlesUseCase _getUserArticles;
+  final GetSavedArticlesUseCase _getSavedArticles;
+  final GetPublishedArticlesUseCase _getPublishedArticles;
+  final DeleteArticleUseCase _deleteArticle;
+  final GetAllCategoriesUseCase _getAllCategories;
 
-  ProfileCubit(this._getCurrentUser, this._getUserArticles)
-      : super(const ProfileInitial());
+  ProfileCubit(
+    this._getCurrentUser,
+    this._getSavedArticles,
+    this._getPublishedArticles,
+    this._deleteArticle,
+    this._getAllCategories,
+  ) : super(const ProfileInitial());
 
   Future<void> loadProfile(String userId) async {
     emit(const ProfileLoading());
-    final userResult = await _getCurrentUser(const NoParams());
+
+    final userFuture = _getCurrentUser(const NoParams());
+    final savedFuture = _getSavedArticles(GetSavedArticlesParams(userId: userId, limit: 4));
+    final publishedFuture = _getPublishedArticles(GetPublishedArticlesParams(authorId: userId, limit: 5));
+    final categoriesFuture = _getAllCategories(const NoParams());
+
+    final userResult = await userFuture;
+    final savedResult = await savedFuture;
+    final publishedResult = await publishedFuture;
+    final categoriesResult = await categoriesFuture;
+
     if (userResult.isFailure) {
       emit(ProfileError(_mapErrorToMessage(userResult.error!)));
       return;
     }
-    final articlesResult = await _getUserArticles(userId);
-    if (articlesResult.isSuccess) {
-      emit(ProfileLoaded(userResult.data!, articlesResult.data!));
-    } else {
-      emit(ProfileError(_mapErrorToMessage(articlesResult.error!)));
+    if (savedResult.isFailure) {
+      emit(ProfileError(_mapErrorToMessage(savedResult.error!)));
+      return;
     }
+    if (publishedResult.isFailure) {
+      emit(ProfileError(_mapErrorToMessage(publishedResult.error!)));
+      return;
+    }
+
+    final publishedArticles = publishedResult.data!;
+    emit(ProfileLoaded(
+      user: userResult.data!,
+      savedArticles: savedResult.data!,
+      publishedArticles: publishedArticles,
+      totalPublishedCount: publishedArticles.length,
+      categories: categoriesResult.isSuccess ? (categoriesResult.data ?? []) : [],
+    ));
+  }
+
+  Future<void> deleteArticle(String articleId, String userId) async {
+    final currentState = state;
+    if (currentState is! ProfileLoaded) return;
+
+    final result = await _deleteArticle(
+      DeleteArticleParams(articleId: articleId, userId: userId),
+    );
+
+    if (result.isFailure) {
+      emit(ProfileError(_mapErrorToMessage(result.error!)));
+      return;
+    }
+
+    final updatedPublished = currentState.publishedArticles
+        .where((a) => a.id != articleId)
+        .toList();
+    final updatedSaved = currentState.savedArticles
+        .where((a) => a.id != articleId)
+        .toList();
+
+    emit(ProfileArticleDeleted(articleId));
+    emit(ProfileLoaded(
+      user: currentState.user,
+      savedArticles: updatedSaved,
+      publishedArticles: updatedPublished,
+      totalPublishedCount: updatedPublished.length,
+    ));
   }
 
   String _mapErrorToMessage(Exception error) {
-    if (error is FirebaseException) {
-      return switch (error.code) {
-        'permission-denied' => 'No tienes permiso para ver este perfil',
-        'not-found'         => 'El perfil no existe',
-        'unavailable'       => 'Sin conexión. Inténtalo de nuevo',
-        _                   => 'Algo salió mal. Inténtalo de nuevo',
-      };
-    }
     return 'Algo salió mal. Inténtalo de nuevo';
   }
 }

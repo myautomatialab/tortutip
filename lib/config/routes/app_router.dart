@@ -11,6 +11,7 @@ import '../../features/onboarding/config/onboarding_routes.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_cubit.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_state.dart';
 import '../../features/explore/config/explore_routes.dart';
+import '../../features/profile/config/profile_routes.dart';
 import '../../injection/injection_container.dart';
 import 'app_routes.dart';
 import 'app_shell.dart';
@@ -27,6 +28,7 @@ class AppRouter {
       routes: [
         ...AuthRoutes.routes,
         ...ArticlesRoutes.routes,
+        ...ProfileRoutes.routes,
 
         // ShellRoute de onboarding — provee OnboardingCubit a las 3 pantallas
         ShellRoute(
