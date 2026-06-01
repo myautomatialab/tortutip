@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:tortutip/features/articles/data/models/article_model.dart';
 import 'package:tortutip/features/articles/domain/params/publish_article_params.dart';
+import 'package:tortutip/features/articles/domain/params/update_article_params.dart';
 import 'package:tortutip/features/articles/domain/params/upload_article_image_params.dart';
 
 abstract class ArticleRemoteDataSource {
@@ -15,6 +16,7 @@ abstract class ArticleRemoteDataSource {
   Future<void> unsaveArticle(String userId, String articleId);
   Future<List<ArticleModel>> getRelatedArticles(String categoryId, String excludeArticleId);
   Future<String> uploadArticleImage(UploadArticleImageParams params);
+  Future<ArticleModel> updateArticle(UpdateArticleParams params);
 }
 
 class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
@@ -155,6 +157,22 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
         .take(5)
         .toList();
     return Future.wait(docs.map(_enrichWithAuthor));
+  }
+
+  @override
+  Future<ArticleModel> updateArticle(UpdateArticleParams params) async {
+    final ref = _firestore.collection('articles').doc(params.articleId);
+    await ref.update({
+      'category_id': params.categoryId,
+      'title': params.title,
+      'body': params.body,
+      'cover_vertical_url': params.coverVerticalUrl,
+      'cover_horizontal_url': params.coverHorizontalUrl,
+      'read_time_minutes': params.readTimeMinutes,
+    });
+    final doc = await ref.get();
+    final article = ArticleModel.fromRawData({'id': doc.id, ...?doc.data()});
+    return _enrichWithAuthor(article);
   }
 
   Future<ArticleModel> _enrichWithAuthor(ArticleModel article) async {

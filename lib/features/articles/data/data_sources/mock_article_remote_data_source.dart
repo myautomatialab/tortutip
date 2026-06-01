@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:tortutip/features/articles/data/data_sources/article_remote_data_source.dart';
 import 'package:tortutip/features/articles/data/models/article_model.dart';
 import 'package:tortutip/features/articles/domain/params/publish_article_params.dart';
+import 'package:tortutip/features/articles/domain/params/update_article_params.dart';
 import 'package:tortutip/features/articles/domain/params/upload_article_image_params.dart';
 
 class MockArticleRemoteDataSource implements ArticleRemoteDataSource {
@@ -154,6 +155,30 @@ class MockArticleRemoteDataSource implements ArticleRemoteDataSource {
   @override
   Future<String> uploadArticleImage(UploadArticleImageParams params) async {
     return 'https://mock.storage/article_cover.jpg';
+  }
+
+  @override
+  Future<ArticleModel> updateArticle(UpdateArticleParams params) async {
+    final existing = _articles.firstWhere(
+      (a) => a.id == params.articleId,
+      orElse: () => _articles.first,
+    );
+    return ArticleModel(
+      id: existing.id,
+      authorId: existing.authorId,
+      categoryId: params.categoryId,
+      title: params.title,
+      body: params.body,
+      coverVerticalUrl: params.coverVerticalUrl,
+      coverHorizontalUrl: params.coverHorizontalUrl,
+      status: existing.status,
+      readTimeMinutes: params.readTimeMinutes,
+      saveCount: existing.saveCount,
+      publishedAt: existing.publishedAt,
+      createdAt: existing.createdAt,
+      authorName: 'Mock Author',
+      authorAvatarUrl: '',
+    );
   }
 
   @override

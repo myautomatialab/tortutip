@@ -81,6 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: AppColors.background,
       appBar: TortuAppBar(
         title: 'Mi Perfil',
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -197,7 +198,10 @@ class _ProfileBody extends StatelessWidget {
                   article: article,
                   categoryName: category?.name ?? article.categoryId,
                   onTapView: () => onViewArticle(article.id),
-                  onTapEdit: () {},
+                  onTapEdit: () => context.push(
+                    AppRoutes.editArticlePath(article.id),
+                    extra: article,
+                  ),
                   onTapDelete: () => onDeleteArticle(article.id),
                 );
               },

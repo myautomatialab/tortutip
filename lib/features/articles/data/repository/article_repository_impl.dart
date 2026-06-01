@@ -2,6 +2,7 @@ import 'package:tortutip/core/resources/data_state.dart';
 import 'package:tortutip/features/articles/data/data_sources/article_remote_data_source.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/articles/domain/params/publish_article_params.dart';
+import 'package:tortutip/features/articles/domain/params/update_article_params.dart';
 import 'package:tortutip/features/articles/domain/params/upload_article_image_params.dart';
 import 'package:tortutip/features/articles/domain/repository/article_repository.dart';
 
@@ -115,6 +116,17 @@ class ArticleRepositoryImpl implements ArticleRepository {
       return DataFailed(e);
     } catch (e) {
       return DataFailed(Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<DataState<ArticleEntity>> updateArticle(
+      UpdateArticleParams params) async {
+    try {
+      final model = await _dataSource.updateArticle(params);
+      return DataSuccess(model);
+    } on Exception catch (e) {
+      return DataFailed(e);
     }
   }
 }

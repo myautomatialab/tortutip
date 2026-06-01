@@ -8,7 +8,9 @@ import 'package:tortutip/core/usecase/usecase.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/articles/domain/params/publish_article_params.dart';
 import 'package:tortutip/features/articles/domain/params/upload_article_image_params.dart';
+import 'package:tortutip/features/articles/domain/params/update_article_params.dart';
 import 'package:tortutip/features/articles/domain/use_cases/publish_article_use_case.dart';
+import 'package:tortutip/features/articles/domain/use_cases/update_article_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/upload_article_image_use_case.dart';
 import 'package:tortutip/features/articles/presentation/bloc/create_article/create_article_cubit.dart';
 import 'package:tortutip/features/articles/presentation/bloc/create_article/create_article_state.dart';
@@ -16,6 +18,8 @@ import 'package:tortutip/features/categories/domain/entities/category_entity.dar
 import 'package:tortutip/features/categories/domain/use_cases/get_all_categories_use_case.dart';
 
 class MockPublishArticleUseCase extends Mock implements PublishArticleUseCase {}
+
+class MockUpdateArticleUseCase extends Mock implements UpdateArticleUseCase {}
 
 class MockUploadArticleImageUseCase extends Mock
     implements UploadArticleImageUseCase {}
@@ -26,6 +30,7 @@ class MockGetAllCategoriesUseCase extends Mock
 void main() {
   late CreateArticleCubit cubit;
   late MockPublishArticleUseCase mockPublishArticle;
+  late MockUpdateArticleUseCase mockUpdateArticle;
   late MockUploadArticleImageUseCase mockUploadImage;
   late MockGetAllCategoriesUseCase mockGetAllCategories;
 
@@ -55,14 +60,25 @@ void main() {
 
   setUp(() {
     mockPublishArticle = MockPublishArticleUseCase();
+    mockUpdateArticle = MockUpdateArticleUseCase();
     mockUploadImage = MockUploadArticleImageUseCase();
     mockGetAllCategories = MockGetAllCategoriesUseCase();
     cubit = CreateArticleCubit(
       mockPublishArticle,
+      mockUpdateArticle,
       mockUploadImage,
       mockGetAllCategories,
     );
     registerFallbackValue(publishParams);
+    registerFallbackValue(const UpdateArticleParams(
+      articleId: 'art_1',
+      categoryId: 'cat_1',
+      title: 'Title',
+      body: 'Body',
+      coverVerticalUrl: '',
+      coverHorizontalUrl: '',
+      readTimeMinutes: 1,
+    ));
     registerFallbackValue(
       UploadArticleImageParams(
         userId: 'user_1',
@@ -230,5 +246,76 @@ void main() {
       await cubit.loadCategories();
       verify(() => mockGetAllCategories(any())).called(1);
     });
+  });
+
+  group('CreateArticleCubit edit mode', () {
+    final articleToEdit = ArticleEntity(
+      id: 'art_edit',
+      authorId: 'user_1',
+      categoryId: 'cat_1',
+      title: 'Original Title',
+      body: 'Original body',
+      coverVerticalUrl: '',
+      coverHorizontalUrl: '',
+      status: 'published',
+      readTimeMinutes: 2,
+      saveCount: 0,
+      createdAt: DateTime(2024),
+    );
+
+    final updatedArticle = ArticleEntity(
+      id: 'art_edit',
+      authorId: 'user_1',
+      categoryId: 'cat_1',
+      title: 'Original Title',
+      body: 'Original body',
+      coverVerticalUrl: '',
+      coverHorizontalUrl: '',
+      status: 'published',
+      readTimeMinutes: 2,
+      saveCount: 0,
+      createdAt: DateTime(2024),
+    );
+
+    test('should_set_editing_id_after_initForEdit', () {
+      cubit.initForEdit(articleToEdit);
+      expect(cubit.isEditing, isTrue);
+    });
+
+    blocTest<CreateArticleCubit, CreateArticleState>(
+      'should_emit_publishing_then_published_when_update_succeeds',
+      build: () {
+        when(() => mockUpdateArticle(any()))
+            .thenAnswer((_) async => DataSuccess(updatedArticle));
+        return cubit;
+      },
+      act: (c) {
+        c.initForEdit(articleToEdit);
+        return c.publishFromForm('user_1');
+      },
+      expect: () => [
+        isA<CreateArticleFormUpdated>(),
+        isA<CreateArticlePublishing>(),
+        isA<CreateArticlePublished>(),
+      ],
+    );
+
+    blocTest<CreateArticleCubit, CreateArticleState>(
+      'should_emit_error_when_update_fails',
+      build: () {
+        when(() => mockUpdateArticle(any()))
+            .thenAnswer((_) async => DataFailed(Exception('error')));
+        return cubit;
+      },
+      act: (c) {
+        c.initForEdit(articleToEdit);
+        return c.publishFromForm('user_1');
+      },
+      expect: () => [
+        isA<CreateArticleFormUpdated>(),
+        isA<CreateArticlePublishing>(),
+        isA<CreateArticleError>(),
+      ],
+    );
   });
 }

@@ -8,6 +8,7 @@ import 'package:tortutip/features/articles/data/models/article_model.dart';
 import 'package:tortutip/features/articles/data/repository/article_repository_impl.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/articles/domain/params/publish_article_params.dart';
+import 'package:tortutip/features/articles/domain/params/update_article_params.dart';
 import 'package:tortutip/features/articles/domain/params/upload_article_image_params.dart';
 
 class MockArticleRemoteDataSource extends Mock
@@ -223,6 +224,50 @@ void main() {
       final result = await repository.uploadArticleImage(uploadParams);
 
       expect(result, isA<DataFailed<String>>());
+    });
+  });
+
+  group('ArticleRepositoryImpl.updateArticle', () {
+    const updateParams = UpdateArticleParams(
+      articleId: 'art_1',
+      categoryId: 'cat_1',
+      title: 'Updated',
+      body: 'Body',
+      coverVerticalUrl: '',
+      coverHorizontalUrl: '',
+      readTimeMinutes: 2,
+    );
+
+    final model = ArticleModel(
+      id: 'art_1',
+      authorId: 'user_1',
+      categoryId: 'cat_1',
+      title: 'Updated',
+      body: 'Body',
+      coverVerticalUrl: '',
+      coverHorizontalUrl: '',
+      status: 'published',
+      readTimeMinutes: 2,
+      saveCount: 0,
+      createdAt: DateTime(2024),
+    );
+
+    test('should_return_DataSuccess_when_datasource_succeeds', () async {
+      when(() => mockDataSource.updateArticle(updateParams))
+          .thenAnswer((_) async => model);
+
+      final result = await repository.updateArticle(updateParams);
+
+      expect(result, isA<DataSuccess<ArticleEntity>>());
+    });
+
+    test('should_return_DataFailed_when_datasource_throws', () async {
+      when(() => mockDataSource.updateArticle(updateParams))
+          .thenThrow(Exception('Firestore error'));
+
+      final result = await repository.updateArticle(updateParams);
+
+      expect(result, isA<DataFailed<ArticleEntity>>());
     });
   });
 }
