@@ -16,48 +16,53 @@ class RichTextToolbar extends StatelessWidget {
           bottom: BorderSide(color: AppColors.border),
         ),
       ),
-      child: QuillSimpleToolbar(
-        controller: controller,
-        config: const QuillSimpleToolbarConfig(
-          showBoldButton: true,
-          showItalicButton: true,
-          showListBullets: true,
-          showLink: true,
-          showQuote: true,
-          showUnderLineButton: false,
-          showStrikeThrough: false,
-          showInlineCode: false,
-          showColorButton: false,
-          showBackgroundColorButton: false,
-          showClearFormat: false,
-          showAlignmentButtons: false,
-          showHeaderStyle: false,
-          showListNumbers: false,
-          showListCheck: false,
-          showCodeBlock: false,
-          showIndent: false,
-          showRedo: false,
-          showUndo: false,
-          showFontFamily: false,
-          showFontSize: false,
-          showDirection: false,
-          showDividers: false,
-          showSearchButton: false,
-          showSubscript: false,
-          showSuperscript: false,
-          buttonOptions: QuillSimpleToolbarButtonOptions(
-            base: QuillToolbarBaseButtonOptions(
-              iconTheme: QuillIconTheme(
-                iconButtonSelectedData: IconButtonData(
-                  color: AppColors.primary,
-                ),
-                iconButtonUnselectedData: IconButtonData(
-                  color: AppColors.textSecondary,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          QuillSimpleToolbar(
+            controller: controller,
+            config: const QuillSimpleToolbarConfig(
+              showBoldButton: true,
+              showItalicButton: true,
+              showListBullets: true,
+              showLink: true,
+              showQuote: true,
+              showUnderLineButton: false,
+              showStrikeThrough: false,
+              showInlineCode: false,
+              showColorButton: false,
+              showBackgroundColorButton: false,
+              showClearFormat: false,
+              showAlignmentButtons: false,
+              showHeaderStyle: false,
+              showListNumbers: false,
+              showListCheck: false,
+              showCodeBlock: false,
+              showIndent: false,
+              showRedo: false,
+              showUndo: false,
+              showFontFamily: false,
+              showFontSize: false,
+              showDirection: false,
+              showDividers: false,
+              showSearchButton: false,
+              showSubscript: false,
+              showSuperscript: false,
+              buttonOptions: QuillSimpleToolbarButtonOptions(
+                base: QuillToolbarBaseButtonOptions(
+                  iconTheme: QuillIconTheme(
+                    iconButtonSelectedData: IconButtonData(
+                      color: AppColors.primary,
+                    ),
+                    iconButtonUnselectedData: IconButtonData(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
