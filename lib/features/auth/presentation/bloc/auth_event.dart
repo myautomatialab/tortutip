@@ -22,7 +22,3 @@ class SignOutEvent extends AuthEvent {
 class RefreshUserEvent extends AuthEvent {
   const RefreshUserEvent();
 }
-
-class EnterHardcoreModeEvent extends AuthEvent {
-  const EnterHardcoreModeEvent();
-}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 
 class TortuFeedSlider extends StatefulWidget {
   final VoidCallback onComplete;
@@ -33,7 +34,7 @@ class _TortuFeedSliderState extends State<TortuFeedSlider>
       CurvedAnimation(parent: _springController, curve: Curves.elasticOut),
     );
     _springAnim.addListener(() {
-      setState(() => _progress = _springAnim.value);
+      if (mounted) setState(() => _progress = _springAnim.value.clamp(0.0, 1.0));
     });
   }
 
@@ -44,7 +45,7 @@ class _TortuFeedSliderState extends State<TortuFeedSlider>
   }
 
   void _onDragUpdate(DragUpdateDetails details, double trackWidth) {
-    if (_completed) return;
+    if (_completed || !mounted) return;
     setState(() {
       _progress =
           (_progress + details.delta.dx / trackWidth).clamp(0.0, 1.0);
@@ -56,7 +57,7 @@ class _TortuFeedSliderState extends State<TortuFeedSlider>
   }
 
   void _onDragEnd(DragEndDetails details) {
-    if (_completed) return;
+    if (_completed || !mounted) return;
     if (_progress < 1.0) {
       _springAnim = Tween<double>(begin: _progress, end: 0.0).animate(
         CurvedAnimation(
@@ -93,12 +94,15 @@ class _TortuFeedSliderState extends State<TortuFeedSlider>
                 // Fill
                 FractionallySizedBox(
                   widthFactor: _progress,
-                  child: Container(
-                    height: _trackHeight,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusFull),
+                  child: Opacity(
+                    opacity: _progress.clamp(0.0, 1.0),
+                    child: Container(
+                      height: _trackHeight,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusFull),
+                      ),
                     ),
                   ),
                 ),
@@ -106,7 +110,7 @@ class _TortuFeedSliderState extends State<TortuFeedSlider>
                 if (_progress < 0.5)
                   Center(
                     child: Text(
-                      'Desliza →',
+                      AppLocalizations.of(context).tortuFeedSlideHint,
                       style: AppTypography.bodySm
                           .copyWith(color: AppColors.textSecondary),
                     ),

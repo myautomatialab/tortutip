@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../config/theme/app_colors.dart';
 import '../../../../config/theme/app_spacing.dart';
 import '../../../../config/theme/app_typography.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/tortutip_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -14,6 +15,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -39,14 +41,14 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.xxl),
-              const Text(
-                'Bienvenido a TortuTip',
+              Text(
+                l10n.loginTitle,
                 style: AppTypography.h1,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.sm),
-              const Text(
-                'Protegemos tu privacidad. Solo Google.',
+              Text(
+                l10n.loginSubtitle,
                 style: AppTypography.subtitle,
                 textAlign: TextAlign.center,
               ),

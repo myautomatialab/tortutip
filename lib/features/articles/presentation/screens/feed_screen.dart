@@ -10,6 +10,7 @@ import 'package:tortutip/features/articles/presentation/widgets/feed_card_stack.
 import 'package:tortutip/features/articles/presentation/widgets/feed_para_ti_chip.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 
@@ -53,7 +54,7 @@ class _FeedScreenState extends State<FeedScreen> {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: TortuAppBar(
-          title: 'TortuTip',
+          title: AppLocalizations.of(context).feedTitle,
           avatarUrl: context.select<AuthBloc, String?>(
             (b) => b.state is AuthAuthenticated
                 ? (b.state as AuthAuthenticated).user.avatarUrl
@@ -71,6 +72,7 @@ class _FeedScreenState extends State<FeedScreen> {
                   padding: const EdgeInsets.only(bottom: AppSpacing.xl),
                   child: BlocBuilder<FeedCubit, FeedState>(
                   builder: (context, state) {
+                    final l10n = AppLocalizations.of(context);
                     if (state is FeedInitial || state is FeedLoading) {
                       return const Center(
                         child: CircularProgressIndicator(
@@ -83,7 +85,7 @@ class _FeedScreenState extends State<FeedScreen> {
                       if (state.articles.isEmpty) {
                         return Center(
                           child: Text(
-                            'No hay artículos disponibles',
+                            l10n.feedNoArticles,
                             style: AppTypography.body
                                 .copyWith(color: AppColors.textSecondary),
                           ),
@@ -99,13 +101,13 @@ class _FeedScreenState extends State<FeedScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  '¡Has leído todo!',
+                                  l10n.feedReadAll,
                                   style: AppTypography.h3,
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: AppSpacing.sm),
                                 Text(
-                                  'Empieza de nuevo con un orden aleatorio',
+                                  l10n.feedReadAllSubtitle,
                                   style: AppTypography.body.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
@@ -113,7 +115,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                 ),
                                 const SizedBox(height: AppSpacing.xl),
                                 TortuPrimaryButton(
-                                  label: 'Iniciar de nuevo',
+                                  label: l10n.feedStartOver,
                                   onTap: _cubit.shuffleAndRestart,
                                 ),
                               ],
@@ -163,7 +165,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                 horizontal: AppSpacing.screenHorizontal,
                               ),
                               child: TortuSecondaryButton(
-                                label: 'Reintentar',
+                                label: l10n.feedRetry,
                                 onTap: _userId != null
                                     ? () => _cubit.loadFeed(_userId!)
                                     : null,

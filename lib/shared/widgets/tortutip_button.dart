@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../config/theme/app_colors.dart';
 import '../../config/theme/app_spacing.dart';
 import '../../config/theme/app_typography.dart';
@@ -93,7 +94,7 @@ class TortuGoogleButton extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const GoogleLogoIcon(),
+                  const FaIcon(FontAwesomeIcons.google, size: 20),
                   const SizedBox(width: AppSpacing.md),
                   Text(
                     'Continuar con Google',
@@ -107,53 +108,4 @@ class TortuGoogleButton extends StatelessWidget {
       ),
     );
   }
-}
-
-class GoogleLogoIcon extends StatelessWidget {
-  const GoogleLogoIcon({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(22, 22),
-      painter: _GooglePainter(),
-    );
-  }
-}
-
-class _GooglePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
-    final strokeW = size.width * 0.17;
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeW
-      ..strokeCap = StrokeCap.butt;
-
-    paint.color = AppColors.googleBlue;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeW / 2),
-      -1.05, 1.75, false, paint,
-    );
-    paint.color = AppColors.googleRed;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeW / 2),
-      -2.96, 1.91, false, paint,
-    );
-    paint.color = AppColors.googleYellow;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeW / 2),
-      2.27, 0.84, false, paint,
-    );
-    paint.color = AppColors.googleGreen;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeW / 2),
-      0.70, 1.57, false, paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

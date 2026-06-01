@@ -12,6 +12,7 @@ import 'package:tortutip/features/categories/domain/entities/category_entity.dar
 import 'package:tortutip/features/explore/presentation/bloc/category_list_cubit.dart';
 import 'package:tortutip/features/explore/presentation/bloc/category_list_state.dart';
 import 'package:tortutip/features/explore/presentation/widgets/article_list_card.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/shared/widgets/tortutip_empty_view.dart';
@@ -42,9 +43,10 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: TortuAppBar.detail(
-        title: 'Category',
+        title: l10n.categoryListTitle,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +60,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '— CATEGORY',
+                  l10n.categoryListSectionLabel,
                   style: AppTypography.caption.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
@@ -89,10 +91,10 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                   return _buildListWithLoader(context, state);
                 }
                 if (state is CategoryListEmpty) {
-                  return const TortuEmptyView(
+                  return TortuEmptyView(
                     icon: Icons.article_outlined,
-                    title: 'Sin artículos',
-                    subtitle: 'Aún no hay artículos publicados en esta categoría.',
+                    title: l10n.categoryListEmpty,
+                    subtitle: l10n.categoryListEmptySubtitle,
                   );
                 }
                 if (state is CategoryListError) {
@@ -122,7 +124,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
             child: Center(
               child: TortuSecondaryButton(
-                label: 'Load more',
+                label: AppLocalizations.of(context).categoryListLoadMore,
                 onTap: () => context
                     .read<CategoryListCubit>()
                     .loadMore(_userId),

@@ -11,6 +11,7 @@ import 'bookmarks_injection.dart';
 import 'categories_injection.dart';
 import 'explore_injection.dart';
 import 'profile_injection.dart';
+import 'search_injection.dart';
 import 'user_injection.dart';
 
 final sl = GetIt.instance;
@@ -39,4 +40,5 @@ Future<void> initDependencies() async {
   initProfileDependencies();    // profile depende de user + articles
   initExploreDependencies();    // explore depende de articles + categories
   initBookmarksDependencies(); // bookmarks depende de profile + articles
+  initSearchDependencies();    // search depende de Firebase
 }

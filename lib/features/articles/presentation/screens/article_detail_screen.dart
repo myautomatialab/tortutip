@@ -15,6 +15,7 @@ import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_event.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/injection/injection_container.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/features/tortu_feed/presentation/widgets/tortu_feed_widget.dart';
@@ -51,7 +52,7 @@ class ArticleDetailScreen extends StatelessWidget {
           return Scaffold(
             backgroundColor: AppColors.background,
             appBar: TortuAppBar.detail(
-              title: 'Detalle',
+              title: AppLocalizations.of(context).articleDetailTitle,
             ),
             body: _buildBody(context, state, userId),
           );
@@ -87,7 +88,7 @@ class ArticleDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               TortuSecondaryButton(
-                label: 'Reintentar',
+                label: AppLocalizations.of(context).articleDetailRetry,
                 onTap: () {
                   final retryAuthState = context.read<AuthBloc>().state;
                   final retryIsDoneToday = retryAuthState is AuthAuthenticated

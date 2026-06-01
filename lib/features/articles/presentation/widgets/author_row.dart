@@ -7,11 +7,15 @@ import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 class AuthorRow extends StatelessWidget {
   final UserEntity author;
   final int readTimeMinutes;
+  final bool? isSaved;
+  final VoidCallback? onToggleSave;
 
   const AuthorRow({
     super.key,
     required this.author,
     required this.readTimeMinutes,
+    this.isSaved,
+    this.onToggleSave,
   });
 
   @override
@@ -67,6 +71,17 @@ class AuthorRow extends StatelessWidget {
             style: AppTypography.caption,
           ),
         ),
+        if (onToggleSave != null) ...[
+          const SizedBox(width: AppSpacing.xs),
+          GestureDetector(
+            onTap: onToggleSave,
+            child: Icon(
+              (isSaved ?? false) ? Icons.bookmark : Icons.bookmark_outline,
+              color: (isSaved ?? false) ? AppColors.primary : AppColors.textSecondary,
+              size: AppSpacing.iconMd,
+            ),
+          ),
+        ],
       ],
     );
   }

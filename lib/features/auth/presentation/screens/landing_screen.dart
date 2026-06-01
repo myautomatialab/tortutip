@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../config/theme/app_colors.dart';
 import '../../../../config/theme/app_spacing.dart';
 import '../../../../config/theme/app_typography.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/tortutip_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -17,12 +18,13 @@ class LandingScreen extends StatelessWidget {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthError && state.message.isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
         }
       },
       builder: (context, state) {
+        final l10n = AppLocalizations.of(context);
         return Scaffold(
           backgroundColor: AppColors.background,
           body: Stack(
@@ -34,20 +36,6 @@ class LandingScreen extends StatelessWidget {
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
-              ),
-
-              // Layer 0.5: WELLNESS text centered over collage
-              Positioned.fill(
-                child: Center(
-                  child: Text(
-                    'WELLNESS ⊙',
-                    style: AppTypography.h2.copyWith(
-                      color: AppColors.white,
-                      letterSpacing: 2.0,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
               ),
 
               // Layer 1: Gradient overlay bottom to top
@@ -64,25 +52,7 @@ class LandingScreen extends StatelessWidget {
                 ),
               ),
 
-              // Layer 2: Hardcore mode trigger — discrete icon, bottom-right corner
-              Positioned(
-                right: AppSpacing.lg,
-                bottom: AppSpacing.xxl,
-                child: SafeArea(
-                  child: GestureDetector(
-                    onTap: () => context
-                        .read<AuthBloc>()
-                        .add(const EnterHardcoreModeEvent()),
-                    child: Icon(
-                      Icons.developer_mode,
-                      size: AppSpacing.iconSizeMd,
-                      color: AppColors.textTertiary.withValues(alpha: 0.4),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Layer 3: Content
+              // Layer 2: Content
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -97,35 +67,63 @@ class LandingScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
-                          width: AppSpacing.avatarSizeLg,
-                          height: AppSpacing.avatarSizeLg,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.primary.withValues(alpha: 0.12),
-                          ),
-                          child: const Icon(
-                            Icons.bolt,
-                            color: AppColors.primary,
-                            size: AppSpacing.iconSizeLg,
-                          ),
-                        ),
                         const SizedBox(height: AppSpacing.md),
-                        const Text(
-                          'Crea una vida que te guste',
-                          style: AppTypography.hero,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.lg,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.pink.withValues(alpha: 0.35),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusFull,
+                            ),
+                            border: Border.all(
+                              color: AppColors.white.withValues(alpha: 0.25),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Text(
+                                l10n.landingTagline,
+                                style: AppTypography.caption.copyWith(
+                                  color: AppColors.white,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
-                        const Text(
-                          'Get better, one tip at a time.',
+
+                        Text(
+                          l10n.landingHeroLine1,
+                          style: AppTypography.hero.copyWith(
+                            color: Colors.pink.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          l10n.landingHeroLine2,
                           style: AppTypography.subtitle,
                         ),
                         const SizedBox(height: AppSpacing.xl),
                         TortuGoogleButton(
                           isLoading: state is AuthLoading,
-                          onTap: () => context
-                              .read<AuthBloc>()
-                              .add(const SignInWithGoogleEvent()),
+                          onTap: () => context.read<AuthBloc>().add(
+                            const SignInWithGoogleEvent(),
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         RichText(
@@ -133,23 +131,22 @@ class LandingScreen extends StatelessWidget {
                           text: TextSpan(
                             style: AppTypography.caption,
                             children: [
-                              const TextSpan(
-                                text: 'Si continuas, aceptas los ',
+                              TextSpan(
+                                text: l10n.landingTermsPrefix,
                               ),
                               TextSpan(
-                                text: 'Terminos del servicio',
+                                text: l10n.landingTermsOfService,
                                 style: AppTypography.caption.copyWith(
                                   color: AppColors.primary,
                                   decoration: TextDecoration.underline,
                                   decorationColor: AppColors.primary,
                                 ),
                               ),
-                              const TextSpan(
-                                text:
-                                    ' de TortuTip y confirmas que has leido nuestra ',
+                              TextSpan(
+                                text: l10n.landingTermsMiddle,
                               ),
                               TextSpan(
-                                text: 'Politica de privacidad',
+                                text: l10n.landingPrivacyPolicy,
                                 style: AppTypography.caption.copyWith(
                                   color: AppColors.primary,
                                   decoration: TextDecoration.underline,

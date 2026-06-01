@@ -38,11 +38,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<DataState<UserEntity>> enterHardcoreMode() async {
-    throw UnimplementedError('Not available in production');
-  }
-
-  @override
   Future<DataState<UserEntity>> checkCurrentAuth() async {
     try {
       final user = await _dataSource.checkCurrentUser();

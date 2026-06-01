@@ -1,0 +1,1 @@
+- [Token Mappings & Fix Patterns](token-mappings.md) — Resolved color/spacing tokens added to AppColors/AppSpacing, architecture and test fix patterns

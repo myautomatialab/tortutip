@@ -11,6 +11,7 @@ import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/features/bookmarks/presentation/bloc/bookmarks_cubit.dart';
 import 'package:tortutip/features/bookmarks/presentation/bloc/bookmarks_state.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
 import 'package:tortutip/shared/widgets/tortutip_article_list_card.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
@@ -40,9 +41,10 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: TortuAppBar(
-        title: 'Mis Marcadores',
+        title: l10n.bookmarksTitle,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => context.pop(),
@@ -57,9 +59,9 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
           if (state is BookmarksEmpty) {
             return TortuEmptyView(
               icon: Icons.bookmark_border,
-              title: 'Aún no tienes marcadores',
-              subtitle: 'Guarda artículos que te interesen para leerlos después.',
-              actionLabel: 'Explorar artículos',
+              title: l10n.bookmarksEmpty,
+              subtitle: l10n.bookmarksEmptySubtitle,
+              actionLabel: l10n.bookmarksExploreAction,
               onActionTap: () => context.go(AppRoutes.feed),
             );
           }
@@ -72,6 +74,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
   }
 
   Widget _buildList(BuildContext context, BookmarksLoaded state) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -84,18 +87,18 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '— GUARDADOS',
+                l10n.bookmarksSectionLabel,
                 style: AppTypography.caption.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                'Mis Marcadores',
+                l10n.bookmarksSectionTitle,
                 style: AppTypography.hero.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
-                'Los artículos que has guardado para leer más tarde.',
+                l10n.bookmarksSectionSubtitle,
                 style: AppTypography.body.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -136,7 +139,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
       child: Center(
         child: TortuSecondaryButton(
-          label: 'Cargar más',
+          label: AppLocalizations.of(context).bookmarksLoadMore,
           onTap: () =>
               context.read<BookmarksCubit>().loadMore(_userId(context)),
         ),
@@ -156,12 +159,13 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
   void _onUnsave(BuildContext context, ArticleEntity article) {
     final cubit = context.read<BookmarksCubit>();
     cubit.unsaveArticle(_userId(context), article.id);
+    final l10n2 = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Eliminado de marcadores'),
+        content: Text(l10n2.bookmarksRemoved),
         duration: const Duration(seconds: 5),
         action: SnackBarAction(
-          label: 'Deshacer',
+          label: l10n2.bookmarksUndo,
           onPressed: () => cubit.loadBookmarks(_userId(context)),
         ),
       ),
@@ -184,7 +188,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             ),
             const SizedBox(height: AppSpacing.lg),
             TortuPrimaryButton(
-              label: 'Reintentar',
+              label: AppLocalizations.of(context).bookmarksRetry,
               onTap: () => context
                   .read<BookmarksCubit>()
                   .loadBookmarks(_userId(context)),

@@ -11,6 +11,7 @@ import '../../features/onboarding/config/onboarding_routes.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_cubit.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_state.dart';
 import '../../features/bookmarks/config/bookmarks_routes.dart';
+import '../../features/search/config/search_routes.dart';
 import '../../features/bookmarks/presentation/bloc/bookmarks_cubit.dart';
 import '../../features/explore/config/explore_routes.dart';
 import '../../features/profile/config/profile_routes.dart';
@@ -29,6 +30,7 @@ class AppRouter {
       redirect: (context, state) => _redirect(context, state),
       routes: [
         ...AuthRoutes.routes,
+        ...SearchRoutes.routes,
         ...ArticlesRoutes.routes,
         ...ExploreRoutes.routes,
         ...ProfileRoutes.routes,

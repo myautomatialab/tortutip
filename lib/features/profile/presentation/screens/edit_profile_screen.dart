@@ -10,6 +10,7 @@ import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_event.dart';
 import 'package:tortutip/features/profile/presentation/bloc/edit_profile_cubit.dart';
 import 'package:tortutip/features/profile/presentation/bloc/edit_profile_state.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/shared/widgets/tortutip_input.dart';
@@ -47,6 +48,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> _onTapAvatar() async {
     final picker = ImagePicker();
+    final l10n = AppLocalizations.of(context);
     await showModalBottomSheet<void>(
       context: context,
       builder: (ctx) => SafeArea(
@@ -55,7 +57,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt_outlined),
-              title: const Text('Cámara'),
+              title: Text(l10n.editProfileCamera),
               onTap: () async {
                 Navigator.of(ctx).pop();
                 final file = await picker.pickImage(
@@ -72,7 +74,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Galería'),
+              title: Text(l10n.editProfileGallery),
               onTap: () async {
                 Navigator.of(ctx).pop();
                 final file = await picker.pickImage(
@@ -94,22 +96,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _onSignOut(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cerrar sesión'),
-        content: const Text('¿Estás seguro de que quieres cerrar sesión?'),
+        title: Text(l10n.editProfileSignOutTitle),
+        content: Text(l10n.editProfileSignOutContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar'),
+            child: Text(l10n.editProfileCancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               context.read<AuthBloc>().add(const SignOutEvent());
             },
-            child: const Text('Cerrar sesión'),
+            child: Text(l10n.editProfileSignOutConfirm),
           ),
         ],
       ),
@@ -117,17 +120,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _onDeleteAccount(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar cuenta'),
+        title: Text(l10n.editProfileDeleteAccountTitle),
         content: const Text(
           '¿Estás seguro? Esta acción es irreversible y eliminará todos tus datos permanentemente.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar'),
+            child: Text(l10n.editProfileCancel),
           ),
           TextButton(
             onPressed: () {
@@ -135,7 +139,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               context.read<EditProfileCubit>().deleteAccount();
             },
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Eliminar'),
+            child: Text(l10n.editProfileDeleteAccountConfirm),
           ),
         ],
       ),
@@ -159,6 +163,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BlocListener<EditProfileCubit, EditProfileState>(
       listener: (context, state) {
         if (state is EditProfileImageUploaded) {
@@ -192,15 +197,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40,
-              height: 4,
+              width: AppSpacing.dragHandleWidth,
+              height: AppSpacing.xs,
               decoration: BoxDecoration(
                 color: AppColors.border,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            Text('Editar Perfil', style: AppTypography.h3),
+            Text(l10n.editProfileTitle, style: AppTypography.h3),
             const SizedBox(height: AppSpacing.xl),
             _AvatarPicker(
               avatarUrl: _currentAvatarUrl,
@@ -209,7 +214,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             const SizedBox(height: AppSpacing.xl),
             TortuTextField(
-              hint: 'Tu nombre',
+              hint: l10n.editProfileNameHint,
               controller: _nameController,
               onChanged: (_) {
                 if (_nameError) setState(() => _nameError = false);
@@ -225,7 +230,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
             const SizedBox(height: AppSpacing.md),
             TortuTextField(
-              hint: 'Cuéntanos sobre ti',
+              hint: l10n.editProfileBioHint,
               controller: _bioController,
               maxLines: 4,
             ),
@@ -237,13 +242,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 return Column(
                   children: [
                     TortuPrimaryButton(
-                      label: 'Guardar Cambios',
+                      label: l10n.editProfileSaveChanges,
                       onTap: isLoading ? null : _onSave,
                       isLoading: isLoading,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     TortuSecondaryButton(
-                      label: 'Cancelar',
+                      label: l10n.editProfileCancel,
                       onTap: isLoading
                           ? null
                           : () => Navigator.of(context).pop(),
@@ -254,7 +259,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     TextButton(
                       onPressed: isLoading ? null : () => _onSignOut(context),
                       child: Text(
-                        'Cerrar sesión',
+                        l10n.editProfileSignOutConfirm,
                         style: AppTypography.body.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -265,7 +270,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ? null
                           : () => _onDeleteAccount(context),
                       child: Text(
-                        'Eliminar cuenta',
+                        l10n.editProfileDeleteAccountTitle,
                         style: AppTypography.body.copyWith(
                           color: AppColors.error,
                         ),

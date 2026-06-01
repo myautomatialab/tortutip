@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/features/articles/presentation/bloc/article_detail/article_detail_cubit.dart';
 import 'package:tortutip/features/tortu_feed/presentation/widgets/tortu_feed_completed_view.dart';
 import 'package:tortutip/features/tortu_feed/presentation/widgets/tortu_feed_slider.dart';
@@ -71,8 +72,8 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
   void _onTapCollapsed() {
     if (widget.isDoneToday) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vuelve mañana para seguir alimentando a Tortu 🐢'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).tortuFeedComeBackTomorrow),
         ),
       );
       return;
@@ -147,7 +148,7 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
+                color: AppColors.dark.withValues(alpha: 0.25),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -156,7 +157,7 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
           child: Icon(
             Icons.eco,
             color: isDone ? AppColors.textSecondary : AppColors.white,
-            size: 24,
+            size: AppSpacing.iconMd,
           ),
         ),
       ),
@@ -177,7 +178,7 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
             borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: AppColors.dark.withValues(alpha: 0.12),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
@@ -192,7 +193,7 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
                   const Text('🐢', style: TextStyle(fontSize: 20)),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
-                    'Darle de comer a Tortu',
+                    AppLocalizations.of(context).tortuFeedTitle,
                     style: AppTypography.bodyLg
                         .copyWith(fontWeight: FontWeight.bold),
                   ),

@@ -5,11 +5,13 @@ import '../theme/app_spacing.dart';
 class TortuTipTabBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTabTap;
+  final bool isWriter;
 
   const TortuTipTabBar({
     super.key,
     required this.currentIndex,
     required this.onTabTap,
+    this.isWriter = false,
   });
 
   @override
@@ -28,7 +30,7 @@ class TortuTipTabBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
+              color: AppColors.dark.withValues(alpha: 0.25),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -43,9 +45,12 @@ class TortuTipTabBar extends StatelessWidget {
               selected: currentIndex == 0,
               onTap: () => onTabTap(0),
             ),
-            const SizedBox(width: AppSpacing.sm),
-            _TabIconCenter(onTap: () => onTabTap(1)),
-            const SizedBox(width: AppSpacing.sm),
+            if (isWriter) ...[
+              const SizedBox(width: AppSpacing.sm),
+              _TabIconCenter(onTap: () => onTabTap(1)),
+              const SizedBox(width: AppSpacing.sm),
+            ] else
+              const SizedBox(width: AppSpacing.sm),
             _TabIcon(
               icon: Icons.explore_outlined,
               selectedIcon: Icons.explore,
@@ -126,12 +131,7 @@ class _TabIconState extends State<_TabIcon>
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.sm,
           ),
-          decoration: BoxDecoration(
-            color: widget.selected
-                ? AppColors.primaryDark.withValues(alpha: 0.30)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-          ),
+          decoration: const BoxDecoration(),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             switchInCurve: Curves.easeOut,

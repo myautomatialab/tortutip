@@ -4,6 +4,7 @@ import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/widgets/tortutip_chip.dart';
 import 'package:tortutip/shared/widgets/tortutip_skeleton.dart';
 
@@ -25,7 +26,9 @@ class PublishedArticleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return GestureDetector(
+      onTap: onTapView,
+      child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         ClipRRect(
@@ -62,8 +65,11 @@ class PublishedArticleRow extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 article.title,
-                style: AppTypography.body.copyWith(fontWeight: FontWeight.bold),
-                maxLines: 1,
+                style: AppTypography.body.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textSecondary,
+                ),
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
@@ -81,43 +87,46 @@ class PublishedArticleRow extends StatelessWidget {
                 _confirmDelete(context);
             }
           },
-          itemBuilder: (_) => [
-            const PopupMenuItem(value: 'view', child: Text('Ver')),
-            const PopupMenuItem(value: 'edit', child: Text('Editar')),
-            const PopupMenuItem(
-              value: 'delete',
-              child: Text(
-                'Eliminar',
-                style: TextStyle(color: AppColors.error),
+          itemBuilder: (ctx) {
+            final l10n = AppLocalizations.of(ctx);
+            return [
+              PopupMenuItem(value: 'view', child: Text(l10n.articleMenuView)),
+              PopupMenuItem(value: 'edit', child: Text(l10n.articleMenuEdit)),
+              PopupMenuItem(
+                value: 'delete',
+                child: Text(
+                  l10n.articleMenuDelete,
+                  style: const TextStyle(color: AppColors.error),
+                ),
               ),
-            ),
-          ],
+            ];
+          },
         ),
       ],
+      ),
     );
   }
 
   void _confirmDelete(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar artículo'),
-        content: const Text(
-          '¿Seguro que quieres eliminar este artículo? Esta acción no se puede deshacer.',
-        ),
+        title: Text(l10n.articleDeleteTitle),
+        content: Text(l10n.articleDeleteContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar'),
+            child: Text(l10n.articleDeleteCancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               onTapDelete();
             },
-            child: const Text(
-              'Eliminar',
-              style: TextStyle(color: AppColors.error),
+            child: Text(
+              l10n.articleMenuDelete,
+              style: const TextStyle(color: AppColors.error),
             ),
           ),
         ],

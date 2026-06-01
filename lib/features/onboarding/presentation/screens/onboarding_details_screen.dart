@@ -8,6 +8,7 @@ import 'package:tortutip/features/onboarding/presentation/bloc/onboarding_cubit.
 import 'package:tortutip/features/onboarding/presentation/bloc/onboarding_state.dart';
 import 'package:tortutip/features/onboarding/presentation/widgets/age_range_chip.dart';
 import 'package:tortutip/features/onboarding/presentation/widgets/gender_card.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/shared/widgets/tortutip_progress_dots.dart';
@@ -45,6 +46,7 @@ class _OnboardingDetailsScreenState extends State<OnboardingDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BlocListener<OnboardingCubit, OnboardingState>(
       listener: (context, state) {
         if (state is OnboardingError) {
@@ -92,7 +94,7 @@ class _OnboardingDetailsScreenState extends State<OnboardingDetailsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: AppSpacing.xxl),
-                      Text('Cuéntanos un poco más', style: AppTypography.h1),
+                      Text(l10n.onboardingDetailsTitle, style: AppTypography.h1),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         'Esto nos ayuda a personalizar tus recomendaciones diarias',
@@ -101,7 +103,7 @@ class _OnboardingDetailsScreenState extends State<OnboardingDetailsScreen> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Text('Género', style: AppTypography.h4),
+                      Text(l10n.onboardingDetailsGender, style: AppTypography.h4),
                       const SizedBox(height: AppSpacing.md),
                       GridView.count(
                         crossAxisCount: 2,
@@ -113,7 +115,7 @@ class _OnboardingDetailsScreenState extends State<OnboardingDetailsScreen> {
                         children: [
                           GenderCard(
                             value: 'female',
-                            label: 'Femenino',
+                            label: l10n.onboardingGenderFemale,
                             icon: Icons.female,
                             selected: _selectedGender == 'female',
                             onTap: () =>
@@ -121,7 +123,7 @@ class _OnboardingDetailsScreenState extends State<OnboardingDetailsScreen> {
                           ),
                           GenderCard(
                             value: 'male',
-                            label: 'Masculino',
+                            label: l10n.onboardingGenderMale,
                             icon: Icons.male,
                             selected: _selectedGender == 'male',
                             onTap: () =>
@@ -129,7 +131,7 @@ class _OnboardingDetailsScreenState extends State<OnboardingDetailsScreen> {
                           ),
                           GenderCard(
                             value: 'other',
-                            label: 'Otros',
+                            label: l10n.onboardingGenderOther,
                             icon: Icons.transgender,
                             selected: _selectedGender == 'other',
                             onTap: () =>
@@ -137,7 +139,7 @@ class _OnboardingDetailsScreenState extends State<OnboardingDetailsScreen> {
                           ),
                           GenderCard(
                             value: 'prefer_not_to_say',
-                            label: 'Prefiero no decirlo',
+                            label: l10n.onboardingGenderPreferNotToSay,
                             icon: Icons.visibility_off,
                             selected:
                                 _selectedGender == 'prefer_not_to_say',
@@ -147,7 +149,7 @@ class _OnboardingDetailsScreenState extends State<OnboardingDetailsScreen> {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Text('Rango de edad', style: AppTypography.h4),
+                      Text(l10n.onboardingDetailsAgeRange, style: AppTypography.h4),
                       const SizedBox(height: AppSpacing.md),
                       Wrap(
                         spacing: AppSpacing.sm,
@@ -183,7 +185,7 @@ class _OnboardingDetailsScreenState extends State<OnboardingDetailsScreen> {
                 child: BlocBuilder<OnboardingCubit, OnboardingState>(
                   builder: (context, state) {
                     return TortuPrimaryButton(
-                      label: 'Finalizar →',
+                      label: l10n.onboardingFinish,
                       onTap: _canFinish ? _onFinish : null,
                       isLoading: state is OnboardingLoading,
                     );

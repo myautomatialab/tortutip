@@ -346,7 +346,7 @@ void main() {
       build: () {
         stubHappyPath();
         when(() => mockFeedTortu(any()))
-            .thenAnswer((_) async => const DataSuccess(null));
+            .thenAnswer((_) async => const DataSuccess(false));
         when(() => mockRecordFeedSwipe(any()))
             .thenAnswer((_) async => DataSuccess(author));
         return cubit;
@@ -388,7 +388,7 @@ void main() {
       build: () {
         stubHappyPath();
         when(() => mockFeedTortu(any()))
-            .thenAnswer((_) async => const DataSuccess(null));
+            .thenAnswer((_) async => const DataSuccess(false));
         when(() => mockRecordFeedSwipe(any()))
             .thenAnswer((_) async => DataFailed(Exception('swipe error')));
         return cubit;

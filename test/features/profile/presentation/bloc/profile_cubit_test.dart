@@ -13,12 +13,14 @@ import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
 import 'package:tortutip/features/categories/domain/use_cases/get_all_categories_use_case.dart';
 import 'package:tortutip/shared/user/domain/use_cases/get_current_user_use_case.dart';
+import 'package:tortutip/shared/user/domain/use_cases/update_user_role_use_case.dart';
 
 class MockGetCurrentUserUseCase extends Mock implements GetCurrentUserUseCase {}
 class MockGetSavedArticlesUseCase extends Mock implements GetSavedArticlesUseCase {}
 class MockGetPublishedArticlesUseCase extends Mock implements GetPublishedArticlesUseCase {}
 class MockDeleteArticleUseCase extends Mock implements DeleteArticleUseCase {}
 class MockGetAllCategoriesUseCase extends Mock implements GetAllCategoriesUseCase {}
+class MockUpdateUserRoleUseCase extends Mock implements UpdateUserRoleUseCase {}
 
 class FakeNoParams extends Fake implements NoParams {}
 class FakeGetSavedArticlesParams extends Fake implements GetSavedArticlesParams {}
@@ -31,6 +33,7 @@ void main() {
   late MockGetPublishedArticlesUseCase mockGetPublishedArticles;
   late MockDeleteArticleUseCase mockDeleteArticle;
   late MockGetAllCategoriesUseCase mockGetAllCategories;
+  late MockUpdateUserRoleUseCase mockUpdateUserRole;
 
   setUpAll(() {
     registerFallbackValue(FakeNoParams());
@@ -71,6 +74,7 @@ void main() {
     mockGetPublishedArticles = MockGetPublishedArticlesUseCase();
     mockDeleteArticle = MockDeleteArticleUseCase();
     mockGetAllCategories = MockGetAllCategoriesUseCase();
+    mockUpdateUserRole = MockUpdateUserRoleUseCase();
     when(() => mockGetAllCategories(any()))
         .thenAnswer((_) async => const DataSuccess(<CategoryEntity>[]));
   });
@@ -81,6 +85,7 @@ void main() {
         mockGetPublishedArticles,
         mockDeleteArticle,
         mockGetAllCategories,
+        mockUpdateUserRole,
       );
 
   group('ProfileCubit', () {

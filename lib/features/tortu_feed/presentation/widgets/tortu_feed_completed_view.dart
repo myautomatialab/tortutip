@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 
 class TortuFeedCompletedView extends StatefulWidget {
   final VoidCallback onDone;
@@ -73,14 +74,14 @@ class _TortuFeedCompletedViewState extends State<TortuFeedCompletedView>
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '¡Tip aprendido!',
+                AppLocalizations.of(context).tortuFeedCompleted,
                 style: AppTypography.bodyLg.copyWith(
                   color: AppColors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                'Tortu está feliz +1%',
+                AppLocalizations.of(context).tortuFeedHappy,
                 style:
                     AppTypography.body.copyWith(color: AppColors.white),
               ),

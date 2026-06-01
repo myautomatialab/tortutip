@@ -19,6 +19,10 @@ abstract class TortuFeedRemoteDataSource {
     required String userId,
     required String categoryId,
   });
+
+  Future<int> getStreakDays({required String userId});
+
+  Future<double> getOverallProgress({required String userId});
 }
 
 class TortuFeedRemoteDataSourceImpl implements TortuFeedRemoteDataSource {
@@ -106,5 +110,67 @@ class TortuFeedRemoteDataSourceImpl implements TortuFeedRemoteDataSource {
         .get();
     if (!doc.exists) return 0.0;
     return (doc.data()!['progress'] as num).toDouble();
+  }
+
+  @override
+  Future<int> getStreakDays({required String userId}) async {
+    final snapshot = await _firestore
+        .collection('daily_tips')
+        .where('user_id', isEqualTo: userId)
+        .get();
+
+    if (snapshot.docs.isEmpty) return 0;
+
+    final dates = snapshot.docs
+        .map((d) => d.data()['date'] as String?)
+        .whereType<String>()
+        .toSet()
+        .toList()
+      ..sort((a, b) => b.compareTo(a)); // desc
+
+    final today = _todayDate();
+    if (dates.first != today) return 0; // streak roto
+
+    int streak = 1;
+    for (int i = 1; i < dates.length; i++) {
+      final expected = _offsetDate(today, -i);
+      if (dates[i] == expected) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  @override
+  Future<double> getOverallProgress({required String userId}) async {
+    final snapshot = await _firestore
+        .collection('user_category_progress')
+        .where('user_id', isEqualTo: userId)
+        .get();
+
+    if (snapshot.docs.isEmpty) return 0.0;
+
+    final total = snapshot.docs.fold<double>(
+      0.0,
+      (acc, doc) => acc + (doc.data()['progress'] as num).toDouble(),
+    );
+    return (total / snapshot.docs.length).clamp(0.0, 1.0);
+  }
+
+  String _todayDate() {
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+  }
+
+  String _offsetDate(String base, int offsetDays) {
+    final parts = base.split('-');
+    final date = DateTime(
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+      int.parse(parts[2]),
+    ).add(Duration(days: offsetDays));
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 }
