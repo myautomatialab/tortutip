@@ -1,13 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tortutip/core/usecase/usecase.dart';
 import 'package:tortutip/features/articles/domain/params/publish_article_params.dart';
 import 'package:tortutip/features/articles/domain/params/upload_article_image_params.dart';
 import 'package:tortutip/features/articles/domain/use_cases/publish_article_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/upload_article_image_use_case.dart';
+import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
 import 'package:tortutip/features/categories/domain/use_cases/get_all_categories_use_case.dart';
-import 'package:tortutip/core/usecase/usecase.dart';
 
 import 'create_article_state.dart';
 
@@ -22,6 +23,7 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
   String _title = '';
   String _categoryId = '';
   String _bodyJson = '';
+  List<CategoryEntity> _categories = [];
 
   CreateArticleCubit(
     this._publishArticle,
@@ -35,10 +37,10 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
         title: _title,
         categoryId: _categoryId,
         bodyJson: _bodyJson,
+        categories: _categories,
       );
 
-  Future<void> uploadCoverImage(File imageFile, bool isVertical) async {
-    final userId = 'current_user';
+  Future<void> uploadCoverImage(File imageFile, bool isVertical, String userId) async {
     emit(CreateArticleImageUploading(isVertical: isVertical));
     final params = UploadArticleImageParams(
       userId: userId,
@@ -54,7 +56,9 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
       }
       emit(_currentFormState);
     } else {
-      emit(CreateArticleError(_mapErrorToMessage(result.error!)));
+      // Show the raw error for debugging — replace with _mapErrorToMessage after fix
+      emit(CreateArticleError('Upload error: ${result.error}'));
+      emit(_currentFormState);
     }
   }
 
@@ -90,7 +94,7 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
       authorId: authorId,
       categoryId: _categoryId,
       title: _title,
-      body: _bodyJson,
+      body: _extractPlainText(_bodyJson),
       coverVerticalUrl: _coverVerticalUrl ?? '',
       coverHorizontalUrl: _coverHorizontalUrl ?? '',
       readTimeMinutes: readTime,
@@ -103,25 +107,40 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
     }
   }
 
+  String _extractPlainText(String bodyJson) {
+    try {
+      final ops = jsonDecode(bodyJson) as List<dynamic>;
+      return ops
+          .map((op) => op is Map && op['insert'] is String ? op['insert'] as String : '')
+          .join()
+          .trim();
+    } catch (_) {
+      return bodyJson;
+    }
+  }
+
   int _calculateReadTime(String bodyJson) {
-    final wordCount = bodyJson.trim().split(RegExp(r'\s+')).length;
+    final plain = _extractPlainText(bodyJson);
+    final wordCount = plain.trim().split(RegExp(r'\s+')).length;
     return (wordCount / 200).ceil().clamp(1, 999);
   }
 
   String _mapErrorToMessage(Exception error) {
-    if (error is FirebaseException) {
-      return switch (error.code) {
-        'permission-denied' => 'No tienes permiso para publicar artículos',
-        'unavailable' => 'Sin conexión. Inténtalo de nuevo',
-        _ => 'No se pudo publicar el artículo. Inténtalo de nuevo',
-      };
+    final msg = error.toString().toLowerCase();
+    if (msg.contains('permission-denied') || msg.contains('unauthorized')) {
+      return 'No tienes permiso para realizar esta acción';
     }
-    return 'No se pudo publicar el artículo. Inténtalo de nuevo';
+    if (msg.contains('unavailable') || msg.contains('network')) {
+      return 'Sin conexión. Inténtalo de nuevo';
+    }
+    return 'Algo salió mal. Inténtalo de nuevo';
   }
 
-  // Expose getAllCategories for the screen
   Future<void> loadCategories() async {
-    // Screen uses CategoryCubit for categories — this is unused but kept for completeness
-    await _getAllCategories(const NoParams());
+    final result = await _getAllCategories(const NoParams());
+    if (result.isSuccess) {
+      _categories = result.data ?? [];
+      emit(_currentFormState);
+    }
   }
 }

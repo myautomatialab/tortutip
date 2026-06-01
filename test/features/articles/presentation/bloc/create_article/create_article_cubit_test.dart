@@ -113,7 +113,7 @@ void main() {
             .thenAnswer((_) async => const DataSuccess('https://url/img.jpg'));
         return cubit;
       },
-      act: (c) => c.uploadCoverImage(File('test.jpg'), true),
+      act: (c) => c.uploadCoverImage(File('test.jpg'), true, 'test_user_id'),
       expect: () => [
         isA<CreateArticleImageUploading>(),
         isA<CreateArticleFormUpdated>(),
@@ -133,10 +133,11 @@ void main() {
                 (_) async => DataFailed(Exception('upload error')));
         return cubit;
       },
-      act: (c) => c.uploadCoverImage(File('test.jpg'), false),
+      act: (c) => c.uploadCoverImage(File('test.jpg'), false, 'test_user_id'),
       expect: () => [
         isA<CreateArticleImageUploading>(),
         isA<CreateArticleError>(),
+        isA<CreateArticleFormUpdated>(),
       ],
     );
   });

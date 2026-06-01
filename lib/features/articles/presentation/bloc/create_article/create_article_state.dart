@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
+import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
 
 abstract class CreateArticleState extends Equatable {
   const CreateArticleState();
@@ -30,6 +31,7 @@ class CreateArticleFormUpdated extends CreateArticleState {
   final String title;
   final String categoryId;
   final String bodyJson;
+  final List<CategoryEntity> categories;
 
   const CreateArticleFormUpdated({
     this.coverVerticalUrl,
@@ -37,6 +39,7 @@ class CreateArticleFormUpdated extends CreateArticleState {
     required this.title,
     required this.categoryId,
     required this.bodyJson,
+    this.categories = const [],
   });
 
   bool get isValid =>
@@ -46,6 +49,24 @@ class CreateArticleFormUpdated extends CreateArticleState {
       categoryId.isNotEmpty &&
       bodyJson.length >= 50;
 
+  CreateArticleFormUpdated copyWith({
+    String? coverVerticalUrl,
+    String? coverHorizontalUrl,
+    String? title,
+    String? categoryId,
+    String? bodyJson,
+    List<CategoryEntity>? categories,
+  }) {
+    return CreateArticleFormUpdated(
+      coverVerticalUrl: coverVerticalUrl ?? this.coverVerticalUrl,
+      coverHorizontalUrl: coverHorizontalUrl ?? this.coverHorizontalUrl,
+      title: title ?? this.title,
+      categoryId: categoryId ?? this.categoryId,
+      bodyJson: bodyJson ?? this.bodyJson,
+      categories: categories ?? this.categories,
+    );
+  }
+
   @override
   List<Object?> get props => [
         coverVerticalUrl,
@@ -53,6 +74,7 @@ class CreateArticleFormUpdated extends CreateArticleState {
         title,
         categoryId,
         bodyJson,
+        categories,
       ];
 }
 

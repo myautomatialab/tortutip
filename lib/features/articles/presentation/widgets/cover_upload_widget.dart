@@ -94,28 +94,47 @@ class _CoverZone extends StatelessWidget {
   }
 
   Widget _buildContent() {
+    Widget? imageWidget;
+
+    if (imageSource is File) {
+      imageWidget = Image.file(
+        imageSource as File,
+        fit: BoxFit.cover,
+        errorBuilder: (ctx, err, st) => _emptyZone(),
+      );
+    } else if (imageSource is String) {
+      imageWidget = Image.network(
+        imageSource as String,
+        fit: BoxFit.cover,
+        errorBuilder: (ctx, err, st) => _emptyZone(),
+      );
+    }
+
+    if (imageWidget != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          imageWidget,
+          if (isUploading)
+            Container(
+              color: AppColors.dark.withValues(alpha: 0.26),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.white,
+                  strokeWidth: 2,
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
     if (isUploading) {
       return const Center(
         child: CircularProgressIndicator(
           color: AppColors.primary,
           strokeWidth: 2,
         ),
-      );
-    }
-
-    if (imageSource is File) {
-      return Image.file(
-        imageSource as File,
-        fit: BoxFit.cover,
-        errorBuilder: (ctx, err, st) => _emptyZone(),
-      );
-    }
-
-    if (imageSource is String) {
-      return Image.network(
-        imageSource as String,
-        fit: BoxFit.cover,
-        errorBuilder: (ctx, err, st) => _emptyZone(),
       );
     }
 

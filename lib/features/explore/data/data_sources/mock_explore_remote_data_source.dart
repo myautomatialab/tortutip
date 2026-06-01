@@ -4,6 +4,21 @@ import 'package:tortutip/features/articles/data/models/article_model.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/explore/data/data_sources/explore_remote_data_source.dart';
 
+Map<String, dynamic> _entityToRaw(ArticleEntity e) => {
+      'id': e.id,
+      'author_id': e.authorId,
+      'category_id': e.categoryId,
+      'title': e.title,
+      'body': e.body,
+      'cover_vertical_url': e.coverVerticalUrl,
+      'cover_horizontal_url': e.coverHorizontalUrl,
+      'status': e.status,
+      'read_time_minutes': e.readTimeMinutes,
+      'save_count': e.saveCount,
+      'published_at': e.publishedAt?.toIso8601String(),
+      'created_at': e.createdAt.toIso8601String(),
+    };
+
 class MockExploreRemoteDataSource implements ExploreRemoteDataSource {
   static final List<ArticleEntity> _articles = [
     ArticleModel(
@@ -94,7 +109,7 @@ class MockExploreRemoteDataSource implements ExploreRemoteDataSource {
   ];
 
   @override
-  Future<List<ArticleEntity>> getArticlesByCategory(
+  Future<List<Map<String, dynamic>>> getArticlesByCategory(
     String categoryId,
     int page,
     int pageSize,
@@ -104,9 +119,10 @@ class MockExploreRemoteDataSource implements ExploreRemoteDataSource {
 
     final start = page * pageSize;
     if (start >= allForCategory.length) return [];
-    return allForCategory.sublist(
+    final paged = allForCategory.sublist(
       start,
       min(start + pageSize, allForCategory.length),
     );
+    return paged.map(_entityToRaw).toList();
   }
 }

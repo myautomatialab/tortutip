@@ -24,16 +24,17 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
 
   @override
   Future<List<ArticleModel>> getFeedArticles(List<String> categoryIds) async {
+    if (categoryIds.isEmpty) return [];
     final snapshot = await _firestore
         .collection('articles')
         .where('category_id', whereIn: categoryIds)
         .where('status', isEqualTo: 'published')
-        .orderBy('published_at', descending: true)
         .get();
-    return snapshot.docs
-        .map((doc) =>
-            ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
+    final docs = snapshot.docs
+        .map((doc) => ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
         .toList();
+    docs.sort((a, b) => (b.publishedAt ?? DateTime(0)).compareTo(a.publishedAt ?? DateTime(0)));
+    return docs;
   }
 
   @override
@@ -99,20 +100,26 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
   @override
   Future<List<ArticleModel>> getFeedArticlesPaged(
       List<String> categoryIds, int page, int pageSize) async {
-    final limit = (page + 1) * pageSize;
-    final snapshot = await _firestore
-        .collection('articles')
-        .where('category_id', whereIn: categoryIds)
-        .where('status', isEqualTo: 'published')
-        .orderBy('published_at', descending: true)
-        .limit(limit)
-        .get();
+    final Query<Map<String, dynamic>> query;
+    if (categoryIds.isEmpty) {
+      query = _firestore
+          .collection('articles')
+          .where('status', isEqualTo: 'published');
+    } else {
+      query = _firestore
+          .collection('articles')
+          .where('category_id', whereIn: categoryIds)
+          .where('status', isEqualTo: 'published');
+    }
+    final snapshot = await query.get();
     final all = snapshot.docs
         .map((doc) => ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
         .toList();
+    all.sort((a, b) => (b.publishedAt ?? DateTime(0)).compareTo(a.publishedAt ?? DateTime(0)));
     final start = page * pageSize;
     if (start >= all.length) return [];
-    return all.sublist(start);
+    final end = (start + pageSize).clamp(0, all.length);
+    return all.sublist(start, end);
   }
 
   @override
@@ -146,7 +153,9 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
     final ref = _storage.ref(
       'articles/${params.userId}/${timestamp}_$orientation.jpg',
     );
-    final task = await ref.putFile(params.imageFile);
-    return task.ref.getDownloadURL();
+    final bytes = await params.imageFile.readAsBytes();
+    final metadata = SettableMetadata(contentType: 'image/jpeg');
+    await ref.putData(bytes, metadata);
+    return ref.getDownloadURL();
   }
 }

@@ -26,7 +26,7 @@ class FeedCardStack extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    final cardWidth = screenWidth - AppSpacing.lg * 2;
+    final cardWidth = screenWidth - AppSpacing.sm * 2;
     final cardHeight = screenHeight * _cardHeightFactor;
 
     final hasNext = currentIndex + 1 < articles.length;

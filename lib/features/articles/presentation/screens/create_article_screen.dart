@@ -6,17 +6,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/presentation/bloc/create_article/create_article_cubit.dart';
 import 'package:tortutip/features/articles/presentation/bloc/create_article/create_article_state.dart';
+import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/features/articles/presentation/screens/preview_article_screen.dart';
 import 'package:tortutip/features/articles/presentation/widgets/cover_upload_widget.dart';
 import 'package:tortutip/features/articles/presentation/widgets/rich_text_toolbar.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
+import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/shared/widgets/tortutip_chip.dart';
 
@@ -32,10 +34,10 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
   late final QuillController _quillController;
   late final TextEditingController _titleController;
   final _imagePicker = ImagePicker();
+  String _userId = '';
 
   bool _isUploadingVertical = false;
   bool _isUploadingHorizontal = false;
-  // imageSource can be File (local, post-crop) or String (remote URL from cubit)
   Object? _coverVerticalSource;
   Object? _coverHorizontalSource;
 
@@ -47,6 +49,11 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
     _titleController = TextEditingController();
 
     _quillController.addListener(_onBodyChanged);
+
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      _userId = authState.user.id;
+    }
 
     _cubit.loadCategories();
   }
@@ -152,45 +159,36 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
 
     if (source == null || !mounted) return;
 
+    // Refresh userId in case it wasn't ready in initState
+    if (_userId.isEmpty) {
+      final authState = context.read<AuthBloc>().state;
+      if (authState is AuthAuthenticated) _userId = authState.user.id;
+    }
+
+    if (_userId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error: user not authenticated')),
+      );
+      return;
+    }
+
     final picked =
         await _imagePicker.pickImage(source: source, imageQuality: 85);
     if (picked == null || !mounted) return;
 
-    final croppedFile = await ImageCropper().cropImage(
-      sourcePath: picked.path,
-      aspectRatio: isVertical
-          ? const CropAspectRatio(ratioX: 3, ratioY: 4)
-          : const CropAspectRatio(ratioX: 16, ratioY: 9),
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: isVertical ? 'Vertical Cover' : 'Horizontal Cover',
-          toolbarColor: AppColors.primary,
-          toolbarWidgetColor: Colors.white,
-          lockAspectRatio: true,
-        ),
-        IOSUiSettings(
-          title: isVertical ? 'Vertical Cover' : 'Horizontal Cover',
-          aspectRatioLockEnabled: true,
-          resetAspectRatioEnabled: false,
-        ),
-      ],
-    );
-
-    if (croppedFile == null || !mounted) return;
-
-    final croppedLocalFile = File(croppedFile.path);
+    final imageFile = File(picked.path);
 
     setState(() {
       if (isVertical) {
         _isUploadingVertical = true;
-        _coverVerticalSource = croppedLocalFile;
+        _coverVerticalSource = imageFile;
       } else {
         _isUploadingHorizontal = true;
-        _coverHorizontalSource = croppedLocalFile;
+        _coverHorizontalSource = imageFile;
       }
     });
 
-    await _cubit.uploadCoverImage(croppedLocalFile, isVertical);
+    await _cubit.uploadCoverImage(imageFile, isVertical, _userId);
 
     if (mounted) {
       setState(() {
@@ -201,6 +199,10 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
   }
 
   void _onCoverUrlsUpdated(String? vertical, String? horizontal) {
+    var changed = false;
+    if (vertical != null && _coverVerticalSource != vertical) changed = true;
+    if (horizontal != null && _coverHorizontalSource != horizontal) changed = true;
+    if (!changed) return;
     setState(() {
       if (vertical != null) _coverVerticalSource = vertical;
       if (horizontal != null) _coverHorizontalSource = horizontal;
@@ -229,7 +231,7 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
   }
 
   void _onPublish() {
-    _cubit.publishFromForm('current_user');
+    _cubit.publishFromForm(_userId);
   }
 
   @override
@@ -317,15 +319,12 @@ class _CreateArticleView extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
+        appBar: TortuAppBar(
+          title: 'Create Article',
           leading: IconButton(
             icon: const Icon(Icons.close, color: AppColors.textPrimary),
             onPressed: onClose,
           ),
-          title: Text('Create Article', style: AppTypography.h4),
-          centerTitle: true,
         ),
         body: Column(
           children: [
@@ -378,6 +377,7 @@ class _CreateArticleView extends StatelessWidget {
                         placeholder:
                             'Start your journey here... share your wisdom with the world.',
                         minHeight: 200,
+                        scrollable: false,
                         padding: EdgeInsets.symmetric(
                           horizontal: AppSpacing.screenHorizontal,
                           vertical: AppSpacing.lg,
@@ -426,18 +426,14 @@ class _CategorySelectorState extends State<_CategorySelector> {
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
-            SizedBox(
-              height: 36,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screenHorizontal,
-                ),
-                itemCount: categories.length,
-                separatorBuilder: (ctx, i) =>
-                    const SizedBox(width: AppSpacing.sm),
-                itemBuilder: (_, i) {
-                  final cat = categories[i];
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenHorizontal,
+              ),
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: categories.map((cat) {
                   return _SelectableCategoryChip(
                     category: cat,
                     isSelected: _selectedId == cat.id,
@@ -446,7 +442,7 @@ class _CategorySelectorState extends State<_CategorySelector> {
                       context.read<CreateArticleCubit>().selectCategory(cat.id);
                     },
                   );
-                },
+                }).toList(),
               ),
             ),
           ],
