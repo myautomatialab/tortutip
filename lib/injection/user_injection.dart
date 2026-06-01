@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
 import '../config/app_config.dart';
+import '../features/auth/hardcore/hardcore_session.dart';
 import '../features/onboarding/presentation/bloc/onboarding_cubit.dart';
+import '../shared/user/data/data_sources/hardcore_user_data_source.dart';
 import '../shared/user/data/data_sources/mock_user_remote_data_source.dart';
 import '../shared/user/data/data_sources/user_remote_data_source.dart';
 import '../shared/user/data/repository/user_repository_impl.dart';
@@ -20,18 +22,14 @@ final sl = GetIt.instance;
 
 void initUserDependencies() {
   // DataSource
-  if (AppConfig.kUseMockData) {
-    sl.registerLazySingleton<UserRemoteDataSource>(
-      () => MockUserRemoteDataSource(),
+  sl.registerFactory<UserRemoteDataSource>(() {
+    if (HardcoreSession.isActive) return HardcoreUserDataSource();
+    if (AppConfig.kUseMockData) return MockUserRemoteDataSource();
+    return UserRemoteDataSourceImpl(
+      sl<FirebaseFirestore>(),
+      sl<FirebaseAuth>(),
     );
-  } else {
-    sl.registerLazySingleton<UserRemoteDataSource>(
-      () => UserRemoteDataSourceImpl(
-        sl<FirebaseFirestore>(),
-        sl<FirebaseAuth>(),
-      ),
-    );
-  }
+  });
 
   // Repository
   sl.registerLazySingleton<UserRepository>(

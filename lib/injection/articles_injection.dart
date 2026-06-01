@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import '../config/app_config.dart';
 import '../features/articles/data/data_sources/article_remote_data_source.dart';
 import '../features/articles/data/data_sources/mock_article_remote_data_source.dart';
+import '../features/auth/hardcore/hardcore_session.dart';
 import '../features/articles/data/repository/article_repository_impl.dart';
 import '../features/articles/domain/repository/article_repository.dart';
 import '../features/articles/domain/use_cases/get_article_detail_use_case.dart';
@@ -29,18 +30,15 @@ final sl = GetIt.instance;
 
 void initArticlesDependencies() {
   // DataSource — también necesita Storage para subir imágenes de portada
-  if (AppConfig.kUseMockData) {
-    sl.registerLazySingleton<ArticleRemoteDataSource>(
-      () => MockArticleRemoteDataSource(),
+  sl.registerFactory<ArticleRemoteDataSource>(() {
+    if (HardcoreSession.isActive || AppConfig.kUseMockData) {
+      return MockArticleRemoteDataSource();
+    }
+    return ArticleRemoteDataSourceImpl(
+      sl<FirebaseFirestore>(),
+      sl<FirebaseStorage>(),
     );
-  } else {
-    sl.registerLazySingleton<ArticleRemoteDataSource>(
-      () => ArticleRemoteDataSourceImpl(
-        sl<FirebaseFirestore>(),
-        sl<FirebaseStorage>(),
-      ),
-    );
-  }
+  });
 
   // Repository
   sl.registerLazySingleton<ArticleRepository>(

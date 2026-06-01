@@ -7,6 +7,8 @@ import '../features/tortu_feed/domain/repository/tortu_feed_repository.dart';
 import '../features/tortu_feed/domain/use_cases/check_today_tip_use_case.dart';
 import '../features/tortu_feed/domain/use_cases/feed_tortu_use_case.dart';
 import '../features/tortu_feed/domain/use_cases/get_category_progress_use_case.dart';
+import '../features/tortu_feed/domain/use_cases/get_overall_progress_use_case.dart';
+import '../features/tortu_feed/domain/use_cases/get_streak_days_use_case.dart';
 import '../features/tortu_feed/domain/use_cases/update_category_progress_use_case.dart';
 
 final sl = GetIt.instance;
@@ -24,4 +26,6 @@ void initTortuFeedDependencies() {
   sl.registerLazySingleton(() => CheckTodayTipUseCase(sl()));
   sl.registerLazySingleton(() => UpdateCategoryProgressUseCase(sl()));
   sl.registerLazySingleton(() => GetCategoryProgressUseCase(sl()));
+  sl.registerLazySingleton(() => GetStreakDaysUseCase(sl()));
+  sl.registerLazySingleton(() => GetOverallProgressUseCase(sl()));
 }
