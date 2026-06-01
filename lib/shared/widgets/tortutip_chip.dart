@@ -34,7 +34,7 @@ class TortuCategoryChip extends StatelessWidget {
       );
 
   factory TortuCategoryChip.fromName(String name) {
-    final colors = _chipColorForName(name);
+    final colors = chipColorForCategoryName(name);
     return TortuCategoryChip(
       label: name,
       backgroundColor: colors.$1,
@@ -86,7 +86,7 @@ class TortuOutlineChip extends StatelessWidget {
   }
 }
 
-(Color, Color) _chipColorForName(String name) {
+(Color, Color) chipColorForCategoryName(String name) {
   final lower = name.toLowerCase();
   if (lower.contains('food') || lower.contains('comida')) {
     return (AppColors.categoryHealthyFood, AppColors.textOnYellow);
