@@ -7,11 +7,10 @@ import 'package:tortutip/features/articles/domain/use_cases/get_saved_article_id
 import 'package:tortutip/features/articles/domain/use_cases/save_article_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/unsave_article_use_case.dart';
 import 'package:tortutip/features/tortu_feed/domain/repository/tortu_feed_repository.dart';
-import 'package:tortutip/features/tortu_feed/domain/use_cases/check_today_tip_use_case.dart';
 import 'package:tortutip/features/tortu_feed/domain/use_cases/feed_tortu_use_case.dart';
-import 'package:tortutip/features/tortu_feed/domain/use_cases/update_category_progress_use_case.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 import 'package:tortutip/shared/user/domain/use_cases/get_user_by_id_use_case.dart';
+import 'package:tortutip/shared/user/domain/use_cases/record_feed_swipe_use_case.dart';
 
 import 'article_detail_state.dart';
 
@@ -22,9 +21,8 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
   final UnsaveArticleUseCase _unsaveArticle;
   final GetUserByIdUseCase _getUserById;
   final GetSavedArticleIdsUseCase _getSavedArticleIds;
-  final CheckTodayTipUseCase _checkTodayTip;
   final FeedTortuUseCase _feedTortu;
-  final UpdateCategoryProgressUseCase _updateCategoryProgress;
+  final RecordFeedSwipeUseCase _recordFeedSwipe;
 
   ArticleDetailCubit(
     this._getArticleDetail,
@@ -33,12 +31,15 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
     this._unsaveArticle,
     this._getUserById,
     this._getSavedArticleIds,
-    this._checkTodayTip,
     this._feedTortu,
-    this._updateCategoryProgress,
+    this._recordFeedSwipe,
   ) : super(const ArticleDetailInitial());
 
-  Future<void> loadArticle(String articleId, String currentUserId) async {
+  Future<void> loadArticle(
+    String articleId,
+    String currentUserId, {
+    bool isDoneToday = false,
+  }) async {
     emit(const ArticleDetailLoading());
 
     final articleResult = await _getArticleDetail(articleId);
@@ -48,8 +49,6 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
     }
     final article = articleResult.data!;
 
-    final date = _todayDate();
-
     // Parallel calls that don't depend on each other
     final results = await Future.wait([
       _getUserById(GetUserByIdParams(userId: article.authorId)),
@@ -58,13 +57,11 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
         categoryId: article.categoryId,
         excludeArticleId: articleId,
       )),
-      _checkTodayTip(CheckTodayTipParams(userId: currentUserId, date: date)),
     ]);
 
     final authorResult = results[0];
     final savedIdsResult = results[1];
     final relatedResult = results[2];
-    final todayTipResult = results[3];
 
     if (!authorResult.isSuccess) {
       emit(ArticleDetailError(_mapErrorToMessage(authorResult.error!)));
@@ -79,9 +76,6 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
     final relatedArticles = relatedResult.isSuccess
         ? List<ArticleEntity>.from(relatedResult.data as List)
         : <ArticleEntity>[];
-    final isDoneToday = todayTipResult.isSuccess
-        ? (todayTipResult.data as bool)
-        : false;
 
     emit(ArticleDetailLoaded(
       article: article,
@@ -131,6 +125,7 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
   Future<bool> feedTortu(String userId, String categoryId) async {
     final current = state;
     if (current is! ArticleDetailLoaded) return false;
+    if (current.isDoneToday) return false;
 
     final date = _todayDate();
     final tipResult = await _feedTortu(FeedTortuParams(
@@ -141,10 +136,9 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
     ));
     if (tipResult.isFailure) return false;
 
-    await _updateCategoryProgress(UpdateCategoryProgressParams(
-      userId: userId,
-      categoryId: categoryId,
-    ));
+    final swipeResult =
+        await _recordFeedSwipe(RecordFeedSwipeParams(userId: userId));
+    if (swipeResult.isFailure) return false;
 
     emit(ArticleDetailLoaded(
       article: current.article,

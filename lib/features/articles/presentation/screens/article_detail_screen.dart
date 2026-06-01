@@ -34,8 +34,13 @@ class ArticleDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userId = _currentUserId(context);
 
+    final authState = context.read<AuthBloc>().state;
+    final isDoneToday =
+        authState is AuthAuthenticated ? authState.user.isDoneToday : false;
+
     return BlocProvider(
-      create: (_) => sl<ArticleDetailCubit>()..loadArticle(articleId, userId),
+      create: (_) =>
+          sl<ArticleDetailCubit>()..loadArticle(articleId, userId, isDoneToday: isDoneToday),
       child: BlocConsumer<ArticleDetailCubit, ArticleDetailState>(
         listener: (context, state) {
           // No additional listener logic needed here; toggleSave returns bool
@@ -95,7 +100,14 @@ class ArticleDetailScreen extends StatelessWidget {
               const SizedBox(height: AppSpacing.lg),
               TortuSecondaryButton(
                 label: 'Reintentar',
-                onTap: () => cubit.loadArticle(articleId, userId),
+                onTap: () {
+                  final retryAuthState = context.read<AuthBloc>().state;
+                  final retryIsDoneToday = retryAuthState is AuthAuthenticated
+                      ? retryAuthState.user.isDoneToday
+                      : false;
+                  cubit.loadArticle(articleId, userId,
+                      isDoneToday: retryIsDoneToday);
+                },
               ),
             ],
           ),
