@@ -12,8 +12,6 @@ import '../features/explore/domain/repository/explore_repository.dart';
 import '../features/explore/domain/use_cases/get_articles_by_category_use_case.dart';
 import '../features/explore/presentation/bloc/category_list_cubit.dart';
 import '../features/explore/presentation/bloc/explore_cubit.dart';
-import '../features/tortu_feed/domain/use_cases/get_category_progress_use_case.dart';
-
 final sl = GetIt.instance;
 
 void initExploreDependencies() {
@@ -30,10 +28,7 @@ void initExploreDependencies() {
   sl.registerLazySingleton(() => GetArticlesByCategoryUseCase(sl()));
 
   // Cubits — factory, one new instance per screen
-  sl.registerFactory(() => ExploreCubit(
-        sl<GetAllCategoriesUseCase>(),
-        sl<GetCategoryProgressUseCase>(),
-      ));
+  sl.registerFactory(() => ExploreCubit(sl<GetAllCategoriesUseCase>()));
   sl.registerFactory(() => CategoryListCubit(
         sl<GetArticlesByCategoryUseCase>(),
         sl<GetSavedArticleIdsUseCase>(),

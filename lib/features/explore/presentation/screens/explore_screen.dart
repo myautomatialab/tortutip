@@ -22,13 +22,31 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
+  bool _isVisible = false;
+
+  void _loadData() {
+    final authState = context.read<AuthBloc>().state;
+    final user = authState is AuthAuthenticated ? authState.user : null;
+    context.read<ExploreCubit>().loadExplore(user: user);
+  }
+
   @override
   void initState() {
     super.initState();
-    final authState = context.read<AuthBloc>().state;
-    final userId =
-        authState is AuthAuthenticated ? authState.user.id : '';
-    context.read<ExploreCubit>().loadExplore(userId: userId);
+    _loadData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    try {
+      final location = GoRouterState.of(context).matchedLocation;
+      final nowVisible = location == AppRoutes.explore;
+      if (nowVisible && !_isVisible) {
+        _loadData();
+      }
+      _isVisible = nowVisible;
+    } catch (_) {}
   }
 
   @override
@@ -116,10 +134,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   void _onCategoryTap(BuildContext context, CategoryEntity category) {
-    context.push(
-      AppRoutes.exploreCategoryPath(category.id),
-      extra: category,
-    );
+    context
+        .push(
+          AppRoutes.exploreCategoryPath(category.id),
+          extra: category,
+        )
+        .then((_) => _loadData());
   }
 }
 
