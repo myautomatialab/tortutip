@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:tortutip/config/routes/app_routes.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
@@ -13,6 +12,7 @@ import 'package:tortutip/features/articles/presentation/widgets/article_cover_im
 import 'package:tortutip/features/articles/presentation/widgets/author_row.dart';
 import 'package:tortutip/features/articles/presentation/widgets/related_articles_section.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:tortutip/features/auth/presentation/bloc/auth_event.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/injection/injection_container.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
@@ -43,27 +43,15 @@ class ArticleDetailScreen extends StatelessWidget {
           sl<ArticleDetailCubit>()..loadArticle(articleId, userId, isDoneToday: isDoneToday),
       child: BlocConsumer<ArticleDetailCubit, ArticleDetailState>(
         listener: (context, state) {
-          // No additional listener logic needed here; toggleSave returns bool
+          if (state is ArticleDetailLoaded && state.isDoneToday) {
+            context.read<AuthBloc>().add(const RefreshUserEvent());
+          }
         },
         builder: (context, state) {
           return Scaffold(
             backgroundColor: AppColors.background,
             appBar: TortuAppBar.detail(
               title: 'Detalle',
-              actions: state is ArticleDetailLoaded
-                  ? [
-                      IconButton(
-                        icon: const Icon(Icons.share_outlined,
-                            color: AppColors.primary),
-                        tooltip: 'Compartir',
-                        onPressed: () {
-                          Share.share(
-                            '${state.article.title}\n${AppRoutes.articleDetailPath(articleId)}',
-                          );
-                        },
-                      ),
-                    ]
-                  : null,
             ),
             body: _buildBody(context, state, userId),
           );
