@@ -185,6 +185,21 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
     );
   }
 
+  static const Map<String, String> _categoryNames = {
+    'mock_cat_mindfulness': 'Mindfulness',
+    'mock_cat_nutrition': 'Nutrition',
+    'mock_cat_movement': 'Movement',
+    'mock_cat_sleep': 'Sleep',
+    'mock_cat_food': 'Healthy Food',
+    'mock_cat_fitness': 'Fitness',
+    'mock_cat_meditation': 'Meditation',
+    'mock_cat_mental': 'Mental Health',
+  };
+
+  String _resolveCategoryName(String categoryId) {
+    return _categoryNames[categoryId] ?? categoryId;
+  }
+
   Widget _buildCategoryChip() {
     return Positioned(
       top: AppSpacing.lg,
@@ -199,7 +214,7 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         ),
         child: Text(
-          widget.article.categoryId,
+          _resolveCategoryName(widget.article.categoryId),
           style: AppTypography.caption.copyWith(color: AppColors.white),
         ),
       ),

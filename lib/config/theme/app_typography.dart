@@ -97,6 +97,14 @@ class AppTypography {
     color: AppColors.primaryDark,
   );
 
+  // ── Micro ────────────────────────────────────────────────────
+  static const TextStyle micro = TextStyle(
+    fontSize: 8,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textTertiary,
+    height: 1.5,
+  );
+
   // ── Subtítulo hero ───────────────────────────────────────────
   static const TextStyle subtitle = TextStyle(
     fontSize: 15,

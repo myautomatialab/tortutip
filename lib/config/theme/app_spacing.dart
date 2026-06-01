@@ -37,6 +37,12 @@ class AppSpacing {
   static const double relatedCardImageWidth = 120;
   static const double relatedCardImageHeight = 80;
 
+  // ── Tamaños de componentes de explore ───────────────────────
+  static const double categoryCardHeight = 160.0;
+  static const double articleListCardImageHeight = 180.0;
+  static const double tabCenterButtonSize = 50.0;
+  static const double iconTabBar = 26.0;
+
   // ── Border radius ────────────────────────────────────────────
   static const double radiusXs = 4;
   static const double radiusSm = 8;

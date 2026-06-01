@@ -51,6 +51,10 @@ class AppColors {
   // ── Roles ────────────────────────────────────────────────────
   static const writerAccent = Color(0xFFF5A623);
 
+  // ── Overlay ──────────────────────────────────────────────────
+  static const streakBackground = Color(0xFFFAE8E0);
+  static const overlayDark = Color(0xB3000000);
+
   // ── Third-party brand colors ─────────────────────────────────
   static const googleBlue = Color(0xFF4285F4);
   static const googleRed = Color(0xFFEA4335);

@@ -66,7 +66,7 @@ class _TabIcon extends StatelessWidget {
         child: Icon(
           icon,
           color: selected ? AppColors.textOnDark : AppColors.textOnDark.withValues(alpha: 0.54),
-          size: 26,
+          size: AppSpacing.iconTabBar,
         ),
       ),
     );
@@ -82,8 +82,8 @@ class _TabIconCenter extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 50,
-        height: 50,
+        width: AppSpacing.tabCenterButtonSize,
+        height: AppSpacing.tabCenterButtonSize,
         decoration: const BoxDecoration(
           color: AppColors.primaryDark,
           shape: BoxShape.circle,
