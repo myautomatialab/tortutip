@@ -11,6 +11,7 @@ import 'package:tortutip/features/onboarding/presentation/bloc/onboarding_cubit.
 import 'package:tortutip/features/onboarding/presentation/bloc/onboarding_state.dart';
 import 'package:tortutip/features/onboarding/presentation/widgets/category_card.dart';
 import 'package:tortutip/injection/injection_container.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/shared/widgets/tortutip_progress_dots.dart';
 
@@ -36,6 +37,7 @@ class _OnboardingCategoriesScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BlocProvider(
       create: (_) => sl<CategoryCubit>()..loadCategories(),
       child: BlocListener<OnboardingCubit, OnboardingState>(
@@ -73,10 +75,10 @@ class _OnboardingCategoriesScreenState
                     ],
                   ),
                   const SizedBox(height: AppSpacing.xxl),
-                  Text('Personaliza tu feed', style: AppTypography.h1),
+                  Text(l10n.onboardingCategoriesTitle, style: AppTypography.h1),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Selecciona los temas que más te interesan para adaptar tu experiencia un 1% cada día.',
+                    l10n.onboardingCategoriesSubtitle,
                     style: AppTypography.body.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -130,7 +132,7 @@ class _OnboardingCategoriesScreenState
                   BlocBuilder<OnboardingCubit, OnboardingState>(
                     builder: (context, state) {
                       return TortuPrimaryButton(
-                        label: 'Siguiente →',
+                        label: l10n.onboardingNext,
                         onTap:
                             _selectedCategoryIds.isEmpty ? null : _onNext,
                         isLoading: state is OnboardingLoading,

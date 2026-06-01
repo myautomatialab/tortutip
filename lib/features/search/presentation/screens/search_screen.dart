@@ -15,6 +15,7 @@ import 'package:tortutip/shared/widgets/tortutip_chip.dart';
 import 'package:tortutip/shared/widgets/tortutip_skeleton.dart';
 import 'package:tortutip/features/search/presentation/widgets/recent_search_row.dart';
 import 'package:tortutip/features/search/presentation/widgets/search_bar_widget.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/features/search/presentation/widgets/search_empty_state.dart';
 import 'package:tortutip/features/search/presentation/widgets/search_skeleton.dart';
 import 'package:tortutip/features/search/presentation/widgets/suggestion_row.dart';
@@ -132,10 +133,11 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildInitialView(SearchInitial state) {
+    final l10n = AppLocalizations.of(context);
     if (state.recentSearches.isEmpty) {
       return Center(
         child: Text(
-          'Start searching...',
+          l10n.searchStartSearching,
           style: AppTypography.subtitle,
         ),
       );
@@ -146,7 +148,7 @@ class _SearchScreenState extends State<SearchScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-          child: Text('Recent searches', style: AppTypography.label),
+          child: Text(l10n.searchRecentSearches, style: AppTypography.label),
         ),
         ...state.recentSearches.map(
           (q) => RecentSearchRow(
@@ -285,10 +287,11 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildArticlesTab(SearchLoaded state) {
+    final l10n = AppLocalizations.of(context);
     final articles = state.filteredArticles;
     if (articles.isEmpty) {
       return Center(
-        child: Text('No articles found', style: AppTypography.subtitle),
+        child: Text(l10n.searchNoArticles, style: AppTypography.subtitle),
       );
     }
     return ListView.builder(
@@ -316,9 +319,10 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildCategoriesTab(SearchLoaded state) {
+    final l10n = AppLocalizations.of(context);
     if (state.categories.isEmpty) {
       return Center(
-        child: Text('No categories found', style: AppTypography.subtitle),
+        child: Text(l10n.searchNoCategories, style: AppTypography.subtitle),
       );
     }
     return ListView.builder(

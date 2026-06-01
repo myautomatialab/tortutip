@@ -19,6 +19,7 @@ import 'package:tortutip/features/profile/presentation/screens/edit_profile_scre
 import 'package:tortutip/features/profile/presentation/widgets/profile_header_card.dart';
 import 'package:tortutip/features/profile/presentation/widgets/published_article_row.dart';
 import 'package:get_it/get_it.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 
@@ -59,8 +60,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 context.read<ProfileCubit>().loadProfile(_userId!);
               }
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Perfil actualizado'),
+                SnackBar(
+                  content: Text(AppLocalizations.of(context).profileUpdated),
                   backgroundColor: AppColors.success,
                 ),
               );
@@ -84,7 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: TortuAppBar(
-        title: 'Mi Perfil',
+        title: AppLocalizations.of(context).profileTitle,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -153,7 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-class _ProfileBody extends StatelessWidget {
+class _ProfileBody extends StatefulWidget {
   final ProfileLoaded state;
   final String userId;
   final void Function(String articleId) onDeleteArticle;
@@ -165,6 +166,19 @@ class _ProfileBody extends StatelessWidget {
     required this.onDeleteArticle,
     required this.onViewArticle,
   });
+
+  @override
+  State<_ProfileBody> createState() => _ProfileBodyState();
+}
+
+class _ProfileBodyState extends State<_ProfileBody> {
+  static const _pageSize = 5;
+  int _visibleCount = _pageSize;
+
+  ProfileLoaded get state => widget.state;
+  String get userId => widget.userId;
+  void Function(String) get onDeleteArticle => widget.onDeleteArticle;
+  void Function(String) get onViewArticle => widget.onViewArticle;
 
   Future<void> _onRoleToggled(BuildContext context, bool isWriter) async {
     final newRole = isWriter ? 'writer' : 'reader';
@@ -201,51 +215,129 @@ class _ProfileBody extends StatelessWidget {
             onRoleToggled: (isWriter) => _onRoleToggled(context, isWriter),
           ),
           const SizedBox(height: AppSpacing.xxl),
-          if (state.publishedArticles.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenHorizontal,
-              ),
-              child: Text('Mis Tips', style: AppTypography.h4),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenHorizontal,
             ),
-            const SizedBox(height: AppSpacing.md),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenHorizontal,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
               ),
-              itemCount: state.publishedArticles.length,
-              separatorBuilder: (context, index) =>
-                  const SizedBox(height: AppSpacing.md),
-              itemBuilder: (context, index) {
-                final article = state.publishedArticles[index];
-                final category = state.categoryById(article.categoryId);
-                return PublishedArticleRow(
-                  article: article,
-                  categoryName: category?.name ?? article.categoryId,
-                  onTapView: () => onViewArticle(article.id),
-                  onTapEdit: () => _openEditArticle(context, article),
-                  onTapDelete: () => onDeleteArticle(article.id),
-                );
-              },
+              child: state.publishedArticles.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.all(AppSpacing.xxl),
+                      child: Center(
+                        child: Text(
+                          'Aún no tienes artículos publicados.',
+                          style: AppTypography.body
+                              .copyWith(color: AppColors.textSecondary),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                  : _ArticlesList(
+                      articles: state.publishedArticles,
+                      visibleCount: _visibleCount,
+                      state: state,
+                      onViewArticle: onViewArticle,
+                      onEditArticle: (article) =>
+                          _openEditArticle(context, article),
+                      onDeleteArticle: onDeleteArticle,
+                      onShowMore: () => setState(
+                        () => _visibleCount += _pageSize,
+                      ),
+                    ),
             ),
-          ],
-          if (state.publishedArticles.isEmpty)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xxl),
-                child: Text(
-                  'Aún no tienes artículos publicados.',
-                  style: AppTypography.body
-                      .copyWith(color: AppColors.textSecondary),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
+          ),
           const SizedBox(height: AppSpacing.xxl),
         ],
       ),
+    );
+  }
+}
+
+class _ArticlesList extends StatelessWidget {
+  final List<ArticleEntity> articles;
+  final int visibleCount;
+  final ProfileLoaded state;
+  final void Function(String) onViewArticle;
+  final void Function(ArticleEntity) onEditArticle;
+  final void Function(String) onDeleteArticle;
+  final VoidCallback onShowMore;
+
+  const _ArticlesList({
+    required this.articles,
+    required this.visibleCount,
+    required this.state,
+    required this.onViewArticle,
+    required this.onEditArticle,
+    required this.onDeleteArticle,
+    required this.onShowMore,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = articles.take(visibleCount).toList();
+    final hasMore = articles.length > visibleCount;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md,
+          ),
+          child: Text(AppLocalizations.of(context).profileMyTips, style: AppTypography.h4),
+        ),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          itemCount: visible.length,
+          separatorBuilder: (_, _) => const Divider(
+            height: 1,
+            color: AppColors.border,
+          ),
+          itemBuilder: (_, index) {
+            final article = visible[index];
+            final category = state.categoryById(article.categoryId);
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: PublishedArticleRow(
+                article: article,
+                categoryName: category?.name ?? article.categoryId,
+                onTapView: () => onViewArticle(article.id),
+                onTapEdit: () => onEditArticle(article),
+                onTapDelete: () => onDeleteArticle(article.id),
+              ),
+            );
+          },
+        ),
+        if (hasMore)
+          InkWell(
+            onTap: onShowMore,
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(AppSpacing.radiusXl),
+            ),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: AppColors.border)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(AppSpacing.radiusXl),
+                ),
+              ),
+              child: Text(
+                'Ver más (${articles.length - visibleCount})',
+                style: AppTypography.body.copyWith(color: AppColors.primary),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        if (!hasMore) const SizedBox(height: AppSpacing.md),
+      ],
     );
   }
 }

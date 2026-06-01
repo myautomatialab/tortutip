@@ -18,6 +18,7 @@ import 'package:tortutip/features/articles/presentation/screens/preview_article_
 import 'package:tortutip/features/articles/presentation/widgets/cover_upload_widget.dart';
 import 'package:tortutip/features/articles/presentation/widgets/rich_text_toolbar.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/shared/widgets/tortutip_chip.dart';
 
@@ -102,24 +103,25 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
       return;
     }
 
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.background,
-        title: Text('Discard article?', style: AppTypography.h3),
+        title: Text(l10n.createArticleDiscardTitle, style: AppTypography.h3),
         content: Text(
-          'Your article will be lost if you leave now.',
+          l10n.createArticleDiscardContent,
           style: AppTypography.body,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Keep editing'),
+            child: Text(l10n.createArticleKeepEditing),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Discard',
+              l10n.createArticleDiscard,
               style: AppTypography.label.copyWith(color: AppColors.error),
             ),
           ),
@@ -156,17 +158,27 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            ListTile(
-              leading: const Icon(Icons.camera_alt_outlined,
-                  color: AppColors.textPrimary),
-              title: Text('Camera', style: AppTypography.body),
-              onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined,
-                  color: AppColors.textPrimary),
-              title: Text('Photo library', style: AppTypography.body),
-              onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
+            Builder(
+              builder: (ctx2) {
+                final l10n2 = AppLocalizations.of(ctx2);
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.camera_alt_outlined,
+                          color: AppColors.textPrimary),
+                      title: Text(l10n2.createArticleCameraOption, style: AppTypography.body),
+                      onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.photo_library_outlined,
+                          color: AppColors.textPrimary),
+                      title: Text(l10n2.createArticleLibraryOption, style: AppTypography.body),
+                      onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
+                    ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: AppSpacing.lg),
           ],
@@ -184,7 +196,7 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
 
     if (_userId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: user not authenticated')),
+        SnackBar(content: Text(AppLocalizations.of(context).createArticleNotAuthError)),
       );
       return;
     }
@@ -311,6 +323,7 @@ class _CreateArticleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BlocListener<CreateArticleCubit, CreateArticleState>(
       listener: (ctx, state) {
         if (state is CreateArticlePublished) {
@@ -370,7 +383,7 @@ class _CreateArticleView extends StatelessWidget {
                         maxLines: 3,
                         minLines: 1,
                         decoration: InputDecoration(
-                          hintText: 'Write your title...',
+                          hintText: l10n.createArticleTitleHint,
                           hintStyle: AppTypography.h1
                               .copyWith(color: AppColors.textTertiary),
                           filled: false,
@@ -391,9 +404,8 @@ class _CreateArticleView extends StatelessWidget {
                     RichTextToolbar(controller: quillController),
                     QuillEditor.basic(
                       controller: quillController,
-                      config: const QuillEditorConfig(
-                        placeholder:
-                            'Start your journey here... share your wisdom with the world.',
+                      config: QuillEditorConfig(
+                        placeholder: l10n.createArticleBodyHint,
                         minHeight: 200,
                         scrollable: false,
                         padding: EdgeInsets.symmetric(
@@ -430,6 +442,7 @@ class _CategorySelectorState extends State<_CategorySelector> {
   Widget build(BuildContext context) {
     return BlocBuilder<CreateArticleCubit, CreateArticleState>(
       builder: (ctx, state) {
+        final l10n = AppLocalizations.of(ctx);
         final categories = state is CreateArticleFormUpdated
             ? state.categories
             : <CategoryEntity>[];
@@ -448,7 +461,7 @@ class _CategorySelectorState extends State<_CategorySelector> {
                 horizontal: AppSpacing.screenHorizontal,
               ),
               child: Text(
-                'Choose Category',
+                l10n.createArticleChooseCategory,
                 style:
                     AppTypography.label.copyWith(color: AppColors.textSecondary),
               ),
@@ -532,6 +545,7 @@ class _BottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CreateArticleCubit, CreateArticleState>(
       builder: (ctx, state) {
+        final l10n = AppLocalizations.of(ctx);
         final isPublishing = state is CreateArticlePublishing;
         final canPublish = !isPublishing &&
             state is CreateArticleFormUpdated &&
@@ -550,14 +564,14 @@ class _BottomBar extends StatelessWidget {
               children: [
                 Expanded(
                   child: TortuSecondaryButton(
-                    label: 'Preview',
+                    label: l10n.createArticlePreview,
                     onTap: isPublishing ? null : onPreview,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: TortuPrimaryButton(
-                    label: isEditing ? 'Update' : 'Publish',
+                    label: isEditing ? l10n.createArticleUpdate : l10n.createArticlePublish,
                     onTap: canPublish ? onPublish : null,
                     isLoading: isPublishing,
                   ),

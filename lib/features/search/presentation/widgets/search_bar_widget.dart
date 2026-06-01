@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 
 class SearchBarWidget extends StatefulWidget {
   final TextEditingController controller;
@@ -41,6 +42,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   @override
   Widget build(BuildContext context) {
     final isFocused = widget.focusNode.hasFocus;
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
@@ -63,7 +65,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                 },
                 style: AppTypography.body,
                 decoration: InputDecoration(
-                  hintText: 'Search articles, categories...',
+                  hintText: l10n.searchBarHint,
                   hintStyle: AppTypography.body
                       .copyWith(color: AppColors.textSecondary),
                   prefixIcon: Icon(
@@ -84,7 +86,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           GestureDetector(
             onTap: widget.onCancel,
             child: Text(
-              'Cancel',
+              l10n.searchCancel,
               style: AppTypography.body
                   .copyWith(color: AppColors.primary),
             ),

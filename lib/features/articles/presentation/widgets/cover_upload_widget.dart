@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 
 class CoverUploadWidget extends StatelessWidget {
   final Object? coverVerticalSource;
@@ -25,6 +26,7 @@ class CoverUploadWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.screenHorizontal,
@@ -36,7 +38,7 @@ class CoverUploadWidget extends StatelessWidget {
           Expanded(
             flex: 3,
             child: _CoverZone(
-              label: 'VERTICAL COVER\n(FEED)',
+              label: l10n.coverVerticalLabel,
               aspectRatio: 3 / 4,
               imageSource: coverVerticalSource,
               isUploading: isUploadingVertical,
@@ -47,7 +49,7 @@ class CoverUploadWidget extends StatelessWidget {
           Expanded(
             flex: 4,
             child: _CoverZone(
-              label: 'HORIZONTAL COVER\n(ARTICLE)',
+              label: l10n.coverHorizontalLabel,
               aspectRatio: 16 / 9,
               imageSource: coverHorizontalSource,
               isUploading: isUploadingHorizontal,

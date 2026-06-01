@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../config/theme/app_colors.dart';
 import '../../../../config/theme/app_spacing.dart';
 import '../../../../config/theme/app_typography.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/tortutip_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -23,6 +24,7 @@ class LandingScreen extends StatelessWidget {
         }
       },
       builder: (context, state) {
+        final l10n = AppLocalizations.of(context);
         return Scaffold(
           backgroundColor: AppColors.background,
           body: Stack(
@@ -94,7 +96,7 @@ class LandingScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: AppSpacing.sm),
                               Text(
-                                'BIENESTAR · CONOCIMIENTO · COMUNIDAD',
+                                l10n.landingTagline,
                                 style: AppTypography.caption.copyWith(
                                   color: AppColors.white,
                                   letterSpacing: 1.2,
@@ -106,14 +108,14 @@ class LandingScreen extends StatelessWidget {
                         const SizedBox(height: AppSpacing.sm),
 
                         Text(
-                          'Un tip al día.',
+                          l10n.landingHeroLine1,
                           style: AppTypography.hero.copyWith(
                             color: Colors.pink.withValues(alpha: 0.5),
                           ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
-                        const Text(
-                          'Una vida mejor.',
+                        Text(
+                          l10n.landingHeroLine2,
                           style: AppTypography.subtitle,
                         ),
                         const SizedBox(height: AppSpacing.xl),
@@ -129,23 +131,22 @@ class LandingScreen extends StatelessWidget {
                           text: TextSpan(
                             style: AppTypography.caption,
                             children: [
-                              const TextSpan(
-                                text: 'Si continuas, aceptas los ',
+                              TextSpan(
+                                text: l10n.landingTermsPrefix,
                               ),
                               TextSpan(
-                                text: 'Terminos del servicio',
+                                text: l10n.landingTermsOfService,
                                 style: AppTypography.caption.copyWith(
                                   color: AppColors.primary,
                                   decoration: TextDecoration.underline,
                                   decorationColor: AppColors.primary,
                                 ),
                               ),
-                              const TextSpan(
-                                text:
-                                    ' de TortuTip y confirmas que has leido nuestra ',
+                              TextSpan(
+                                text: l10n.landingTermsMiddle,
                               ),
                               TextSpan(
-                                text: 'Politica de privacidad',
+                                text: l10n.landingPrivacyPolicy,
                                 style: AppTypography.caption.copyWith(
                                   color: AppColors.primary,
                                   decoration: TextDecoration.underline,

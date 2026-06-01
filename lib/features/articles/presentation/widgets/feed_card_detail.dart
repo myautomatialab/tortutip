@@ -5,6 +5,7 @@ import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 
 class FeedCardDetail extends StatelessWidget {
@@ -17,6 +18,7 @@ class FeedCardDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.white,
@@ -67,13 +69,13 @@ class FeedCardDetail extends StatelessWidget {
                   Text(
                     article.authorName.isNotEmpty
                         ? article.authorName
-                        : 'Unknown author',
+                        : l10n.feedCardUnknownAuthor,
                     style: AppTypography.label.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
-                    '${article.readTimeMinutes} min de lectura',
+                    l10n.feedCardReadTime(article.readTimeMinutes),
                     style: AppTypography.caption,
                   ),
                 ],
@@ -82,7 +84,7 @@ class FeedCardDetail extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           TortuPrimaryButton(
-            label: 'Saber más →',
+            label: l10n.feedCardReadMore,
             onTap: () => context.push(AppRoutes.articleDetailPath(article.id)),
           ),
         ],
