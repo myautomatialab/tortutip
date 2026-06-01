@@ -42,6 +42,12 @@ dependencies:
   # Compartir contenido
   share_plus: ^10.1.4
 
+  # Editor de texto enriquecido
+  flutter_quill: ^11.5.1
+
+  # Selección de imágenes
+  image_picker: ^1.1.2
+
   # Imágenes de red con caché
   cached_network_image: ^3.4.1
 

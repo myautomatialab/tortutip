@@ -66,6 +66,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>TortuTip needs camera access to capture your article cover photo.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>TortuTip needs photo library access to select your article cover photo.</string>
 	<key>GIDClientID</key>
 	<string>560559933172-0886as3vtmhvh13trk7urmlsi1alolif.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>
