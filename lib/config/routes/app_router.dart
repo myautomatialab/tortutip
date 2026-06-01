@@ -10,6 +10,7 @@ import '../../features/articles/config/articles_routes.dart';
 import '../../features/onboarding/config/onboarding_routes.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_cubit.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_state.dart';
+import '../../features/bookmarks/config/bookmarks_routes.dart';
 import '../../features/explore/config/explore_routes.dart';
 import '../../features/profile/config/profile_routes.dart';
 import '../../injection/injection_container.dart';
@@ -29,6 +30,7 @@ class AppRouter {
         ...AuthRoutes.routes,
         ...ArticlesRoutes.routes,
         ...ProfileRoutes.routes,
+        ...BookmarksRoutes.routes,
 
         // ShellRoute de onboarding — provee OnboardingCubit a las 3 pantallas
         ShellRoute(
