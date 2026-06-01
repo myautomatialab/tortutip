@@ -22,14 +22,6 @@ class ArticlesRoutes {
     GoRoute(
       path: AppRoutes.feed,
       pageBuilder: (_, _) => const NoTransitionPage(child: FeedScreen()),
-      routes: [
-        GoRoute(
-          path: ':articleId',
-          builder: (_, state) => ArticleDetailScreen(
-            articleId: state.pathParameters['articleId']!,
-          ),
-        ),
-      ],
     ),
   ];
 }

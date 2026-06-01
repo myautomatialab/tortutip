@@ -11,7 +11,7 @@ class AppRoutes {
   static const editProfile          = '/explore/edit';
   static const profile              = '/profile';
 
-  static String articleDetailPath(String id) => '/feed/$id';
+  static String articleDetailPath(String id) => '/article/$id';
   static String articlePath(String id) => '/article/$id';
 
   static String exploreCategoryPath(String categoryId) =>
