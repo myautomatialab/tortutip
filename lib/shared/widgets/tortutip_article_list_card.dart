@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
@@ -8,6 +9,7 @@ import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
 import 'package:tortutip/shared/widgets/tortutip_chip.dart';
+import 'package:tortutip/shared/widgets/tortutip_skeleton.dart';
 
 class TortuArticleListCard extends StatelessWidget {
   final ArticleEntity article;
@@ -43,12 +45,15 @@ class TortuArticleListCard extends StatelessWidget {
                   topLeft: Radius.circular(AppSpacing.radiusLg),
                   topRight: Radius.circular(AppSpacing.radiusLg),
                 ),
-                child: Image.network(
-                  article.coverHorizontalUrl,
+                child: CachedNetworkImage(
+                  imageUrl: article.coverHorizontalUrl,
                   height: AppSpacing.articleListCardImageHeight,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, _) => Container(
+                  placeholder: (context, url) => TortuSkeletonImage(
+                    height: AppSpacing.articleListCardImageHeight,
+                  ),
+                  errorWidget: (context, url, error) => Container(
                     height: AppSpacing.articleListCardImageHeight,
                     width: double.infinity,
                     color: AppColors.surface,

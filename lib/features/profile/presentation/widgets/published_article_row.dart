@@ -5,6 +5,7 @@ import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/shared/widgets/tortutip_chip.dart';
+import 'package:tortutip/shared/widgets/tortutip_skeleton.dart';
 
 class PublishedArticleRow extends StatelessWidget {
   final ArticleEntity article;
@@ -36,8 +37,10 @@ class PublishedArticleRow extends StatelessWidget {
                 ? CachedNetworkImage(
                     imageUrl: article.coverHorizontalUrl,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) =>
-                        Container(color: AppColors.surface),
+                    placeholder: (context, url) => TortuSkeletonBox(
+                      width: AppSpacing.thumbnailSm,
+                      height: AppSpacing.thumbnailSm,
+                    ),
                     errorWidget: (context, url, error) => Container(
                       color: AppColors.surface,
                       child: const Icon(
