@@ -28,36 +28,12 @@ class LandingScreen extends StatelessWidget {
           body: Stack(
             fit: StackFit.expand,
             children: [
-              // Layer 0: 2x2 color grid collage
-              Column(
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Container(color: AppColors.categoryHealthyFood),
-                        ),
-                        Expanded(
-                          child: Container(color: AppColors.categoryFitness),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child:
-                              Container(color: AppColors.categoryMentalHealth),
-                        ),
-                        Expanded(
-                          child:
-                              Container(color: AppColors.categoryProductividad),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              // Layer 0: splash image full screen
+              Image.asset(
+                'assets/images/splash_logo.png',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
               ),
 
               // Layer 0.5: WELLNESS text centered over collage
@@ -88,7 +64,25 @@ class LandingScreen extends StatelessWidget {
                 ),
               ),
 
-              // Layer 2: Content
+              // Layer 2: Hardcore mode trigger — discrete icon, bottom-right corner
+              Positioned(
+                right: AppSpacing.lg,
+                bottom: AppSpacing.xxl,
+                child: SafeArea(
+                  child: GestureDetector(
+                    onTap: () => context
+                        .read<AuthBloc>()
+                        .add(const EnterHardcoreModeEvent()),
+                    child: Icon(
+                      Icons.developer_mode,
+                      size: AppSpacing.iconSizeMd,
+                      color: AppColors.textTertiary.withValues(alpha: 0.4),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Layer 3: Content
               Positioned(
                 bottom: 0,
                 left: 0,
