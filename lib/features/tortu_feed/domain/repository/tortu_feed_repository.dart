@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:tortutip/core/resources/data_state.dart';
 
 abstract class TortuFeedRepository {
-  Future<DataState<void>> feedTortu(FeedTortuParams params);
+  Future<DataState<bool>> feedTortu(FeedTortuParams params);
   Future<DataState<bool>> checkTodayTip(CheckTodayTipParams params);
   Future<DataState<double>> updateCategoryProgress(UpdateCategoryProgressParams params);
   Future<DataState<double>> getCategoryProgress(GetCategoryProgressParams params);

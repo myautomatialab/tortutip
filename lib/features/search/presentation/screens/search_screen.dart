@@ -217,8 +217,8 @@ class _SearchScreenState extends State<SearchScreen> {
       isScrollable: true,
       tabAlignment: TabAlignment.start,
       tabs: [
-        Tab(text: 'Articles (${state.articles.length})'),
-        Tab(text: 'Categories (${state.categories.length})'),
+        Tab(text: AppLocalizations.of(context).searchTabArticles(state.articles.length)),
+        Tab(text: AppLocalizations.of(context).searchTabCategories(state.categories.length)),
       ],
     );
   }
@@ -241,7 +241,7 @@ class _SearchScreenState extends State<SearchScreen> {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: Row(
           children: [
-            _filterChip('all', 'All', state.activeFilter),
+            _filterChip('all', AppLocalizations.of(context).searchFilterAll, state.activeFilter),
             ...articleCategories.map(
               (catId) {
                 final catName = state.categories

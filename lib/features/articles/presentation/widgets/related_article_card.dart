@@ -33,13 +33,13 @@ class RelatedArticleCard extends StatelessWidget {
               height: AppSpacing.relatedCardImageHeight,
               fit: BoxFit.cover,
               placeholder: (_, _) => Container(
-                width: 120,
-                height: 80,
+                width: AppSpacing.relatedCardImageWidth,
+                height: AppSpacing.relatedCardImageHeight,
                 color: AppColors.border,
               ),
               errorWidget: (_, _, _) => Container(
-                width: 120,
-                height: 80,
+                width: AppSpacing.relatedCardImageWidth,
+                height: AppSpacing.relatedCardImageHeight,
                 color: AppColors.border,
                 child: const Icon(Icons.broken_image_outlined,
                     color: AppColors.textSecondary),

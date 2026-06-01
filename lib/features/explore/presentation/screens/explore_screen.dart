@@ -12,6 +12,7 @@ import 'package:tortutip/features/explore/presentation/bloc/explore_cubit.dart';
 import 'package:tortutip/features/explore/presentation/bloc/explore_state.dart';
 import 'package:tortutip/features/explore/presentation/widgets/category_card.dart';
 import 'package:tortutip/features/explore/presentation/widgets/streak_card.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
 
 class ExploreScreen extends StatefulWidget {
@@ -82,6 +83,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Widget _buildLoaded(BuildContext context, ExploreLoaded state) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: AppSpacing.floatingTabBarClearance),
       child: Column(
@@ -92,7 +94,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Text(
-              'Kaia, your turtle 🐢',
+              l10n.exploreKaiaTitle,
               style: AppTypography.h2.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
@@ -105,7 +107,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Text(
-              'Categories',
+              l10n.exploreCategoriesTitle,
               style: AppTypography.h2.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
@@ -172,7 +174,7 @@ class _SearchBar extends StatelessWidget {
             const Icon(Icons.search, color: AppColors.textSecondary),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'Search articles...',
+              AppLocalizations.of(context).exploreSearchHint,
               style: AppTypography.body.copyWith(color: AppColors.textSecondary),
             ),
           ],

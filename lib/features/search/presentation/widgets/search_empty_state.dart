@@ -3,6 +3,7 @@ import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 
 class SearchEmptyState extends StatefulWidget {
   final List<CategoryEntity> suggestedCategories;
@@ -58,20 +59,20 @@ class _SearchEmptyStateState extends State<SearchEmptyState>
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'No results found',
+                AppLocalizations.of(context).searchEmptyTitle,
                 style: AppTypography.h3,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Try different keywords or explore a category',
+                AppLocalizations.of(context).searchEmptySubtitle,
                 style: AppTypography.subtitle,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.xl),
               if (widget.suggestedCategories.isNotEmpty) ...[
                 Text(
-                  'Explore categories',
+                  AppLocalizations.of(context).searchEmptyExploreLabel,
                   style: AppTypography.label,
                 ),
                 const SizedBox(height: AppSpacing.md),

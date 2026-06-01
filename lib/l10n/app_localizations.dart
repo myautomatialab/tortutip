@@ -637,6 +637,156 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Descartar'**
   String get discard;
+
+  /// No description provided for @bookmarksExploreAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Explorar artículos'**
+  String get bookmarksExploreAction;
+
+  /// No description provided for @bookmarksSectionLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'— GUARDADOS'**
+  String get bookmarksSectionLabel;
+
+  /// No description provided for @bookmarksSectionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis Marcadores'**
+  String get bookmarksSectionTitle;
+
+  /// No description provided for @bookmarksSectionSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Los artículos que has guardado para leer más tarde.'**
+  String get bookmarksSectionSubtitle;
+
+  /// No description provided for @bookmarksRetry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get bookmarksRetry;
+
+  /// No description provided for @feedRetry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get feedRetry;
+
+  /// No description provided for @exploreKaiaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Kaia, tu tortuga 🐢'**
+  String get exploreKaiaTitle;
+
+  /// No description provided for @exploreCategoriesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Categorías'**
+  String get exploreCategoriesTitle;
+
+  /// No description provided for @exploreSearchHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar artículos...'**
+  String get exploreSearchHint;
+
+  /// No description provided for @exploreStreakDays.
+  ///
+  /// In es, this message translates to:
+  /// **'Día {days} de racha'**
+  String exploreStreakDays(int days);
+
+  /// No description provided for @exploreStreakMotivation.
+  ///
+  /// In es, this message translates to:
+  /// **'🔥 ¡Sigue así!'**
+  String get exploreStreakMotivation;
+
+  /// No description provided for @searchEmptyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontraron resultados'**
+  String get searchEmptyTitle;
+
+  /// No description provided for @searchEmptySubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Prueba con otras palabras clave o explora una categoría'**
+  String get searchEmptySubtitle;
+
+  /// No description provided for @searchEmptyExploreLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Explorar categorías'**
+  String get searchEmptyExploreLabel;
+
+  /// No description provided for @articleDetailRelated.
+  ///
+  /// In es, this message translates to:
+  /// **'Más como esto'**
+  String get articleDetailRelated;
+
+  /// No description provided for @categoryListSectionLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'— CATEGORÍA'**
+  String get categoryListSectionLabel;
+
+  /// No description provided for @searchTabArticles.
+  ///
+  /// In es, this message translates to:
+  /// **'Artículos ({count})'**
+  String searchTabArticles(int count);
+
+  /// No description provided for @searchTabCategories.
+  ///
+  /// In es, this message translates to:
+  /// **'Categorías ({count})'**
+  String searchTabCategories(int count);
+
+  /// No description provided for @searchFilterAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get searchFilterAll;
+
+  /// No description provided for @tortuFeedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Darle de comer a Tortu'**
+  String get tortuFeedTitle;
+
+  /// No description provided for @tortuFeedComeBackTomorrow.
+  ///
+  /// In es, this message translates to:
+  /// **'Vuelve mañana para seguir alimentando a Tortu 🐢'**
+  String get tortuFeedComeBackTomorrow;
+
+  /// No description provided for @tortuFeedSlideHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Desliza →'**
+  String get tortuFeedSlideHint;
+
+  /// No description provided for @tortuFeedCompleted.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Tip aprendido!'**
+  String get tortuFeedCompleted;
+
+  /// No description provided for @tortuFeedHappy.
+  ///
+  /// In es, this message translates to:
+  /// **'Tortu está feliz +1%'**
+  String get tortuFeedHappy;
+
+  /// No description provided for @createArticlePublishedSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Artículo publicado con éxito!'**
+  String get createArticlePublishedSuccess;
 }
 
 class _AppLocalizationsDelegate

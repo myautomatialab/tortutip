@@ -4,6 +4,7 @@ import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/articles/presentation/widgets/related_article_card.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 
 class RelatedArticlesSection extends StatelessWidget {
   final List<ArticleEntity> articles;
@@ -23,7 +24,7 @@ class RelatedArticlesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Más como esto',
+          AppLocalizations.of(context).articleDetailRelated,
           style: AppTypography.h4.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: AppSpacing.md),

@@ -197,8 +197,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40,
-              height: 4,
+              width: AppSpacing.dragHandleWidth,
+              height: AppSpacing.xs,
               decoration: BoxDecoration(
                 color: AppColors.border,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusFull),

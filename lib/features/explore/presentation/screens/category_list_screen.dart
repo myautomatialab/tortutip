@@ -60,7 +60,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '— CATEGORY',
+                  l10n.categoryListSectionLabel,
                   style: AppTypography.caption.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,

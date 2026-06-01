@@ -165,7 +165,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                 horizontal: AppSpacing.screenHorizontal,
                               ),
                               child: TortuSecondaryButton(
-                                label: 'Reintentar',
+                                label: l10n.feedRetry,
                                 onTap: _userId != null
                                     ? () => _cubit.loadFeed(_userId!)
                                     : null,

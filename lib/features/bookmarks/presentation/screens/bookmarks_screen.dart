@@ -61,7 +61,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
               icon: Icons.bookmark_border,
               title: l10n.bookmarksEmpty,
               subtitle: l10n.bookmarksEmptySubtitle,
-              actionLabel: 'Explorar artículos',
+              actionLabel: l10n.bookmarksExploreAction,
               onActionTap: () => context.go(AppRoutes.feed),
             );
           }
@@ -74,6 +74,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
   }
 
   Widget _buildList(BuildContext context, BookmarksLoaded state) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -86,18 +87,18 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '— GUARDADOS',
+                l10n.bookmarksSectionLabel,
                 style: AppTypography.caption.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                'Mis Marcadores',
+                l10n.bookmarksSectionTitle,
                 style: AppTypography.hero.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
-                'Los artículos que has guardado para leer más tarde.',
+                l10n.bookmarksSectionSubtitle,
                 style: AppTypography.body.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -187,7 +188,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             ),
             const SizedBox(height: AppSpacing.lg),
             TortuPrimaryButton(
-              label: 'Reintentar',
+              label: AppLocalizations.of(context).bookmarksRetry,
               onTap: () => context
                   .read<BookmarksCubit>()
                   .loadBookmarks(_userId(context)),

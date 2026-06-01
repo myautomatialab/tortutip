@@ -8,7 +8,7 @@ class TortuFeedRepositoryImpl implements TortuFeedRepository {
   TortuFeedRepositoryImpl(this._dataSource);
 
   @override
-  Future<DataState<void>> feedTortu(FeedTortuParams params) async {
+  Future<DataState<bool>> feedTortu(FeedTortuParams params) async {
     try {
       await _dataSource.feedTortu(
         userId: params.userId,
@@ -16,7 +16,7 @@ class TortuFeedRepositoryImpl implements TortuFeedRepository {
         categoryId: params.categoryId,
         date: params.date,
       );
-      return const DataSuccess(null);
+      return const DataSuccess(false);
     } catch (e) {
       return DataFailed(e is Exception ? e : Exception(e.toString()));
     }

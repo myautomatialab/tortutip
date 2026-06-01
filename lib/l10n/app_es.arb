@@ -94,5 +94,45 @@
   "coverHorizontalLabel": "PORTADA HORIZONTAL\n(ARTÍCULO)",
   "errorGeneric": "Algo salió mal. Inténtalo de nuevo",
   "errorNoConnection": "Sin conexión. Inténtalo de nuevo",
-  "discard": "Descartar"
+  "discard": "Descartar",
+  "bookmarksExploreAction": "Explorar artículos",
+  "bookmarksSectionLabel": "— GUARDADOS",
+  "bookmarksSectionTitle": "Mis Marcadores",
+  "bookmarksSectionSubtitle": "Los artículos que has guardado para leer más tarde.",
+  "bookmarksRetry": "Reintentar",
+  "feedRetry": "Reintentar",
+  "exploreKaiaTitle": "Kaia, tu tortuga 🐢",
+  "exploreCategoriesTitle": "Categorías",
+  "exploreSearchHint": "Buscar artículos...",
+  "exploreStreakDays": "Día {days} de racha",
+  "@exploreStreakDays": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "exploreStreakMotivation": "🔥 ¡Sigue así!",
+  "searchEmptyTitle": "No se encontraron resultados",
+  "searchEmptySubtitle": "Prueba con otras palabras clave o explora una categoría",
+  "searchEmptyExploreLabel": "Explorar categorías",
+  "articleDetailRelated": "Más como esto",
+  "categoryListSectionLabel": "— CATEGORÍA",
+  "searchTabArticles": "Artículos ({count})",
+  "@searchTabArticles": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "searchTabCategories": "Categorías ({count})",
+  "@searchTabCategories": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "searchFilterAll": "Todos",
+  "tortuFeedTitle": "Darle de comer a Tortu",
+  "tortuFeedComeBackTomorrow": "Vuelve mañana para seguir alimentando a Tortu 🐢",
+  "tortuFeedSlideHint": "Desliza →",
+  "tortuFeedCompleted": "¡Tip aprendido!",
+  "tortuFeedHappy": "Tortu está feliz +1%",
+  "createArticlePublishedSuccess": "¡Artículo publicado con éxito!"
 }

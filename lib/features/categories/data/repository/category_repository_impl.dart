@@ -11,7 +11,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<DataState<List<CategoryEntity>>> getAllCategories() async {
     try {
       final models = await _dataSource.getAllCategories();
-      return DataSuccess(models.map((m) => m.toEntity()).toList());
+      return DataSuccess(models.cast<CategoryEntity>().toList());
     } on Exception catch (e) {
       return DataFailed(e);
     }

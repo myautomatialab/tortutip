@@ -42,7 +42,7 @@ class CategoryCard extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, AppColors.overlayDark],
+                    colors: [AppColors.transparent, AppColors.overlayDark],
                     stops: [0.3, 1.0],
                   ),
                 ),

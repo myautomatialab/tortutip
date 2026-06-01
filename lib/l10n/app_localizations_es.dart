@@ -287,4 +287,88 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get discard => 'Descartar';
+
+  @override
+  String get bookmarksExploreAction => 'Explorar artículos';
+
+  @override
+  String get bookmarksSectionLabel => '— GUARDADOS';
+
+  @override
+  String get bookmarksSectionTitle => 'Mis Marcadores';
+
+  @override
+  String get bookmarksSectionSubtitle =>
+      'Los artículos que has guardado para leer más tarde.';
+
+  @override
+  String get bookmarksRetry => 'Reintentar';
+
+  @override
+  String get feedRetry => 'Reintentar';
+
+  @override
+  String get exploreKaiaTitle => 'Kaia, tu tortuga 🐢';
+
+  @override
+  String get exploreCategoriesTitle => 'Categorías';
+
+  @override
+  String get exploreSearchHint => 'Buscar artículos...';
+
+  @override
+  String exploreStreakDays(int days) {
+    return 'Día $days de racha';
+  }
+
+  @override
+  String get exploreStreakMotivation => '🔥 ¡Sigue así!';
+
+  @override
+  String get searchEmptyTitle => 'No se encontraron resultados';
+
+  @override
+  String get searchEmptySubtitle =>
+      'Prueba con otras palabras clave o explora una categoría';
+
+  @override
+  String get searchEmptyExploreLabel => 'Explorar categorías';
+
+  @override
+  String get articleDetailRelated => 'Más como esto';
+
+  @override
+  String get categoryListSectionLabel => '— CATEGORÍA';
+
+  @override
+  String searchTabArticles(int count) {
+    return 'Artículos ($count)';
+  }
+
+  @override
+  String searchTabCategories(int count) {
+    return 'Categorías ($count)';
+  }
+
+  @override
+  String get searchFilterAll => 'Todos';
+
+  @override
+  String get tortuFeedTitle => 'Darle de comer a Tortu';
+
+  @override
+  String get tortuFeedComeBackTomorrow =>
+      'Vuelve mañana para seguir alimentando a Tortu 🐢';
+
+  @override
+  String get tortuFeedSlideHint => 'Desliza →';
+
+  @override
+  String get tortuFeedCompleted => '¡Tip aprendido!';
+
+  @override
+  String get tortuFeedHappy => 'Tortu está feliz +1%';
+
+  @override
+  String get createArticlePublishedSuccess => '¡Artículo publicado con éxito!';
 }

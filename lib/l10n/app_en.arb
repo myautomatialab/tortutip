@@ -94,5 +94,45 @@
   "coverHorizontalLabel": "HORIZONTAL COVER\n(ARTICLE)",
   "errorGeneric": "Something went wrong. Try again",
   "errorNoConnection": "No connection. Try again",
-  "discard": "Discard"
+  "discard": "Discard",
+  "bookmarksExploreAction": "Explore articles",
+  "bookmarksSectionLabel": "— SAVED",
+  "bookmarksSectionTitle": "My Bookmarks",
+  "bookmarksSectionSubtitle": "Articles you saved to read later.",
+  "bookmarksRetry": "Retry",
+  "feedRetry": "Retry",
+  "exploreKaiaTitle": "Kaia, your turtle 🐢",
+  "exploreCategoriesTitle": "Categories",
+  "exploreSearchHint": "Search articles...",
+  "exploreStreakDays": "Day {days} streak",
+  "@exploreStreakDays": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "exploreStreakMotivation": "🔥 Keep it up!",
+  "searchEmptyTitle": "No results found",
+  "searchEmptySubtitle": "Try different keywords or explore a category",
+  "searchEmptyExploreLabel": "Explore categories",
+  "articleDetailRelated": "More like this",
+  "categoryListSectionLabel": "— CATEGORY",
+  "searchTabArticles": "Articles ({count})",
+  "@searchTabArticles": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "searchTabCategories": "Categories ({count})",
+  "@searchTabCategories": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "searchFilterAll": "All",
+  "tortuFeedTitle": "Feed Tortu",
+  "tortuFeedComeBackTomorrow": "Come back tomorrow to keep feeding Tortu 🐢",
+  "tortuFeedSlideHint": "Slide →",
+  "tortuFeedCompleted": "Tip learned!",
+  "tortuFeedHappy": "Tortu is happy +1%",
+  "createArticlePublishedSuccess": "Article published successfully!"
 }

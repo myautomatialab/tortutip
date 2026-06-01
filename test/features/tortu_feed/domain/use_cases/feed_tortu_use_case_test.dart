@@ -25,11 +25,11 @@ void main() {
   group('FeedTortuUseCase', () {
     test('should_return_DataSuccess_void_when_repository_succeeds', () async {
       when(() => mockRepository.feedTortu(params))
-          .thenAnswer((_) async => const DataSuccess(null));
+          .thenAnswer((_) async => const DataSuccess(false));
 
       final result = await useCase(params);
 
-      expect(result, isA<DataSuccess<void>>());
+      expect(result, isA<DataSuccess<bool>>());
       verify(() => mockRepository.feedTortu(params)).called(1);
     });
 

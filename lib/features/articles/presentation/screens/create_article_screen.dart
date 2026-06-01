@@ -332,7 +332,7 @@ class _CreateArticleView extends StatelessWidget {
             SnackBar(
               backgroundColor: AppColors.success,
               content: Text(
-                'Article published successfully!',
+                AppLocalizations.of(ctx).createArticlePublishedSuccess,
                 style: AppTypography.body.copyWith(color: AppColors.textOnDark),
               ),
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 
 class StreakCard extends StatelessWidget {
   final int streakDays;
@@ -40,12 +41,12 @@ class StreakCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Day $streakDays streak',
+                  AppLocalizations.of(context).exploreStreakDays(streakDays),
                   style: AppTypography.h2.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '🔥 Keep it up!',
+                  AppLocalizations.of(context).exploreStreakMotivation,
                   style: AppTypography.body.copyWith(
                     color: AppColors.primaryDark,
                     fontWeight: FontWeight.bold,

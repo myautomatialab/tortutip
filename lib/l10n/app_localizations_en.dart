@@ -286,4 +286,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discard => 'Discard';
+
+  @override
+  String get bookmarksExploreAction => 'Explore articles';
+
+  @override
+  String get bookmarksSectionLabel => '— SAVED';
+
+  @override
+  String get bookmarksSectionTitle => 'My Bookmarks';
+
+  @override
+  String get bookmarksSectionSubtitle => 'Articles you saved to read later.';
+
+  @override
+  String get bookmarksRetry => 'Retry';
+
+  @override
+  String get feedRetry => 'Retry';
+
+  @override
+  String get exploreKaiaTitle => 'Kaia, your turtle 🐢';
+
+  @override
+  String get exploreCategoriesTitle => 'Categories';
+
+  @override
+  String get exploreSearchHint => 'Search articles...';
+
+  @override
+  String exploreStreakDays(int days) {
+    return 'Day $days streak';
+  }
+
+  @override
+  String get exploreStreakMotivation => '🔥 Keep it up!';
+
+  @override
+  String get searchEmptyTitle => 'No results found';
+
+  @override
+  String get searchEmptySubtitle =>
+      'Try different keywords or explore a category';
+
+  @override
+  String get searchEmptyExploreLabel => 'Explore categories';
+
+  @override
+  String get articleDetailRelated => 'More like this';
+
+  @override
+  String get categoryListSectionLabel => '— CATEGORY';
+
+  @override
+  String searchTabArticles(int count) {
+    return 'Articles ($count)';
+  }
+
+  @override
+  String searchTabCategories(int count) {
+    return 'Categories ($count)';
+  }
+
+  @override
+  String get searchFilterAll => 'All';
+
+  @override
+  String get tortuFeedTitle => 'Feed Tortu';
+
+  @override
+  String get tortuFeedComeBackTomorrow =>
+      'Come back tomorrow to keep feeding Tortu 🐢';
+
+  @override
+  String get tortuFeedSlideHint => 'Slide →';
+
+  @override
+  String get tortuFeedCompleted => 'Tip learned!';
+
+  @override
+  String get tortuFeedHappy => 'Tortu is happy +1%';
+
+  @override
+  String get createArticlePublishedSuccess => 'Article published successfully!';
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
+import 'package:tortutip/l10n/app_localizations.dart';
 
 class TortuFeedSlider extends StatefulWidget {
   final VoidCallback onComplete;
@@ -109,7 +110,7 @@ class _TortuFeedSliderState extends State<TortuFeedSlider>
                 if (_progress < 0.5)
                   Center(
                     child: Text(
-                      'Desliza →',
+                      AppLocalizations.of(context).tortuFeedSlideHint,
                       style: AppTypography.bodySm
                           .copyWith(color: AppColors.textSecondary),
                     ),
