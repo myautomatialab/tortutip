@@ -22,6 +22,9 @@ import '../features/articles/presentation/bloc/create_article/create_article_cub
 import '../features/articles/presentation/bloc/feed/feed_cubit.dart';
 import '../features/categories/domain/use_cases/get_all_categories_use_case.dart';
 import '../shared/user/domain/use_cases/get_user_by_id_use_case.dart';
+import '../features/tortu_feed/domain/use_cases/check_today_tip_use_case.dart';
+import '../features/tortu_feed/domain/use_cases/feed_tortu_use_case.dart';
+import '../features/tortu_feed/domain/use_cases/update_category_progress_use_case.dart';
 
 final sl = GetIt.instance;
 
@@ -72,6 +75,9 @@ void initArticlesDependencies() {
         sl<UnsaveArticleUseCase>(),
         sl<GetUserByIdUseCase>(),
         sl<GetSavedArticleIdsUseCase>(),
+        sl<CheckTodayTipUseCase>(),
+        sl<FeedTortuUseCase>(),
+        sl<UpdateCategoryProgressUseCase>(),
       ));
   sl.registerFactory(() => CreateArticleCubit(
         sl<PublishArticleUseCase>(),

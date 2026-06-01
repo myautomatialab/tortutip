@@ -6,6 +6,10 @@ import 'package:tortutip/features/articles/domain/use_cases/get_related_articles
 import 'package:tortutip/features/articles/domain/use_cases/get_saved_article_ids_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/save_article_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/unsave_article_use_case.dart';
+import 'package:tortutip/features/tortu_feed/domain/repository/tortu_feed_repository.dart';
+import 'package:tortutip/features/tortu_feed/domain/use_cases/check_today_tip_use_case.dart';
+import 'package:tortutip/features/tortu_feed/domain/use_cases/feed_tortu_use_case.dart';
+import 'package:tortutip/features/tortu_feed/domain/use_cases/update_category_progress_use_case.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 import 'package:tortutip/shared/user/domain/use_cases/get_user_by_id_use_case.dart';
 
@@ -18,6 +22,9 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
   final UnsaveArticleUseCase _unsaveArticle;
   final GetUserByIdUseCase _getUserById;
   final GetSavedArticleIdsUseCase _getSavedArticleIds;
+  final CheckTodayTipUseCase _checkTodayTip;
+  final FeedTortuUseCase _feedTortu;
+  final UpdateCategoryProgressUseCase _updateCategoryProgress;
 
   ArticleDetailCubit(
     this._getArticleDetail,
@@ -26,6 +33,9 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
     this._unsaveArticle,
     this._getUserById,
     this._getSavedArticleIds,
+    this._checkTodayTip,
+    this._feedTortu,
+    this._updateCategoryProgress,
   ) : super(const ArticleDetailInitial());
 
   Future<void> loadArticle(String articleId, String currentUserId) async {
@@ -38,6 +48,8 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
     }
     final article = articleResult.data!;
 
+    final date = _todayDate();
+
     // Parallel calls that don't depend on each other
     final results = await Future.wait([
       _getUserById(GetUserByIdParams(userId: article.authorId)),
@@ -46,11 +58,13 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
         categoryId: article.categoryId,
         excludeArticleId: articleId,
       )),
+      _checkTodayTip(CheckTodayTipParams(userId: currentUserId, date: date)),
     ]);
 
     final authorResult = results[0];
     final savedIdsResult = results[1];
     final relatedResult = results[2];
+    final todayTipResult = results[3];
 
     if (!authorResult.isSuccess) {
       emit(ArticleDetailError(_mapErrorToMessage(authorResult.error!)));
@@ -65,12 +79,16 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
     final relatedArticles = relatedResult.isSuccess
         ? List<ArticleEntity>.from(relatedResult.data as List)
         : <ArticleEntity>[];
+    final isDoneToday = todayTipResult.isSuccess
+        ? (todayTipResult.data as bool)
+        : false;
 
     emit(ArticleDetailLoaded(
       article: article,
       author: author,
       isSaved: isSaved,
       relatedArticles: relatedArticles,
+      isDoneToday: isDoneToday,
     ));
   }
 
@@ -86,6 +104,7 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
       author: loaded.author,
       isSaved: !previouslySaved,
       relatedArticles: loaded.relatedArticles,
+      isDoneToday: loaded.isDoneToday,
     ));
 
     final result = previouslySaved
@@ -101,11 +120,45 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
         author: loaded.author,
         isSaved: previouslySaved,
         relatedArticles: loaded.relatedArticles,
+        isDoneToday: loaded.isDoneToday,
       ));
       return false;
     }
 
     return true;
+  }
+
+  Future<bool> feedTortu(String userId, String categoryId) async {
+    final current = state;
+    if (current is! ArticleDetailLoaded) return false;
+
+    final date = _todayDate();
+    final tipResult = await _feedTortu(FeedTortuParams(
+      userId: userId,
+      articleId: current.article.id,
+      categoryId: categoryId,
+      date: date,
+    ));
+    if (tipResult.isFailure) return false;
+
+    await _updateCategoryProgress(UpdateCategoryProgressParams(
+      userId: userId,
+      categoryId: categoryId,
+    ));
+
+    emit(ArticleDetailLoaded(
+      article: current.article,
+      author: current.author,
+      isSaved: current.isSaved,
+      relatedArticles: current.relatedArticles,
+      isDoneToday: true,
+    ));
+    return true;
+  }
+
+  String _todayDate() {
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
 
   String _mapErrorToMessage(Exception error) {
