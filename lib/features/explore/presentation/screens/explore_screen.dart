@@ -60,7 +60,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
               : null,
         ),
       ),
-      body: BlocBuilder<ExploreCubit, ExploreState>(
+      body: BlocListener<AuthBloc, AuthState>(
+        listenWhen: (prev, curr) => curr is AuthAuthenticated,
+        listener: (context, state) => _loadData(),
+        child: BlocBuilder<ExploreCubit, ExploreState>(
         builder: (context, state) {
           if (state is ExploreLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -73,6 +76,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
           }
           return const SizedBox.shrink();
         },
+        ),
       ),
     );
   }
@@ -147,12 +151,9 @@ class _SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Búsqueda próximamente')),
-        );
-      },
-      child: Container(
+      onTap: () => context.push(AppRoutes.search),
+      child: AbsorbPointer(
+        child: Container(
         margin: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.sm,
@@ -175,6 +176,7 @@ class _SearchBar extends StatelessWidget {
               style: AppTypography.body.copyWith(color: AppColors.textSecondary),
             ),
           ],
+        ),
         ),
       ),
     );
