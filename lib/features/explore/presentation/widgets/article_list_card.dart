@@ -1,14 +1,10 @@
-import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:tortutip/config/theme/app_colors.dart';
-import 'package:tortutip/config/theme/app_spacing.dart';
-import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
-import 'package:tortutip/shared/widgets/tortutip_chip.dart';
+import 'package:tortutip/shared/widgets/tortutip_article_list_card.dart';
 
+// Thin wrapper that preserves the existing API for explore screens.
+// The shared implementation lives in shared/widgets/tortutip_article_list_card.dart.
 class ArticleListCard extends StatelessWidget {
   final ArticleEntity article;
   final CategoryEntity category;
@@ -31,136 +27,14 @@ class ArticleListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return TortuArticleListCard(
+      article: article,
+      category: category,
+      isSaved: isSaved,
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(AppSpacing.radiusLg),
-                  topRight: Radius.circular(AppSpacing.radiusLg),
-                ),
-                child: Image.network(
-                  article.coverHorizontalUrl,
-                  height: AppSpacing.articleListCardImageHeight,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, _) => Container(
-                    height: AppSpacing.articleListCardImageHeight,
-                    width: double.infinity,
-                    color: AppColors.surface,
-                  ),
-                ),
-              ),
-              Positioned(
-                top: AppSpacing.md,
-                right: AppSpacing.md,
-                child: GestureDetector(
-                  onTap: onBookmarkTap,
-                  child: CircleAvatar(
-                    radius: 16,
-                    backgroundColor: AppColors.white.withValues(alpha: 0.9),
-                    child: Icon(
-                      isSaved ? Icons.bookmark : Icons.bookmark_border,
-                      color: isSaved
-                          ? AppColors.primaryDark
-                          : AppColors.textSecondary,
-                      size: 16,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    TortuCategoryChip.fromName(category.name),
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      '${article.readTimeMinutes} min read',
-                      style: AppTypography.caption,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  article.title,
-                  style: AppTypography.h2.copyWith(
-                    color: isSaved
-                        ? AppColors.primaryDark
-                        : AppColors.textPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  _extractDescription(article.body),
-                  style: AppTypography.body.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 14,
-                      backgroundImage: authorAvatarUrl != null
-                          ? NetworkImage(authorAvatarUrl!)
-                          : null,
-                      child: authorAvatarUrl == null
-                          ? const Icon(Icons.person, size: 14)
-                          : null,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      authorName ?? '',
-                      style: AppTypography.caption,
-                    ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.arrow_forward,
-                      color: AppColors.textSecondary,
-                      size: 16,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      onBookmarkTap: onBookmarkTap,
+      authorName: authorName,
+      authorAvatarUrl: authorAvatarUrl,
     );
-  }
-
-  static String _extractDescription(String rawBody) {
-    try {
-      final decoded = jsonDecode(rawBody);
-      if (decoded is Map && decoded['ops'] is List) {
-        final ops = decoded['ops'] as List;
-        final buffer = StringBuffer();
-        for (final op in ops) {
-          if (op is Map && op['insert'] is String) {
-            buffer.write(op['insert'] as String);
-          }
-        }
-        final text = buffer.toString();
-        return text.substring(0, min(120, text.length));
-      }
-    } catch (_) {
-      // Fall through to raw body
-    }
-    return rawBody.substring(0, min(120, rawBody.length));
   }
 }
