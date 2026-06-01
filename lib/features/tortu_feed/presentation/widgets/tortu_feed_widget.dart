@@ -32,7 +32,6 @@ class TortuFeedWidget extends StatefulWidget {
 class _TortuFeedWidgetState extends State<TortuFeedWidget>
     with TickerProviderStateMixin {
   _TortuFeedState _state = _TortuFeedState.collapsed;
-  bool _isDoneToday = false;
 
   late AnimationController _expandController;
   late Animation<double> _expandAnim;
@@ -42,7 +41,6 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
   @override
   void initState() {
     super.initState();
-    _isDoneToday = widget.isDoneToday;
 
     _appearController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -64,14 +62,6 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
   }
 
   @override
-  void didUpdateWidget(TortuFeedWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isDoneToday != oldWidget.isDoneToday) {
-      setState(() => _isDoneToday = widget.isDoneToday);
-    }
-  }
-
-  @override
   void dispose() {
     _appearController.dispose();
     _expandController.dispose();
@@ -79,7 +69,7 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
   }
 
   void _onTapCollapsed() {
-    if (_isDoneToday) {
+    if (widget.isDoneToday) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Vuelve mañana para seguir alimentando a Tortu 🐢'),
@@ -92,7 +82,11 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
   }
 
   Future<void> _onComplete() async {
-    setState(() => _state = _TortuFeedState.completed);
+    if (widget.isDoneToday) return;
+    setState(() {
+      _state = _TortuFeedState.completed;
+    });
+    if (!mounted) return;
     final cubit = context.read<ArticleDetailCubit>();
     await cubit.feedTortu(widget.userId, widget.categoryId);
   }
@@ -100,6 +94,26 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
   @override
   Widget build(BuildContext context) {
     if (widget.isSaved) return const SizedBox.shrink();
+
+    if (_state == _TortuFeedState.expanded) {
+      return Positioned.fill(
+        child: Stack(
+          children: [
+            // Capa transparente — tap fuera colapsa el pill
+            GestureDetector(
+              onTap: () => setState(() => _state = _TortuFeedState.collapsed),
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox.expand(),
+            ),
+            Positioned(
+              bottom: AppSpacing.xxl,
+              right: AppSpacing.lg,
+              child: _buildContent(context),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Positioned(
       bottom: AppSpacing.xxl,
@@ -120,7 +134,7 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
   }
 
   Widget _buildCollapsed() {
-    final isDone = _isDoneToday;
+    final isDone = widget.isDoneToday;
     return ScaleTransition(
       scale: _appearAnim,
       child: GestureDetector(
@@ -198,7 +212,6 @@ class _TortuFeedWidgetState extends State<TortuFeedWidget>
       onDone: () {
         setState(() {
           _state = _TortuFeedState.collapsed;
-          _isDoneToday = true;
         });
       },
     );
