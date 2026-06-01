@@ -11,6 +11,8 @@ class TortuAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final bool showTitle;
   final String? avatarUrl;
+  final bool? centerTitle; 
+
 
   const TortuAppBar({
     super.key,
@@ -19,6 +21,7 @@ class TortuAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.showTitle = true,
     this.avatarUrl,
+    this.centerTitle,
   });
 
   factory TortuAppBar.main({List<Widget>? actions, String? avatarUrl}) {
@@ -44,21 +47,24 @@ class TortuAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: AppColors.background,
       elevation: 0,
       scrolledUnderElevation: 0,
-      centerTitle: _isMain,
+      centerTitle: centerTitle ?? _isMain, 
       titleSpacing: _isMain ? AppSpacing.md : NavigationToolbar.kMiddleSpacing,
       leading: _isMain
           ? Center(
-              child: Container(
-                width: AppSpacing.avatarSizeSm,
-                height: AppSpacing.avatarSizeSm,
-                decoration: const BoxDecoration(
-                  color: AppColors.surface,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.bookmark_outline,
-                  color: AppColors.textPrimary,
-                  size: AppSpacing.iconMd,
+              child: GestureDetector(
+                onTap: () => context.push(AppRoutes.bookmarks),
+                child: Container(
+                  width: AppSpacing.avatarSizeSm,
+                  height: AppSpacing.avatarSizeSm,
+                  decoration: const BoxDecoration(
+                    color: AppColors.surface,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.bookmark_outline,
+                    color: AppColors.textPrimary,
+                    size: AppSpacing.iconMd,
+                  ),
                 ),
               ),
             )

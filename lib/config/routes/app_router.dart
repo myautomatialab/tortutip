@@ -10,6 +10,8 @@ import '../../features/articles/config/articles_routes.dart';
 import '../../features/onboarding/config/onboarding_routes.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_cubit.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_state.dart';
+import '../../features/bookmarks/config/bookmarks_routes.dart';
+import '../../features/bookmarks/presentation/bloc/bookmarks_cubit.dart';
 import '../../features/explore/config/explore_routes.dart';
 import '../../features/profile/config/profile_routes.dart';
 import '../../injection/injection_container.dart';
@@ -28,6 +30,7 @@ class AppRouter {
       routes: [
         ...AuthRoutes.routes,
         ...ArticlesRoutes.routes,
+        ...ExploreRoutes.routes,
         ...ProfileRoutes.routes,
 
         // ShellRoute de onboarding — provee OnboardingCubit a las 3 pantallas
@@ -53,10 +56,19 @@ class AppRouter {
 
         // Un único ShellRoute que mantiene AppShell vivo entre tabs
         ShellRoute(
-          builder: (_, _, child) => AppShell(child: child),
+          builder: (context, _, child) => BlocProvider(
+            create: (ctx) {
+              final authState = context.read<AuthBloc>().state;
+              final userId =
+                  authState is AuthAuthenticated ? authState.user.id : '';
+              return sl<BookmarksCubit>()..loadBookmarks(userId);
+            },
+            child: AppShell(child: child),
+          ),
           routes: [
             ...ArticlesRoutes.shellRoutes,
             ...ExploreRoutes.shellRoutes,
+            ...BookmarksRoutes.shellRoutes,
           ],
         ),
       ],

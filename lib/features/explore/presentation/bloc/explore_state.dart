@@ -19,11 +19,16 @@ class ExploreLoading extends ExploreState {
 class ExploreLoaded extends ExploreState {
   final List<CategoryEntity> categories;
   final int streakDays;
+  final double categoryProgress;
 
-  const ExploreLoaded({required this.categories, required this.streakDays});
+  const ExploreLoaded({
+    required this.categories,
+    required this.streakDays,
+    required this.categoryProgress,
+  });
 
   @override
-  List<Object> get props => [categories, streakDays];
+  List<Object> get props => [categories, streakDays, categoryProgress];
 }
 
 class ExploreError extends ExploreState {

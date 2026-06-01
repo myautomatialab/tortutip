@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tortutip/core/resources/data_state.dart';
 import 'package:tortutip/core/usecase/usecase.dart';
 import 'package:tortutip/features/auth/domain/use_cases/check_auth_use_case.dart';
+import 'package:tortutip/features/auth/domain/use_cases/enter_hardcore_mode_use_case.dart';
 import 'package:tortutip/features/auth/domain/use_cases/sign_in_with_google_use_case.dart';
 import 'package:tortutip/features/auth/domain/use_cases/sign_out_use_case.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
@@ -18,11 +19,15 @@ class MockSignInWithGoogleUseCase extends Mock
 
 class MockSignOutUseCase extends Mock implements SignOutUseCase {}
 
+class MockEnterHardcoreModeUseCase extends Mock
+    implements EnterHardcoreModeUseCase {}
+
 void main() {
   late AuthBloc bloc;
   late MockCheckAuthUseCase mockCheckAuth;
   late MockSignInWithGoogleUseCase mockSignIn;
   late MockSignOutUseCase mockSignOut;
+  late MockEnterHardcoreModeUseCase mockEnterHardcore;
 
   setUpAll(() {
     registerFallbackValue(const NoParams());
@@ -32,7 +37,13 @@ void main() {
     mockCheckAuth = MockCheckAuthUseCase();
     mockSignIn = MockSignInWithGoogleUseCase();
     mockSignOut = MockSignOutUseCase();
-    bloc = AuthBloc(mockCheckAuth, mockSignIn, mockSignOut);
+    mockEnterHardcore = MockEnterHardcoreModeUseCase();
+    bloc = AuthBloc(
+      mockCheckAuth,
+      mockSignIn,
+      mockSignOut,
+      enterHardcoreMode: mockEnterHardcore,
+    );
   });
 
   tearDown(() => bloc.close());
@@ -170,6 +181,56 @@ void main() {
       expect: () => [
         isA<AuthError>(),
       ],
+    );
+  });
+
+  group('EnterHardcoreModeEvent', () {
+    final tHardcoreUser = UserEntity(
+      id: 'hardcore_001',
+      name: 'Alex Hardcore',
+      email: 'hardcore@tortutip.dev',
+      avatarUrl: '',
+      bio: '',
+      role: 'writer',
+      gender: 'male',
+      ageRange: '25-34',
+      createdAt: DateTime(2024),
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'should_emit_loading_then_authenticated_when_EnterHardcoreModeEvent_succeeds',
+      build: () {
+        when(() => mockEnterHardcore(any()))
+            .thenAnswer((_) async => DataSuccess(tHardcoreUser));
+        return bloc;
+      },
+      act: (b) => b.add(const EnterHardcoreModeEvent()),
+      expect: () => [
+        isA<AuthLoading>(),
+        isA<AuthAuthenticated>(),
+      ],
+      verify: (b) {
+        final state = b.state as AuthAuthenticated;
+        expect(state.user.role, equals('writer'));
+      },
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'should_emit_loading_then_error_when_EnterHardcoreModeEvent_fails',
+      build: () {
+        when(() => mockEnterHardcore(any()))
+            .thenAnswer((_) async => DataFailed(Exception('hardcore error')));
+        return bloc;
+      },
+      act: (b) => b.add(const EnterHardcoreModeEvent()),
+      expect: () => [
+        isA<AuthLoading>(),
+        isA<AuthError>(),
+      ],
+      verify: (b) {
+        final state = b.state as AuthError;
+        expect(state.message, isNotEmpty);
+      },
     );
   });
 }

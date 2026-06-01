@@ -6,8 +6,11 @@ import 'package:tortutip/features/articles/domain/use_cases/get_related_articles
 import 'package:tortutip/features/articles/domain/use_cases/get_saved_article_ids_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/save_article_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/unsave_article_use_case.dart';
+import 'package:tortutip/features/tortu_feed/domain/repository/tortu_feed_repository.dart';
+import 'package:tortutip/features/tortu_feed/domain/use_cases/feed_tortu_use_case.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 import 'package:tortutip/shared/user/domain/use_cases/get_user_by_id_use_case.dart';
+import 'package:tortutip/shared/user/domain/use_cases/record_feed_swipe_use_case.dart';
 
 import 'article_detail_state.dart';
 
@@ -18,6 +21,8 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
   final UnsaveArticleUseCase _unsaveArticle;
   final GetUserByIdUseCase _getUserById;
   final GetSavedArticleIdsUseCase _getSavedArticleIds;
+  final FeedTortuUseCase _feedTortu;
+  final RecordFeedSwipeUseCase _recordFeedSwipe;
 
   ArticleDetailCubit(
     this._getArticleDetail,
@@ -26,9 +31,15 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
     this._unsaveArticle,
     this._getUserById,
     this._getSavedArticleIds,
+    this._feedTortu,
+    this._recordFeedSwipe,
   ) : super(const ArticleDetailInitial());
 
-  Future<void> loadArticle(String articleId, String currentUserId) async {
+  Future<void> loadArticle(
+    String articleId,
+    String currentUserId, {
+    bool isDoneToday = false,
+  }) async {
     emit(const ArticleDetailLoading());
 
     final articleResult = await _getArticleDetail(articleId);
@@ -71,6 +82,7 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
       author: author,
       isSaved: isSaved,
       relatedArticles: relatedArticles,
+      isDoneToday: isDoneToday,
     ));
   }
 
@@ -86,6 +98,7 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
       author: loaded.author,
       isSaved: !previouslySaved,
       relatedArticles: loaded.relatedArticles,
+      isDoneToday: loaded.isDoneToday,
     ));
 
     final result = previouslySaved
@@ -101,11 +114,45 @@ class ArticleDetailCubit extends Cubit<ArticleDetailState> {
         author: loaded.author,
         isSaved: previouslySaved,
         relatedArticles: loaded.relatedArticles,
+        isDoneToday: loaded.isDoneToday,
       ));
       return false;
     }
 
     return true;
+  }
+
+  Future<bool> feedTortu(String userId, String categoryId) async {
+    final current = state;
+    if (current is! ArticleDetailLoaded) return false;
+    if (current.isDoneToday) return false;
+
+    final date = _todayDate();
+    final tipResult = await _feedTortu(FeedTortuParams(
+      userId: userId,
+      articleId: current.article.id,
+      categoryId: categoryId,
+      date: date,
+    ));
+    if (tipResult.isFailure) return false;
+
+    final swipeResult =
+        await _recordFeedSwipe(RecordFeedSwipeParams(userId: userId));
+    if (swipeResult.isFailure) return false;
+
+    emit(ArticleDetailLoaded(
+      article: current.article,
+      author: current.author,
+      isSaved: current.isSaved,
+      relatedArticles: current.relatedArticles,
+      isDoneToday: true,
+    ));
+    return true;
+  }
+
+  String _todayDate() {
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
 
   String _mapErrorToMessage(Exception error) {

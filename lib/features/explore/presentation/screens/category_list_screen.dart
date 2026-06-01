@@ -13,6 +13,8 @@ import 'package:tortutip/features/explore/presentation/bloc/category_list_cubit.
 import 'package:tortutip/features/explore/presentation/bloc/category_list_state.dart';
 import 'package:tortutip/features/explore/presentation/widgets/article_list_card.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
+import 'package:tortutip/shared/widgets/tortutip_button.dart';
+import 'package:tortutip/shared/widgets/tortutip_empty_view.dart';
 
 class CategoryListScreen extends StatefulWidget {
   final CategoryEntity category;
@@ -41,12 +43,8 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TortuAppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
-        ),
-        title: 'TortuTip',
+      appBar: TortuAppBar.detail(
+        title: widget.category.name,
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined,
@@ -97,6 +95,13 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                 if (state is CategoryListLoadingMore) {
                   return _buildListWithLoader(context, state);
                 }
+                if (state is CategoryListEmpty) {
+                  return const TortuEmptyView(
+                    icon: Icons.article_outlined,
+                    title: 'Sin artículos',
+                    subtitle: 'Aún no hay artículos publicados en esta categoría.',
+                  );
+                }
                 if (state is CategoryListError) {
                   return Center(child: Text(state.message));
                 }
@@ -123,15 +128,11 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
             child: Center(
-              child: TextButton(
-                onPressed: () => context
+              child: TortuSecondaryButton(
+                label: 'Load more',
+                onTap: () => context
                     .read<CategoryListCubit>()
                     .loadMore(_userId),
-                child: Text(
-                  'Load more',
-                  style: AppTypography.body
-                      .copyWith(color: AppColors.primaryDark),
-                ),
               ),
             ),
           );

@@ -47,6 +47,10 @@ class CategoryListLoadingMore extends CategoryListState {
   List<Object> get props => [category, articles];
 }
 
+class CategoryListEmpty extends CategoryListState {
+  const CategoryListEmpty();
+}
+
 class CategoryListError extends CategoryListState {
   final String message;
 

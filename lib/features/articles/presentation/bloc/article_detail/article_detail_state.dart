@@ -22,16 +22,18 @@ class ArticleDetailLoaded extends ArticleDetailState {
   final UserEntity author;
   final bool isSaved;
   final List<ArticleEntity> relatedArticles;
+  final bool isDoneToday;
 
   const ArticleDetailLoaded({
     required this.article,
     required this.author,
     required this.isSaved,
     required this.relatedArticles,
+    required this.isDoneToday,
   });
 
   @override
-  List<Object?> get props => [article, author, isSaved, relatedArticles];
+  List<Object?> get props => [article, author, isSaved, relatedArticles, isDoneToday];
 }
 
 class ArticleDetailError extends ArticleDetailState {
@@ -47,14 +49,16 @@ class ArticleDetailSaving extends ArticleDetailState {
   final UserEntity author;
   final bool isSaved;
   final List<ArticleEntity> relatedArticles;
+  final bool isDoneToday;
 
   const ArticleDetailSaving({
     required this.article,
     required this.author,
     required this.isSaved,
     required this.relatedArticles,
+    required this.isDoneToday,
   });
 
   @override
-  List<Object?> get props => [article, author, isSaved, relatedArticles];
+  List<Object?> get props => [article, author, isSaved, relatedArticles, isDoneToday];
 }

@@ -11,6 +11,18 @@ import 'package:tortutip/injection/injection_container.dart';
 class ExploreRoutes {
   ExploreRoutes._();
 
+  // Fuera del shell — sin TabBar
+  static final routes = <RouteBase>[
+    GoRoute(
+      path: '/explore/category/:categoryId',
+      builder: (context, state) => BlocProvider(
+        create: (_) => sl<CategoryListCubit>(),
+        child: CategoryListScreen(
+            category: state.extra as CategoryEntity),
+      ),
+    ),
+  ];
+
   // Inside the shell — with TabBar
   static final shellRoutes = <RouteBase>[
     GoRoute(
@@ -21,16 +33,6 @@ class ExploreRoutes {
           child: const ExploreScreen(),
         ),
       ),
-      routes: [
-        GoRoute(
-          path: 'category/:categoryId',
-          builder: (context, state) => BlocProvider(
-            create: (_) => sl<CategoryListCubit>(),
-            child: CategoryListScreen(
-                category: state.extra as CategoryEntity),
-          ),
-        ),
-      ],
     ),
   ];
 }

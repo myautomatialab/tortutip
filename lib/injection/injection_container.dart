@@ -6,6 +6,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import 'auth_injection.dart';
 import 'articles_injection.dart';
+import 'tortu_feed_injection.dart';
+import 'bookmarks_injection.dart';
 import 'categories_injection.dart';
 import 'explore_injection.dart';
 import 'profile_injection.dart';
@@ -32,7 +34,9 @@ Future<void> initDependencies() async {
   initAuthDependencies();       // auth no depende de otros features
   initUserDependencies();       // user depende de Firebase
   initCategoriesDependencies(); // categories depende de Firebase
-  initArticlesDependencies();   // articles depende de Firebase + user
+  initTortuFeedDependencies();  // tortu_feed depende de Firebase — antes de articles
+  initArticlesDependencies();   // articles depende de Firebase + user + tortu_feed
   initProfileDependencies();    // profile depende de user + articles
   initExploreDependencies();    // explore depende de articles + categories
+  initBookmarksDependencies(); // bookmarks depende de profile + articles
 }

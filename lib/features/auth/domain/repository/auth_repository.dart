@@ -6,4 +6,5 @@ abstract class AuthRepository {
   Future<DataState<bool>> signOut();
   Future<DataState<UserEntity>> checkCurrentAuth();
   Future<DataState<bool>> deleteAccount();
+  Future<DataState<UserEntity>> enterHardcoreMode();
 }

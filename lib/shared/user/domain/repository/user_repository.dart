@@ -8,4 +8,5 @@ abstract class UserRepository {
   Future<DataState<UserEntity>> updateUserProfile(UserEntity user);
   Future<DataState<List<String>>> getUserCategoryIds(String userId);
   Future<DataState<UserEntity>> getUserById(String userId);
+  Future<DataState<UserEntity>> recordFeedSwipe(String userId);
 }

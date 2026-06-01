@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import '../config/app_config.dart';
 import '../features/articles/data/data_sources/article_remote_data_source.dart';
 import '../features/articles/data/data_sources/mock_article_remote_data_source.dart';
+import '../features/auth/hardcore/hardcore_session.dart';
 import '../features/articles/data/repository/article_repository_impl.dart';
 import '../features/articles/domain/repository/article_repository.dart';
 import '../features/articles/domain/use_cases/get_article_detail_use_case.dart';
@@ -22,23 +23,22 @@ import '../features/articles/presentation/bloc/create_article/create_article_cub
 import '../features/articles/presentation/bloc/feed/feed_cubit.dart';
 import '../features/categories/domain/use_cases/get_all_categories_use_case.dart';
 import '../shared/user/domain/use_cases/get_user_by_id_use_case.dart';
+import '../shared/user/domain/use_cases/record_feed_swipe_use_case.dart';
+import '../features/tortu_feed/domain/use_cases/feed_tortu_use_case.dart';
 
 final sl = GetIt.instance;
 
 void initArticlesDependencies() {
   // DataSource — también necesita Storage para subir imágenes de portada
-  if (AppConfig.kUseMockData) {
-    sl.registerLazySingleton<ArticleRemoteDataSource>(
-      () => MockArticleRemoteDataSource(),
+  sl.registerLazySingleton<ArticleRemoteDataSource>(() {
+    if (HardcoreSession.isActive || AppConfig.kUseMockData) {
+      return MockArticleRemoteDataSource();
+    }
+    return ArticleRemoteDataSourceImpl(
+      sl<FirebaseFirestore>(),
+      sl<FirebaseStorage>(),
     );
-  } else {
-    sl.registerLazySingleton<ArticleRemoteDataSource>(
-      () => ArticleRemoteDataSourceImpl(
-        sl<FirebaseFirestore>(),
-        sl<FirebaseStorage>(),
-      ),
-    );
-  }
+  });
 
   // Repository
   sl.registerLazySingleton<ArticleRepository>(
@@ -72,6 +72,8 @@ void initArticlesDependencies() {
         sl<UnsaveArticleUseCase>(),
         sl<GetUserByIdUseCase>(),
         sl<GetSavedArticleIdsUseCase>(),
+        sl<FeedTortuUseCase>(),
+        sl<RecordFeedSwipeUseCase>(),
       ));
   sl.registerFactory(() => CreateArticleCubit(
         sl<PublishArticleUseCase>(),

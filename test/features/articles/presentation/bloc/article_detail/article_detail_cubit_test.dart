@@ -10,8 +10,11 @@ import 'package:tortutip/features/articles/domain/use_cases/save_article_use_cas
 import 'package:tortutip/features/articles/domain/use_cases/unsave_article_use_case.dart';
 import 'package:tortutip/features/articles/presentation/bloc/article_detail/article_detail_cubit.dart';
 import 'package:tortutip/features/articles/presentation/bloc/article_detail/article_detail_state.dart';
+import 'package:tortutip/features/tortu_feed/domain/repository/tortu_feed_repository.dart';
+import 'package:tortutip/features/tortu_feed/domain/use_cases/feed_tortu_use_case.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 import 'package:tortutip/shared/user/domain/use_cases/get_user_by_id_use_case.dart';
+import 'package:tortutip/shared/user/domain/use_cases/record_feed_swipe_use_case.dart';
 
 class MockGetArticleDetailUseCase extends Mock
     implements GetArticleDetailUseCase {}
@@ -28,6 +31,11 @@ class MockGetUserByIdUseCase extends Mock implements GetUserByIdUseCase {}
 class MockGetSavedArticleIdsUseCase extends Mock
     implements GetSavedArticleIdsUseCase {}
 
+class MockFeedTortuUseCase extends Mock implements FeedTortuUseCase {}
+
+class MockRecordFeedSwipeUseCase extends Mock
+    implements RecordFeedSwipeUseCase {}
+
 void main() {
   late ArticleDetailCubit cubit;
   late MockGetArticleDetailUseCase mockGetArticleDetail;
@@ -36,6 +44,8 @@ void main() {
   late MockUnsaveArticleUseCase mockUnsaveArticle;
   late MockGetUserByIdUseCase mockGetUserById;
   late MockGetSavedArticleIdsUseCase mockGetSavedArticleIds;
+  late MockFeedTortuUseCase mockFeedTortu;
+  late MockRecordFeedSwipeUseCase mockRecordFeedSwipe;
 
   final article = ArticleEntity(
     id: 'art_1',
@@ -72,17 +82,20 @@ void main() {
     mockUnsaveArticle = MockUnsaveArticleUseCase();
     mockGetUserById = MockGetUserByIdUseCase();
     mockGetSavedArticleIds = MockGetSavedArticleIdsUseCase();
+    mockFeedTortu = MockFeedTortuUseCase();
+    mockRecordFeedSwipe = MockRecordFeedSwipeUseCase();
 
     registerFallbackValue(
         const GetRelatedArticlesParams(categoryId: 'c', excludeArticleId: 'e'));
-    registerFallbackValue(
-        const GetSavedArticleIdsParams(userId: 'u'));
-    registerFallbackValue(
-        const GetUserByIdParams(userId: 'u'));
+    registerFallbackValue(const GetSavedArticleIdsParams(userId: 'u'));
+    registerFallbackValue(const GetUserByIdParams(userId: 'u'));
     registerFallbackValue(
         const SaveArticleParams(userId: 'u', articleId: 'a'));
     registerFallbackValue(
         const UnsaveArticleParams(userId: 'u', articleId: 'a'));
+    registerFallbackValue(const FeedTortuParams(
+        userId: 'u', articleId: 'a', categoryId: 'c', date: '2024-01-01'));
+    registerFallbackValue(const RecordFeedSwipeParams(userId: 'u'));
 
     cubit = ArticleDetailCubit(
       mockGetArticleDetail,
@@ -91,6 +104,8 @@ void main() {
       mockUnsaveArticle,
       mockGetUserById,
       mockGetSavedArticleIds,
+      mockFeedTortu,
+      mockRecordFeedSwipe,
     );
   });
 
@@ -101,9 +116,8 @@ void main() {
         .thenAnswer((_) async => DataSuccess(article));
     when(() => mockGetUserById(const GetUserByIdParams(userId: 'user_1')))
         .thenAnswer((_) async => DataSuccess(author));
-    when(() => mockGetSavedArticleIds(any()))
-        .thenAnswer((_) async => DataSuccess(
-            articleInSaved ? ['art_1'] : <String>[]));
+    when(() => mockGetSavedArticleIds(any())).thenAnswer((_) async =>
+        DataSuccess(articleInSaved ? ['art_1'] : <String>[]));
     when(() => mockGetRelatedArticles(any()))
         .thenAnswer((_) async => DataSuccess(relatedArticles));
   }
@@ -159,6 +173,34 @@ void main() {
       expect: () => [
         isA<ArticleDetailLoading>(),
         isA<ArticleDetailLoaded>().having((s) => s.isSaved, 'isSaved', isFalse),
+      ],
+    );
+
+    blocTest<ArticleDetailCubit, ArticleDetailState>(
+      'should_emit_Loaded_with_isDoneToday_true_when_passed_as_true',
+      build: () {
+        stubHappyPath();
+        return cubit;
+      },
+      act: (c) => c.loadArticle('art_1', 'current_user', isDoneToday: true),
+      expect: () => [
+        isA<ArticleDetailLoading>(),
+        isA<ArticleDetailLoaded>()
+            .having((s) => s.isDoneToday, 'isDoneToday', isTrue),
+      ],
+    );
+
+    blocTest<ArticleDetailCubit, ArticleDetailState>(
+      'should_emit_Loaded_with_isDoneToday_false_when_not_passed',
+      build: () {
+        stubHappyPath();
+        return cubit;
+      },
+      act: (c) => c.loadArticle('art_1', 'current_user'),
+      expect: () => [
+        isA<ArticleDetailLoading>(),
+        isA<ArticleDetailLoaded>()
+            .having((s) => s.isDoneToday, 'isDoneToday', isFalse),
       ],
     );
 
@@ -271,11 +313,8 @@ void main() {
       },
       expect: () => [
         isA<ArticleDetailLoading>(),
-        // After load: isSaved false
         isA<ArticleDetailLoaded>().having((s) => s.isSaved, 'isSaved', isFalse),
-        // Optimistic update: isSaved true
         isA<ArticleDetailLoaded>().having((s) => s.isSaved, 'isSaved', isTrue),
-        // Revert: isSaved false
         isA<ArticleDetailLoaded>().having((s) => s.isSaved, 'isSaved', isFalse),
       ],
     );
@@ -294,12 +333,74 @@ void main() {
       },
       expect: () => [
         isA<ArticleDetailLoading>(),
-        // After load: isSaved true
         isA<ArticleDetailLoaded>().having((s) => s.isSaved, 'isSaved', isTrue),
-        // Optimistic update: isSaved false
         isA<ArticleDetailLoaded>().having((s) => s.isSaved, 'isSaved', isFalse),
-        // Revert: isSaved true
         isA<ArticleDetailLoaded>().having((s) => s.isSaved, 'isSaved', isTrue),
+      ],
+    );
+  });
+
+  group('ArticleDetailCubit.feedTortu', () {
+    blocTest<ArticleDetailCubit, ArticleDetailState>(
+      'should_emit_Loaded_with_isDoneToday_true_when_feedTortu_succeeds',
+      build: () {
+        stubHappyPath();
+        when(() => mockFeedTortu(any()))
+            .thenAnswer((_) async => const DataSuccess(null));
+        when(() => mockRecordFeedSwipe(any()))
+            .thenAnswer((_) async => DataSuccess(author));
+        return cubit;
+      },
+      act: (c) async {
+        await c.loadArticle('art_1', 'current_user');
+        await c.feedTortu('current_user', 'cat_1');
+      },
+      expect: () => [
+        isA<ArticleDetailLoading>(),
+        isA<ArticleDetailLoaded>()
+            .having((s) => s.isDoneToday, 'isDoneToday', isFalse),
+        isA<ArticleDetailLoaded>()
+            .having((s) => s.isDoneToday, 'isDoneToday', isTrue),
+      ],
+    );
+
+    blocTest<ArticleDetailCubit, ArticleDetailState>(
+      'should_not_emit_new_state_when_feedTortu_fails',
+      build: () {
+        stubHappyPath();
+        when(() => mockFeedTortu(any()))
+            .thenAnswer((_) async => DataFailed(Exception('error')));
+        return cubit;
+      },
+      act: (c) async {
+        await c.loadArticle('art_1', 'current_user');
+        await c.feedTortu('current_user', 'cat_1');
+      },
+      expect: () => [
+        isA<ArticleDetailLoading>(),
+        isA<ArticleDetailLoaded>()
+            .having((s) => s.isDoneToday, 'isDoneToday', isFalse),
+      ],
+    );
+
+    blocTest<ArticleDetailCubit, ArticleDetailState>(
+      'should_not_emit_new_state_when_recordFeedSwipe_fails',
+      build: () {
+        stubHappyPath();
+        when(() => mockFeedTortu(any()))
+            .thenAnswer((_) async => const DataSuccess(null));
+        when(() => mockRecordFeedSwipe(any()))
+            .thenAnswer((_) async => DataFailed(Exception('swipe error')));
+        return cubit;
+      },
+      act: (c) async {
+        await c.loadArticle('art_1', 'current_user');
+        await c.feedTortu('current_user', 'cat_1');
+      },
+      expect: () => [
+        isA<ArticleDetailLoading>(),
+        isA<ArticleDetailLoaded>()
+            .having((s) => s.isDoneToday, 'isDoneToday', isFalse),
       ],
     );
   });

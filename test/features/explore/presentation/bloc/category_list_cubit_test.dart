@@ -96,6 +96,22 @@ void main() {
     );
 
     blocTest<CategoryListCubit, CategoryListState>(
+      'should_emit_loading_then_empty_when_articles_list_is_empty',
+      build: () {
+        when(() => mockGetArticlesByCategory(any()))
+            .thenAnswer((_) async => const DataSuccess(<ArticleEntity>[]));
+        when(() => mockGetSavedArticleIds(any()))
+            .thenAnswer((_) async => const DataSuccess(<String>[]));
+        return cubit;
+      },
+      act: (c) => c.loadCategory(category, userId),
+      expect: () => [
+        isA<CategoryListLoading>(),
+        isA<CategoryListEmpty>(),
+      ],
+    );
+
+    blocTest<CategoryListCubit, CategoryListState>(
       'should_emit_loading_then_error_when_get_articles_fails',
       build: () {
         when(() => mockGetArticlesByCategory(any()))
