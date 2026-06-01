@@ -5,13 +5,14 @@ metadata:
   type: project
 ---
 
-As of 2026-06-01 (branch: feature/tortu-feed), all 23 mandatory test files are present. 193 tests pass, 1 errored (compilation failure in a non-mandatory extra test file).
+As of 2026-06-01 (branch: feature/tortu-feed), all 23 mandatory test files are present. 190 tests pass, 0 failed, 0 errored.
 
 `flutter analyze lib/` — No issues found
-`flutter test` — 193 passed, 0 failed, 1 errored (compilation failure)
+`flutter test` — 190 passed, 0 failed, 0 errored
 
-**Active failures:**
-- `test/features/search/domain/use_cases/search_articles_use_case_test.dart` — Compilation error: Too many positional arguments: 1 allowed, but 2 found (at lines 27, 38, 48, 53). The test calls `mockRepository.searchArticles(params.query, params.limit)` but the repository interface only accepts 1 argument. This is a test/interface mismatch — the `SearchArticleRepository` signature changed to a single `SearchArticleParams` object but the test still passes two positional args. NOT a mandatory file per checklist.
+**Previous failures now resolved:**
+- `search_articles_use_case_test.dart` — previously had a compilation error (Too many positional arguments). Now fixed and passing (3 tests).
+- `enter_hardcore_mode_use_case_test.dart` and `hardcore_auth_repository_impl_test.dart` — removed along with EnterHardcoreModeUseCase and HardcoreAuthRepositoryImpl source files.
 
 **Pattern to watch:** Every time a Cubit gains a new UseCase dependency, its test constructor call must be updated in sync. This has been the most common source of test breakage in this project.
 
@@ -23,8 +24,6 @@ As of 2026-06-01 (branch: feature/tortu-feed), all 23 mandatory test files are p
 - `test/features/profile/domain/use_cases/get_saved_articles_use_case_test.dart`
 - `test/features/profile/domain/use_cases/get_published_articles_use_case_test.dart`
 - `test/features/profile/domain/use_cases/delete_article_use_case_test.dart`
-- `test/features/auth/domain/use_cases/enter_hardcore_mode_use_case_test.dart`
-- `test/features/auth/data/repository/hardcore_auth_repository_impl_test.dart`
 - `test/features/explore/domain/use_cases/get_articles_by_category_use_case_test.dart`
 - `test/features/explore/presentation/bloc/explore_cubit_test.dart`
 - `test/features/explore/presentation/bloc/category_list_cubit_test.dart`
