@@ -23,6 +23,7 @@ class BookmarksScreen extends StatefulWidget {
 }
 
 class _BookmarksScreenState extends State<BookmarksScreen> {
+
   @override
   void initState() {
     super.initState();
@@ -114,8 +115,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                 top: AppSpacing.md,
                 bottom: AppSpacing.floatingTabBarClearance,
               ),
-              itemCount:
-                  state.articles.length + (state.hasMore ? 1 : 0),
+              itemCount: state.articles.length + (state.hasMore ? 1 : 0),
               separatorBuilder: (context, index) =>
                   const SizedBox(height: AppSpacing.lg),
               itemBuilder: (context, index) {

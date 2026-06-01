@@ -44,7 +44,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TortuAppBar.detail(
-        title: widget.category.name,
+        title: 'Category',
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

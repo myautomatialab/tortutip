@@ -52,6 +52,8 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
     final now = DateTime.now().toIso8601String();
     final data = {
       'author_id': params.authorId,
+      'author_name': params.authorName,
+      'author_avatar_url': params.authorAvatarUrl,
       'category_id': params.categoryId,
       'title': params.title,
       'body': params.body,
@@ -176,6 +178,7 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
   }
 
   Future<ArticleModel> _enrichWithAuthor(ArticleModel article) async {
+    if (article.authorId.isEmpty) return article;
     try {
       final userDoc =
           await _firestore.collection('users').doc(article.authorId).get();
@@ -194,8 +197,8 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
         saveCount: article.saveCount,
         publishedAt: article.publishedAt,
         createdAt: article.createdAt,
-        authorName: data['name'] ?? '',
-        authorAvatarUrl: data['avatar_url'] ?? '',
+        authorName: (data['name'] as String?) ?? '',
+        authorAvatarUrl: (data['avatar_url'] as String?) ?? '',
       );
     } catch (_) {
       return article;

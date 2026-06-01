@@ -35,11 +35,11 @@ class TortuArticleCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 child: Image.network(
                   coverUrl!,
-                  height: 160,
+                  height: AppSpacing.categoryCardHeight,
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (_, _, _) => Container(
-                    height: 160,
+                    height: AppSpacing.categoryCardHeight,
                     decoration: AppDecorations.coverImagePlaceholder,
                   ),
                 ),
@@ -95,9 +95,10 @@ class TortuProfileCard extends StatelessWidget {
           CircleAvatar(
             radius: AppSpacing.avatarSizeMd / 2,
             backgroundColor: AppColors.surface,
-            backgroundImage:
-                avatarUrl != null ? NetworkImage(avatarUrl!) : null,
-            child: avatarUrl == null
+            backgroundImage: (avatarUrl != null && avatarUrl!.isNotEmpty)
+                ? NetworkImage(avatarUrl!)
+                : null,
+            child: (avatarUrl == null || avatarUrl!.isEmpty)
                 ? Text(
                     name.isNotEmpty ? name[0].toUpperCase() : '?',
                     style: AppTypography.h4,

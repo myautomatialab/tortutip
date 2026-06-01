@@ -64,8 +64,7 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
       }
       emit(_currentFormState);
     } else {
-      // Show the raw error for debugging — replace with _mapErrorToMessage after fix
-      emit(CreateArticleError('Upload error: ${result.error}'));
+      emit(CreateArticleError(_mapErrorToMessage(result.error!)));
       emit(_currentFormState);
     }
   }
@@ -109,7 +108,11 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
     }
   }
 
-  Future<void> publishFromForm(String authorId) async {
+  Future<void> publishFromForm(
+      String authorId, {
+      String authorName = '',
+      String authorAvatarUrl = '',
+  }) async {
     emit(const CreateArticlePublishing());
     final readTime = _calculateReadTime(_bodyJson);
     if (_editingArticleId != null) {
@@ -131,6 +134,8 @@ class CreateArticleCubit extends Cubit<CreateArticleState> {
     } else {
       final params = PublishArticleParams(
         authorId: authorId,
+        authorName: authorName,
+        authorAvatarUrl: authorAvatarUrl,
         categoryId: _categoryId,
         title: _title,
         body: _extractPlainText(_bodyJson),

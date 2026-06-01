@@ -36,6 +36,8 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
   late final TextEditingController _titleController;
   final _imagePicker = ImagePicker();
   String _userId = '';
+  String _authorName = '';
+  String _authorAvatarUrl = '';
 
   bool _isUploadingVertical = false;
   bool _isUploadingHorizontal = false;
@@ -54,13 +56,23 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _userId = authState.user.id;
+      _authorName = authState.user.name;
+      _authorAvatarUrl = authState.user.avatarUrl;
     }
 
     _cubit.loadCategories();
 
     if (widget.article != null) {
-      _titleController.text = widget.article!.title;
-      _cubit.initForEdit(widget.article!);
+      final article = widget.article!;
+      _titleController.text = article.title;
+
+      // Pre-populate the Quill editor with the article's body text
+      if (article.body.isNotEmpty) {
+        final doc = Document()..insert(0, article.body);
+        _quillController.document = doc;
+      }
+
+      _cubit.initForEdit(article);
     }
   }
 
@@ -74,7 +86,6 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
     _quillController.removeListener(_onBodyChanged);
     _quillController.dispose();
     _titleController.dispose();
-    _cubit.close();
     super.dispose();
   }
 
@@ -137,8 +148,8 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
           children: [
             const SizedBox(height: AppSpacing.sm),
             Container(
-              width: 40,
-              height: 4,
+              width: AppSpacing.dragHandleWidth,
+              height: AppSpacing.xs,
               decoration: BoxDecoration(
                 color: AppColors.borderStrong,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
@@ -237,7 +248,11 @@ class _CreateArticleScreenState extends State<CreateArticleScreen> {
   }
 
   void _onPublish() {
-    _cubit.publishFromForm(_userId);
+    _cubit.publishFromForm(
+      _userId,
+      authorName: _authorName,
+      authorAvatarUrl: _authorAvatarUrl,
+    );
   }
 
   @override
@@ -419,6 +434,12 @@ class _CategorySelectorState extends State<_CategorySelector> {
             ? state.categories
             : <CategoryEntity>[];
         if (categories.isEmpty) return const SizedBox.shrink();
+
+        // Sync selection with cubit state (handles pre-loaded edit mode)
+        if (state is CreateArticleFormUpdated && _selectedId == null && state.categoryId.isNotEmpty) {
+          _selectedId = state.categoryId;
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -40,6 +40,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         .map((doc) => doc.data()['article_id'] as String?)
         .where((id) => id != null)
         .cast<String>()
+        .toSet()
         .take(limit)
         .toList();
 
@@ -51,7 +52,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       ),
     );
 
-    return articleDocs
+    final articles = articleDocs
         .where((doc) => doc.exists)
         .map((doc) {
           final data = doc.data()!;
@@ -60,6 +61,31 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         })
         .where((data) => data['status'] != 'deleted')
         .toList();
+
+    return Future.wait(articles.map(_enrichWithAuthor));
+  }
+
+  Future<Map<String, dynamic>> _enrichWithAuthor(
+      Map<String, dynamic> article) async {
+    final authorId = article['author_id'] as String? ?? '';
+    if (authorId.isEmpty) return article;
+    // Skip if author data is already stored in the article document
+    final storedName = article['author_name'] as String? ?? '';
+    final storedAvatar = article['author_avatar_url'] as String? ?? '';
+    if (storedName.isNotEmpty) return article;
+    try {
+      final userDoc =
+          await _firestore.collection('users').doc(authorId).get();
+      final data = userDoc.data();
+      if (data == null) return article;
+      return {
+        ...article,
+        'author_name': (data['name'] as String?) ?? '',
+        'author_avatar_url': (data['avatar_url'] as String?) ?? storedAvatar,
+      };
+    } catch (_) {
+      return article;
+    }
   }
 
   @override
@@ -84,11 +110,13 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         return 0;
       });
 
-    return docs.take(limit).map((doc) {
+    final articles = docs.take(limit).map((doc) {
       final data = doc.data();
       data['id'] = doc.id;
       return data;
     }).toList();
+
+    return Future.wait(articles.map(_enrichWithAuthor));
   }
 
   @override
