@@ -16,4 +16,6 @@ class AppRoutes {
 
   static String exploreCategoryPath(String categoryId) =>
       '/explore/category/$categoryId';
+
+  static const bookmarks = '/bookmarks';
 }
