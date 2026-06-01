@@ -6,6 +6,7 @@ import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
+import 'package:tortutip/shared/widgets/tortutip_empty_view.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/features/bookmarks/presentation/bloc/bookmarks_cubit.dart';
@@ -52,50 +53,19 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
           if (state is BookmarksLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (state is BookmarksEmpty) return _buildEmptyState(context);
+          if (state is BookmarksEmpty) {
+            return TortuEmptyView(
+              icon: Icons.bookmark_border,
+              title: 'Aún no tienes marcadores',
+              subtitle: 'Guarda artículos que te interesen para leerlos después.',
+              actionLabel: 'Explorar artículos',
+              onActionTap: () => context.go(AppRoutes.feed),
+            );
+          }
           if (state is BookmarksLoaded) return _buildList(context, state);
           if (state is BookmarksError) return _buildError(context, state.message);
           return const SizedBox.shrink();
         },
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.bookmark_border,
-              color: AppColors.textSecondary,
-              size: 64,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              'Aún no tienes marcadores',
-              style: AppTypography.h2.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Guarda artículos que te interesen para leerlos después.',
-              style: AppTypography.body.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            TortuPrimaryButton(
-              label: 'Explorar artículos',
-              onTap: () => context.go(AppRoutes.feed),
-            ),
-          ],
-        ),
       ),
     );
   }
