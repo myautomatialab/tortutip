@@ -1,11 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 
 class CoverUploadWidget extends StatelessWidget {
-  final String? coverVerticalUrl;
-  final String? coverHorizontalUrl;
+  final Object? coverVerticalSource;
+  final Object? coverHorizontalSource;
   final bool isUploadingVertical;
   final bool isUploadingHorizontal;
   final VoidCallback onTapVertical;
@@ -13,8 +15,8 @@ class CoverUploadWidget extends StatelessWidget {
 
   const CoverUploadWidget({
     super.key,
-    this.coverVerticalUrl,
-    this.coverHorizontalUrl,
+    this.coverVerticalSource,
+    this.coverHorizontalSource,
     this.isUploadingVertical = false,
     this.isUploadingHorizontal = false,
     required this.onTapVertical,
@@ -36,7 +38,7 @@ class CoverUploadWidget extends StatelessWidget {
             child: _CoverZone(
               label: 'VERTICAL COVER\n(FEED)',
               aspectRatio: 3 / 4,
-              imageUrl: coverVerticalUrl,
+              imageSource: coverVerticalSource,
               isUploading: isUploadingVertical,
               onTap: onTapVertical,
             ),
@@ -47,7 +49,7 @@ class CoverUploadWidget extends StatelessWidget {
             child: _CoverZone(
               label: 'HORIZONTAL COVER\n(ARTICLE)',
               aspectRatio: 16 / 9,
-              imageUrl: coverHorizontalUrl,
+              imageSource: coverHorizontalSource,
               isUploading: isUploadingHorizontal,
               onTap: onTapHorizontal,
             ),
@@ -61,14 +63,14 @@ class CoverUploadWidget extends StatelessWidget {
 class _CoverZone extends StatelessWidget {
   final String label;
   final double aspectRatio;
-  final String? imageUrl;
+  final Object? imageSource;
   final bool isUploading;
   final VoidCallback onTap;
 
   const _CoverZone({
     required this.label,
     required this.aspectRatio,
-    this.imageUrl,
+    this.imageSource,
     required this.isUploading,
     required this.onTap,
   });
@@ -101,9 +103,17 @@ class _CoverZone extends StatelessWidget {
       );
     }
 
-    if (imageUrl != null) {
+    if (imageSource is File) {
+      return Image.file(
+        imageSource as File,
+        fit: BoxFit.cover,
+        errorBuilder: (ctx, err, st) => _emptyZone(),
+      );
+    }
+
+    if (imageSource is String) {
       return Image.network(
-        imageUrl!,
+        imageSource as String,
         fit: BoxFit.cover,
         errorBuilder: (ctx, err, st) => _emptyZone(),
       );
