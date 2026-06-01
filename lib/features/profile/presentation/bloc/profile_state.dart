@@ -19,17 +19,40 @@ class ProfileLoading extends ProfileState {
 
 class ProfileLoaded extends ProfileState {
   final UserEntity user;
-  final List<ArticleEntity> articles;
-  const ProfileLoaded(this.user, this.articles);
+  final List<ArticleEntity> savedArticles;
+  final List<ArticleEntity> publishedArticles;
+  final int totalPublishedCount;
+
+  const ProfileLoaded({
+    required this.user,
+    required this.savedArticles,
+    required this.publishedArticles,
+    required this.totalPublishedCount,
+  });
 
   @override
-  List<Object?> get props => [user, articles];
+  List<Object?> get props => [
+        user,
+        savedArticles,
+        publishedArticles,
+        totalPublishedCount,
+      ];
 }
 
 class ProfileError extends ProfileState {
   final String message;
+
   const ProfileError(this.message);
 
   @override
   List<Object?> get props => [message];
+}
+
+class ProfileArticleDeleted extends ProfileState {
+  final String articleId;
+
+  const ProfileArticleDeleted(this.articleId);
+
+  @override
+  List<Object?> get props => [articleId];
 }
