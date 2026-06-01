@@ -40,12 +40,17 @@ class CategoryListCubit extends Cubit<CategoryListState> {
     final savedResult = results[1] as DataState<List<String>>;
 
     if (articlesResult.isSuccess) {
+      final articles = articlesResult.data!;
+      if (articles.isEmpty) {
+        emit(const CategoryListEmpty());
+        return;
+      }
       final savedIds =
           savedResult.isSuccess ? savedResult.data!.toSet() : <String>{};
       emit(CategoryListLoaded(
         category: category,
-        articles: articlesResult.data!,
-        hasMore: articlesResult.data!.length == _pageSize,
+        articles: articles,
+        hasMore: articles.length == _pageSize,
         savedArticleIds: savedIds,
       ));
     } else {
