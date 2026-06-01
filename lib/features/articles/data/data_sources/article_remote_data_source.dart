@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:tortutip/features/articles/data/models/article_model.dart';
 import 'package:tortutip/features/articles/domain/params/publish_article_params.dart';
+import 'package:tortutip/features/articles/domain/params/upload_article_image_params.dart';
 
 abstract class ArticleRemoteDataSource {
   Future<List<ArticleModel>> getFeedArticles(List<String> categoryIds);
@@ -13,11 +14,11 @@ abstract class ArticleRemoteDataSource {
   Future<List<ArticleModel>> getFeedArticlesPaged(List<String> categoryIds, int page, int pageSize);
   Future<void> unsaveArticle(String userId, String articleId);
   Future<List<ArticleModel>> getRelatedArticles(String categoryId, String excludeArticleId);
+  Future<String> uploadArticleImage(UploadArticleImageParams params);
 }
 
 class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
   final FirebaseFirestore _firestore;
-  // ignore: unused_field
   final FirebaseStorage _storage;
   ArticleRemoteDataSourceImpl(this._firestore, this._storage);
 
@@ -53,7 +54,7 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
       'cover_vertical_url': params.coverVerticalUrl,
       'cover_horizontal_url': params.coverHorizontalUrl,
       'status': 'published',
-      'read_time_minutes': (params.body.split(' ').length / 200).ceil(),
+      'read_time_minutes': params.readTimeMinutes,
       'save_count': 0,
       'published_at': now,
       'created_at': now,
@@ -136,5 +137,16 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
         .where((a) => a.id != excludeArticleId)
         .take(5)
         .toList();
+  }
+
+  @override
+  Future<String> uploadArticleImage(UploadArticleImageParams params) async {
+    final orientation = params.isVertical ? 'vertical' : 'horizontal';
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final ref = _storage.ref(
+      'articles/${params.userId}/${timestamp}_$orientation.jpg',
+    );
+    final task = await ref.putFile(params.imageFile);
+    return task.ref.getDownloadURL();
   }
 }
