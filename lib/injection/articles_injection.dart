@@ -30,7 +30,7 @@ final sl = GetIt.instance;
 
 void initArticlesDependencies() {
   // DataSource — también necesita Storage para subir imágenes de portada
-  sl.registerFactory<ArticleRemoteDataSource>(() {
+  sl.registerLazySingleton<ArticleRemoteDataSource>(() {
     if (HardcoreSession.isActive || AppConfig.kUseMockData) {
       return MockArticleRemoteDataSource();
     }

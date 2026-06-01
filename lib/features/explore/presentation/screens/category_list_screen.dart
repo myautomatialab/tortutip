@@ -13,6 +13,7 @@ import 'package:tortutip/features/explore/presentation/bloc/category_list_cubit.
 import 'package:tortutip/features/explore/presentation/bloc/category_list_state.dart';
 import 'package:tortutip/features/explore/presentation/widgets/article_list_card.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
+import 'package:tortutip/shared/widgets/tortutip_button.dart';
 import 'package:tortutip/shared/widgets/tortutip_empty_view.dart';
 
 class CategoryListScreen extends StatefulWidget {
@@ -127,15 +128,11 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
             child: Center(
-              child: TextButton(
-                onPressed: () => context
+              child: TortuSecondaryButton(
+                label: 'Load more',
+                onTap: () => context
                     .read<CategoryListCubit>()
                     .loadMore(_userId),
-                child: Text(
-                  'Load more',
-                  style: AppTypography.body
-                      .copyWith(color: AppColors.primaryDark),
-                ),
               ),
             ),
           );

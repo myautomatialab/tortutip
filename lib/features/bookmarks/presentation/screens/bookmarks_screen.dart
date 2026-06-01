@@ -135,13 +135,10 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
       child: Center(
-        child: TextButton(
-          onPressed: () =>
+        child: TortuSecondaryButton(
+          label: 'Cargar más',
+          onTap: () =>
               context.read<BookmarksCubit>().loadMore(_userId(context)),
-          child: Text(
-            'Cargar más',
-            style: AppTypography.body.copyWith(color: AppColors.primaryDark),
-          ),
         ),
       ),
     );
