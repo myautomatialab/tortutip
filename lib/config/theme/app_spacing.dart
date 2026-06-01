@@ -51,4 +51,8 @@ class AppSpacing {
   static const double radiusLg = 14;
   static const double radiusXl = 16;
   static const double radiusFull = 100;
+
+  // ── Componentes de modal ─────────────────────────────────────
+  static const double dragHandleWidth = 40.0;
+  static const double floatingTabBarClearance = 100.0;
 }

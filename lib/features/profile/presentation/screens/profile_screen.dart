@@ -14,7 +14,6 @@ import 'package:tortutip/features/profile/presentation/bloc/profile_state.dart';
 import 'package:tortutip/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:tortutip/features/profile/presentation/widgets/profile_header_card.dart';
 import 'package:tortutip/features/profile/presentation/widgets/published_article_row.dart';
-import 'package:tortutip/features/profile/presentation/widgets/saved_article_thumbnail.dart';
 import 'package:tortutip/injection/injection_container.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
@@ -174,42 +173,6 @@ class _ProfileBody extends StatelessWidget {
             totalPublishedCount: state.totalPublishedCount,
           ),
           const SizedBox(height: AppSpacing.xxl),
-          if (state.savedArticles.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenHorizontal,
-              ),
-              child: Text('Tips Guardados', style: AppTypography.h4),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenHorizontal,
-              ),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: AppSpacing.md,
-                  mainAxisSpacing: AppSpacing.lg,
-                  childAspectRatio: 0.62,
-                ),
-                itemCount: state.savedArticles.length,
-                itemBuilder: (_, index) {
-                  final article = state.savedArticles[index];
-                  final category = state.categoryById(article.categoryId);
-                  return SavedArticleThumbnail(
-                    article: article,
-                    categoryName: category?.name ?? article.categoryId,
-                    fallbackImageUrl: category?.iconUrl,
-                    onTap: () => onViewArticle(article.id),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-          ],
           if (state.publishedArticles.isNotEmpty) ...[
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -240,12 +203,12 @@ class _ProfileBody extends StatelessWidget {
               },
             ),
           ],
-          if (state.savedArticles.isEmpty && state.publishedArticles.isEmpty)
+          if (state.publishedArticles.isEmpty)
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.xxl),
                 child: Text(
-                  'Aún no tienes artículos.\n¡Empieza a guardar o escribir!',
+                  'Aún no tienes artículos publicados.',
                   style: AppTypography.body
                       .copyWith(color: AppColors.textSecondary),
                   textAlign: TextAlign.center,

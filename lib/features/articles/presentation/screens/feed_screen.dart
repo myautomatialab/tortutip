@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
-import 'package:tortutip/config/routes/app_routes.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
@@ -56,13 +54,11 @@ class _FeedScreenState extends State<FeedScreen> {
         backgroundColor: AppColors.background,
         appBar: TortuAppBar(
           title: 'TortuTip',
-          leading: const SizedBox.shrink(),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.person_outline),
-              onPressed: () => context.push(AppRoutes.profile),
-            ),
-          ],
+          avatarUrl: context.select<AuthBloc, String?>(
+            (b) => b.state is AuthAuthenticated
+                ? (b.state as AuthAuthenticated).user.avatarUrl
+                : null,
+          ),
         ),
         body: SafeArea(
           child: Column(

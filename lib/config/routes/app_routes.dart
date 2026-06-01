@@ -8,7 +8,6 @@ class AppRoutes {
   static const onboardingDetails    = '/onboarding/details';
   static const feed                 = '/feed';
   static const explore              = '/explore';
-  static const create               = '/create';
   static const editProfile          = '/explore/edit';
   static const profile              = '/profile';
 

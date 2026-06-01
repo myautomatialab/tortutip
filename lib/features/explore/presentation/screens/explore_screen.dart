@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +5,8 @@ import 'package:tortutip/config/routes/app_routes.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
+import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
 import 'package:tortutip/features/explore/presentation/bloc/explore_cubit.dart';
 import 'package:tortutip/features/explore/presentation/bloc/explore_state.dart';
@@ -33,12 +33,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
     return Scaffold(
       appBar: TortuAppBar(
         title: 'TortuTip',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person_outline, color: AppColors.textPrimary),
-            onPressed: () => context.push(AppRoutes.profile),
-          ),
-        ],
+        avatarUrl: context.select<AuthBloc, String?>(
+          (b) => b.state is AuthAuthenticated
+              ? (b.state as AuthAuthenticated).user.avatarUrl
+              : null,
+        ),
       ),
       body: BlocBuilder<ExploreCubit, ExploreState>(
         builder: (context, state) {
@@ -59,8 +58,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Widget _buildLoaded(BuildContext context, ExploreLoaded state) {
     return SingleChildScrollView(
-      // 100 = floating tab bar total height (tabBarHeight 76 + bottom padding 24)
-      padding: const EdgeInsets.only(bottom: 100),
+      padding: const EdgeInsets.only(bottom: AppSpacing.floatingTabBarClearance),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -78,22 +76,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
           const SizedBox(height: AppSpacing.xl),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: Row(
-              children: [
-                Text(
-                  'Trending Categories',
-                  style: AppTypography.h2.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'SEE ALL',
-                    style: AppTypography.label
-                        .copyWith(color: AppColors.primaryDark),
-                  ),
-                ),
-              ],
+            child: Text(
+              'Categories',
+              style: AppTypography.h2.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -108,7 +93,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 crossAxisSpacing: AppSpacing.md,
                 childAspectRatio: 1.0,
               ),
-              itemCount: min(4, state.categories.length),
+              itemCount: state.categories.length,
               itemBuilder: (context, index) {
                 final category = state.categories[index];
                 return CategoryCard(
@@ -118,8 +103,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               },
             ),
           ),
-          // 100 = floating tab bar total height (tabBarHeight 76 + bottom padding 24)
-          const SizedBox(height: 100),
+          const SizedBox(height: AppSpacing.floatingTabBarClearance),
         ],
       ),
     );
