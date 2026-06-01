@@ -4,7 +4,7 @@ import 'package:tortutip/features/categories/domain/entities/category_entity.dar
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 
 abstract class SearchRepository {
-  Future<DataState<List<ArticleEntity>>> searchArticles(String query, int limit);
+  Future<DataState<List<ArticleEntity>>> searchArticles(String query);
   Future<DataState<List<CategoryEntity>>> searchCategories(String query);
   Future<DataState<List<UserEntity>>> searchCreators(String query);
   Future<DataState<List<String>>> getRecentSearches();

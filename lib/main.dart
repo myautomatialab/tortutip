@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter/services.dart';
 
 import 'config/routes/app_router.dart';
 import 'config/theme/app_theme.dart';
@@ -10,8 +12,14 @@ import 'features/auth/presentation/bloc/auth_event.dart';
 import 'firebase_options.dart';
 import 'injection/injection_container.dart';
 
+
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  
+   await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -19,6 +27,7 @@ void main() async {
 
   await initDependencies();
 
+  FlutterNativeSplash.remove();
   runApp(const TortuTipApp());
 }
 

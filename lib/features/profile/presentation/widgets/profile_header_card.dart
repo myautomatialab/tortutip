@@ -7,11 +7,13 @@ import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 class ProfileHeaderCard extends StatelessWidget {
   final UserEntity user;
   final int totalPublishedCount;
+  final ValueChanged<bool>? onRoleToggled;
 
   const ProfileHeaderCard({
     super.key,
     required this.user,
     required this.totalPublishedCount,
+    this.onRoleToggled,
   });
 
   String _formatCount(int count) {
@@ -79,12 +81,51 @@ class ProfileHeaderCard extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: AppSpacing.sm),
-                _TipsCountChip(count: totalPublishedCount, format: _formatCount),
+                Row(
+                  children: [
+                    _TipsCountChip(count: totalPublishedCount, format: _formatCount),
+                    const Spacer(),
+                    if (onRoleToggled != null)
+                      _WriterSwitch(
+                        isWriter: user.role == 'writer',
+                        onChanged: onRoleToggled!,
+                      ),
+                  ],
+                ),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _WriterSwitch extends StatelessWidget {
+  final bool isWriter;
+  final ValueChanged<bool> onChanged;
+
+  const _WriterSwitch({required this.isWriter, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          isWriter ? Icons.edit : Icons.menu_book_outlined,
+          size: AppSpacing.iconSm,
+          color: isWriter ? AppColors.primary : AppColors.textSecondary,
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        Switch.adaptive(
+          value: isWriter,
+          onChanged: onChanged,
+          activeThumbColor: AppColors.white,
+          activeTrackColor: AppColors.primary,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ],
     );
   }
 }

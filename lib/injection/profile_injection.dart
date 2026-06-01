@@ -12,6 +12,7 @@ import 'package:tortutip/features/profile/domain/use_cases/get_saved_articles_us
 import 'package:tortutip/features/profile/domain/use_cases/upload_avatar_use_case.dart';
 import 'package:tortutip/features/profile/presentation/bloc/edit_profile_cubit.dart';
 import 'package:tortutip/features/profile/presentation/bloc/profile_cubit.dart';
+import 'package:tortutip/shared/user/domain/use_cases/update_user_role_use_case.dart';
 
 final sl = GetIt.instance;
 
@@ -41,7 +42,7 @@ void initProfileDependencies() {
   );
 
   sl.registerFactory<ProfileCubit>(
-    () => ProfileCubit(sl(), sl(), sl(), sl(), sl<GetAllCategoriesUseCase>()),
+    () => ProfileCubit(sl(), sl(), sl(), sl(), sl<GetAllCategoriesUseCase>(), sl<UpdateUserRoleUseCase>()),
   );
 
   sl.registerFactory<EditProfileCubit>(

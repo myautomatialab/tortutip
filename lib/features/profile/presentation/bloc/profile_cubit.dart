@@ -5,6 +5,7 @@ import 'package:tortutip/features/profile/domain/use_cases/delete_article_use_ca
 import 'package:tortutip/features/profile/domain/use_cases/get_published_articles_use_case.dart';
 import 'package:tortutip/features/profile/domain/use_cases/get_saved_articles_use_case.dart';
 import 'package:tortutip/shared/user/domain/use_cases/get_current_user_use_case.dart';
+import 'package:tortutip/shared/user/domain/use_cases/update_user_role_use_case.dart';
 import 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
@@ -13,6 +14,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   final GetPublishedArticlesUseCase _getPublishedArticles;
   final DeleteArticleUseCase _deleteArticle;
   final GetAllCategoriesUseCase _getAllCategories;
+  final UpdateUserRoleUseCase _updateUserRole;
 
   ProfileCubit(
     this._getCurrentUser,
@@ -20,14 +22,15 @@ class ProfileCubit extends Cubit<ProfileState> {
     this._getPublishedArticles,
     this._deleteArticle,
     this._getAllCategories,
+    this._updateUserRole,
   ) : super(const ProfileInitial());
 
   Future<void> loadProfile(String userId) async {
     emit(const ProfileLoading());
 
     final userFuture = _getCurrentUser(const NoParams());
-    final savedFuture = _getSavedArticles(GetSavedArticlesParams(userId: userId, limit: 4));
-    final publishedFuture = _getPublishedArticles(GetPublishedArticlesParams(authorId: userId, limit: 5));
+    final savedFuture = _getSavedArticles(GetSavedArticlesParams(userId: userId, limit: 100));
+    final publishedFuture = _getPublishedArticles(GetPublishedArticlesParams(authorId: userId, limit: 100));
     final categoriesFuture = _getAllCategories(const NoParams());
 
     final userResult = await userFuture;
@@ -85,6 +88,13 @@ class ProfileCubit extends Cubit<ProfileState> {
       publishedArticles: updatedPublished,
       totalPublishedCount: updatedPublished.length,
     ));
+  }
+
+  Future<bool> toggleRole(String userId, String newRole) async {
+    final result = await _updateUserRole(
+      UpdateUserRoleParams(userId: userId, role: newRole),
+    );
+    return result.isSuccess;
   }
 
   String _mapErrorToMessage(Exception error) {

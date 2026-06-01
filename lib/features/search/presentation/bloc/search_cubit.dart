@@ -60,19 +60,9 @@ class SearchCubit extends Cubit<SearchState> {
       return;
     }
 
-    _debounce = Timer(const Duration(milliseconds: 300), () {
-      _fetchSuggestions(query);
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      search(query);
     });
-  }
-
-  Future<void> _fetchSuggestions(String query) async {
-    final result = await _searchArticles(
-        SearchArticlesParams(query: query, limit: 5));
-    if (result.isSuccess) {
-      final suggestions =
-          result.data!.map((a) => a.title).take(5).toList();
-      emit(SearchSuggesting(query: query, suggestions: suggestions));
-    }
   }
 
   Future<void> search(String query) async {
@@ -81,11 +71,12 @@ class SearchCubit extends Cubit<SearchState> {
 
     final articlesResult =
         await _searchArticles(SearchArticlesParams(query: query));
-    final categoriesResult = await _searchCategories(query);
+    final queryCategoriesResult = await _searchCategories(query);
     final creatorsResult = await _searchCreators(query);
+    final allCategoriesResult = await _searchCategories('');
 
     final allFailed = articlesResult.isFailure &&
-        categoriesResult.isFailure &&
+        queryCategoriesResult.isFailure &&
         creatorsResult.isFailure;
 
     if (allFailed) {
@@ -96,10 +87,19 @@ class SearchCubit extends Cubit<SearchState> {
 
     final articles =
         articlesResult.isSuccess ? articlesResult.data! : [];
-    final categories =
-        categoriesResult.isSuccess ? categoriesResult.data! : [];
+    final queryCategories =
+        queryCategoriesResult.isSuccess ? queryCategoriesResult.data! : [];
+    final allCategories =
+        allCategoriesResult.isSuccess ? allCategoriesResult.data! : [];
     final creators =
         creatorsResult.isSuccess ? creatorsResult.data! : [];
+
+    // Enriquecer con categorías de los artículos encontrados (no solo las que coinciden con la query)
+    final articleCatIds = articles.map((a) => a.categoryId).toSet();
+    final categories = <CategoryEntity>{
+      ...queryCategories,
+      ...allCategories.where((c) => articleCatIds.contains(c.id)),
+    }.toList();
 
     final hasResults =
         articles.isNotEmpty || categories.isNotEmpty || creators.isNotEmpty;

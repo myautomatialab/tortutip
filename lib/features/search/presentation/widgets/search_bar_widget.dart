@@ -3,10 +3,11 @@ import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 
-class SearchBarWidget extends StatelessWidget {
+class SearchBarWidget extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmitted;
   final VoidCallback onCancel;
 
   const SearchBarWidget({
@@ -14,43 +15,64 @@ class SearchBarWidget extends StatelessWidget {
     required this.controller,
     required this.focusNode,
     required this.onChanged,
+    required this.onSubmitted,
     required this.onCancel,
   });
 
   @override
+  State<SearchBarWidget> createState() => _SearchBarWidgetState();
+}
+
+class _SearchBarWidgetState extends State<SearchBarWidget> {
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode.removeListener(_onFocusChange);
+    super.dispose();
+  }
+
+  void _onFocusChange() => setState(() {});
+
+  @override
   Widget build(BuildContext context) {
+    final isFocused = widget.focusNode.hasFocus;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         children: [
           Expanded(
             child: Container(
+              clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.radiusFull),
-                border: Border.all(
-                    color: AppColors.primary, width: 1.5),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
               ),
               child: TextField(
-                controller: controller,
-                focusNode: focusNode,
-                onChanged: onChanged,
+                controller: widget.controller,
+                focusNode: widget.focusNode,
+                cursorColor: AppColors.primary,
+                onChanged: widget.onChanged,
                 onSubmitted: (value) {
-                  if (value.trim().isNotEmpty) {
-                    onChanged(value.trim());
-                  }
+                  final trimmed = value.trim();
+                  if (trimmed.isNotEmpty) widget.onSubmitted(trimmed);
                 },
                 style: AppTypography.body,
                 decoration: InputDecoration(
                   hintText: 'Search articles, categories...',
                   hintStyle: AppTypography.body
                       .copyWith(color: AppColors.textSecondary),
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.search,
-                    color: AppColors.primary,
+                    color: isFocused ? AppColors.primary : AppColors.textSecondary,
                   ),
                   border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: AppSpacing.md,
                   ),
@@ -60,7 +82,7 @@ class SearchBarWidget extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.md),
           GestureDetector(
-            onTap: onCancel,
+            onTap: widget.onCancel,
             child: Text(
               'Cancel',
               style: AppTypography.body

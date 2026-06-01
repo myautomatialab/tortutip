@@ -121,6 +121,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       gender: data['gender'] ?? '',
       ageRange: data['age_range'] ?? '',
       createdAt: DateTime.tryParse(data['created_at'] ?? '') ?? DateTime.now(),
+      streakDays: (data['streak_days'] as int?) ?? 0,
+      lastFeedDate: (data['last_feed_date'] as String?) ?? '',
+      overallProgress: (data['overall_progress'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

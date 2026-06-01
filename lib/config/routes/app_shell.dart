@@ -52,12 +52,15 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthBloc>().state;
+    final isWriter = authState is AuthAuthenticated && authState.user.role == 'writer';
     return Scaffold(
       extendBody: true,
       body: child,
       bottomNavigationBar: TortuTipTabBar(
         currentIndex: _currentIndex(context),
         onTabTap: (i) => _onTabTap(context, i),
+        isWriter: isWriter,
       ),
     );
   }

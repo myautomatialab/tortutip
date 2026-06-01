@@ -9,6 +9,7 @@ import 'package:tortutip/features/articles/presentation/screens/create_article_s
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:tortutip/features/auth/presentation/bloc/auth_event.dart';
 import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/features/profile/presentation/bloc/edit_profile_cubit.dart';
 import 'package:tortutip/features/profile/presentation/bloc/edit_profile_state.dart';
@@ -94,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             builder: (ctx, state) {
               if (state is ProfileLoaded) {
                 return IconButton(
-                  icon: const Icon(Icons.edit_outlined),
+                  icon: const Icon(Icons.settings_outlined),
                   onPressed: () => _openEditProfile(context, state),
                 );
               }
@@ -165,6 +166,15 @@ class _ProfileBody extends StatelessWidget {
     required this.onViewArticle,
   });
 
+  Future<void> _onRoleToggled(BuildContext context, bool isWriter) async {
+    final newRole = isWriter ? 'writer' : 'reader';
+    final success = await context.read<ProfileCubit>().toggleRole(userId, newRole);
+    if (success && context.mounted) {
+      context.read<AuthBloc>().add(const CheckAuthEvent());
+      context.read<ProfileCubit>().loadProfile(userId);
+    }
+  }
+
   void _openEditArticle(BuildContext context, ArticleEntity article) {
     showModalBottomSheet(
       context: context,
@@ -188,6 +198,7 @@ class _ProfileBody extends StatelessWidget {
           ProfileHeaderCard(
             user: state.user,
             totalPublishedCount: state.totalPublishedCount,
+            onRoleToggled: (isWriter) => _onRoleToggled(context, isWriter),
           ),
           const SizedBox(height: AppSpacing.xxl),
           if (state.publishedArticles.isNotEmpty) ...[

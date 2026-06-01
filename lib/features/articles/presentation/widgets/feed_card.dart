@@ -134,8 +134,8 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
         ..translateByDouble(_dragOffset, 0.0, 0.0, 1.0),
       alignment: Alignment.center,
       child: GestureDetector(
-        onPanUpdate: _onPanUpdate,
-        onPanEnd: _onPanEnd,
+        onHorizontalDragUpdate: _onPanUpdate,
+        onHorizontalDragEnd: _onPanEnd,
         onTap: _toggleExpand,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
@@ -224,6 +224,7 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
       right: AppSpacing.lg,
       child: GestureDetector(
         onTap: () => widget.onBookmark(widget.article.id),
+        behavior: HitTestBehavior.opaque,
         child: Container(
           width: AppSpacing.avatarSizeSm + AppSpacing.sm,
           height: AppSpacing.avatarSizeSm + AppSpacing.sm,

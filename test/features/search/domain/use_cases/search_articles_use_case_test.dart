@@ -24,7 +24,7 @@ void main() {
 
     test('should_return_DataSuccess_with_articles_when_repository_succeeds',
         () async {
-      when(() => mockRepository.searchArticles(params.query, params.limit))
+      when(() => mockRepository.searchArticles(params.query))
           .thenAnswer((_) async => DataSuccess(articles));
 
       final result = await useCase(params);
@@ -35,7 +35,7 @@ void main() {
 
     test('should_return_DataFailed_when_repository_fails', () async {
       final exception = Exception('Firestore error');
-      when(() => mockRepository.searchArticles(params.query, params.limit))
+      when(() => mockRepository.searchArticles(params.query))
           .thenAnswer((_) async => DataFailed(exception));
 
       final result = await useCase(params);
@@ -45,12 +45,12 @@ void main() {
     });
 
     test('should_call_repository_with_correct_params', () async {
-      when(() => mockRepository.searchArticles(params.query, params.limit))
+      when(() => mockRepository.searchArticles(params.query))
           .thenAnswer((_) async => DataSuccess(articles));
 
       await useCase(params);
 
-      verify(() => mockRepository.searchArticles(params.query, params.limit))
+      verify(() => mockRepository.searchArticles(params.query))
           .called(1);
     });
   });

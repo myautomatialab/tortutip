@@ -62,4 +62,24 @@ class TortuFeedRepositoryImpl implements TortuFeedRepository {
       return DataFailed(e is Exception ? e : Exception(e.toString()));
     }
   }
+
+  @override
+  Future<DataState<int>> getStreakDays(String userId) async {
+    try {
+      final days = await _dataSource.getStreakDays(userId: userId);
+      return DataSuccess(days);
+    } catch (e) {
+      return DataFailed(e is Exception ? e : Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<DataState<double>> getOverallProgress(String userId) async {
+    try {
+      final progress = await _dataSource.getOverallProgress(userId: userId);
+      return DataSuccess(progress);
+    } catch (e) {
+      return DataFailed(e is Exception ? e : Exception(e.toString()));
+    }
+  }
 }

@@ -12,6 +12,6 @@ class SearchArticlesUseCase
 
   @override
   Future<DataState<List<ArticleEntity>>> call(SearchArticlesParams params) {
-    return _repository.searchArticles(params.query, params.limit);
+    return _repository.searchArticles(params.query);
   }
 }

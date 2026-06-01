@@ -6,6 +6,8 @@ abstract class TortuFeedRepository {
   Future<DataState<bool>> checkTodayTip(CheckTodayTipParams params);
   Future<DataState<double>> updateCategoryProgress(UpdateCategoryProgressParams params);
   Future<DataState<double>> getCategoryProgress(GetCategoryProgressParams params);
+  Future<DataState<int>> getStreakDays(String userId);
+  Future<DataState<double>> getOverallProgress(String userId);
 }
 
 class FeedTortuParams extends Equatable {

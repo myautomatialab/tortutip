@@ -13,10 +13,9 @@ class SearchRepositoryImpl implements SearchRepository {
   SearchRepositoryImpl(this._remoteDataSource, this._localDataSource);
 
   @override
-  Future<DataState<List<ArticleEntity>>> searchArticles(
-      String query, int limit) async {
+  Future<DataState<List<ArticleEntity>>> searchArticles(String query) async {
     try {
-      final models = await _remoteDataSource.searchArticles(query, limit);
+      final models = await _remoteDataSource.searchArticles(query);
       return DataSuccess(models);
     } on Exception catch (e) {
       return DataFailed(e);

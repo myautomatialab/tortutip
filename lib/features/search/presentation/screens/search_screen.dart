@@ -8,9 +8,11 @@ import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
 import 'package:tortutip/features/search/presentation/bloc/search_cubit.dart';
 import 'package:tortutip/features/search/presentation/bloc/search_state.dart';
-import 'package:tortutip/features/search/presentation/widgets/article_result_card.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/search/presentation/widgets/category_result_card.dart';
-import 'package:tortutip/features/search/presentation/widgets/creator_result_card.dart';
+import 'package:tortutip/shared/widgets/tortutip_chip.dart';
+import 'package:tortutip/shared/widgets/tortutip_skeleton.dart';
 import 'package:tortutip/features/search/presentation/widgets/recent_search_row.dart';
 import 'package:tortutip/features/search/presentation/widgets/search_bar_widget.dart';
 import 'package:tortutip/features/search/presentation/widgets/search_empty_state.dart';
@@ -61,6 +63,9 @@ class _SearchScreenState extends State<SearchScreen> {
               focusNode: _focusNode,
               onChanged: (query) {
                 context.read<SearchCubit>().onQueryChanged(query);
+              },
+              onSubmitted: (query) {
+                context.read<SearchCubit>().search(query);
               },
               onCancel: _onCancel,
             ),
@@ -179,8 +184,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildResultsView(SearchLoaded state) {
     return DefaultTabController(
-      length: 3,
-      initialIndex: state.activeTab,
+      length: 2,
+      initialIndex: state.activeTab.clamp(0, 1),
       child: Column(
         children: [
           _buildTabBar(state),
@@ -191,7 +196,6 @@ class _SearchScreenState extends State<SearchScreen> {
               children: [
                 _buildArticlesTab(state),
                 _buildCategoriesTab(state),
-                _buildCreatorsTab(state),
               ],
             ),
           ),
@@ -206,11 +210,13 @@ class _SearchScreenState extends State<SearchScreen> {
       labelStyle: AppTypography.label,
       labelColor: AppColors.primary,
       unselectedLabelColor: AppColors.textSecondary,
-      indicatorColor: AppColors.primary,
+      indicatorColor: AppColors.transparent,
+      dividerColor: AppColors.border,
+      isScrollable: true,
+      tabAlignment: TabAlignment.start,
       tabs: [
         Tab(text: 'Articles (${state.articles.length})'),
         Tab(text: 'Categories (${state.categories.length})'),
-        Tab(text: 'Creators (${state.creators.length})'),
       ],
     );
   }
@@ -223,26 +229,31 @@ class _SearchScreenState extends State<SearchScreen> {
 
     if (articleCategories.isEmpty) return const SizedBox.shrink();
 
-    return SizedBox(
-      height: 40,
-      child: ListView(
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: AppSpacing.xs,
+        bottom: AppSpacing.xs,
+      ),
+      child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        children: [
-          _filterChip('all', 'All', state.activeFilter),
-          ...articleCategories.map(
-            (catId) {
-              final catName = state.categories
-                  .firstWhere(
-                    (c) => c.id == catId,
-                    orElse: () => CategoryEntity(
-                        id: catId, name: catId, description: '', iconUrl: ''),
-                  )
-                  .name;
-              return _filterChip(catId, catName, state.activeFilter);
-            },
-          ),
-        ],
+        child: Row(
+          children: [
+            _filterChip('all', 'All', state.activeFilter),
+            ...articleCategories.map(
+              (catId) {
+                final catName = state.categories
+                    .firstWhere(
+                      (c) => c.id == catId,
+                      orElse: () => CategoryEntity(
+                          id: catId, name: catId, description: '', iconUrl: ''),
+                    )
+                    .name;
+                return _filterChip(catId, catName, state.activeFilter);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -252,20 +263,20 @@ class _SearchScreenState extends State<SearchScreen> {
     return GestureDetector(
       onTap: () => context.read<SearchCubit>().setFilter(value),
       child: Container(
-        margin: const EdgeInsets.only(right: AppSpacing.sm),
+        margin: const EdgeInsets.only(right: AppSpacing.xs),
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
+          horizontal: AppSpacing.md,
           vertical: AppSpacing.xs,
         ),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : AppColors.surface,
+          color: isActive ? AppColors.primary : AppColors.white,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: Border.all(
               color: isActive ? AppColors.primary : AppColors.border),
         ),
         child: Text(
           label,
-          style: AppTypography.label.copyWith(
+          style: AppTypography.labelSm.copyWith(
             color: isActive ? AppColors.textOnDark : AppColors.textPrimary,
           ),
         ),
@@ -281,6 +292,7 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
     return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       itemCount: articles.length,
       itemBuilder: (_, index) {
         final article = articles[index];
@@ -291,18 +303,12 @@ class _SearchScreenState extends State<SearchScreen> {
                   id: '', name: '', description: '', iconUrl: ''),
             )
             .name;
-        return AnimatedOpacity(
-          duration:
-              Duration(milliseconds: 200 + (index * 50)),
-          opacity: 1.0,
-          child: ArticleResultCard(
-            article: article,
-            query: state.query,
-            categoryName: catName,
-            onTap: () => context.push(
-              AppRoutes.articlePath(article.id),
-              extra: article,
-            ),
+        return _ArticleSearchRow(
+          article: article,
+          categoryName: catName,
+          onTap: () => context.push(
+            AppRoutes.articlePath(article.id),
+            extra: article,
           ),
         );
       },
@@ -330,24 +336,122 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildCreatorsTab(SearchLoaded state) {
-    if (state.creators.isEmpty) {
-      return Center(
-        child: Text('No creators found', style: AppTypography.subtitle),
-      );
-    }
-    return ListView.builder(
-      itemCount: state.creators.length,
-      itemBuilder: (_, index) {
-        return CreatorResultCard(creator: state.creators[index]);
-      },
-    );
-  }
-
   void _onCategoryTap(BuildContext context, CategoryEntity category) {
     context.push(
       AppRoutes.exploreCategoryPath(category.id),
       extra: category,
+    );
+  }
+}
+
+class _ArticleSearchRow extends StatelessWidget {
+  final ArticleEntity article;
+  final String categoryName;
+  final VoidCallback onTap;
+
+  const _ArticleSearchRow({
+    required this.article,
+    required this.categoryName,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = chipColorForCategoryName(categoryName);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.xs,
+        ),
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              child: SizedBox(
+                width: AppSpacing.thumbnailSm,
+                height: AppSpacing.thumbnailSm,
+                child: article.coverHorizontalUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: article.coverHorizontalUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => TortuSkeletonBox(
+                          width: AppSpacing.thumbnailSm,
+                          height: AppSpacing.thumbnailSm,
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: AppColors.surface,
+                          child: const Icon(
+                            Icons.image_not_supported_outlined,
+                            color: AppColors.textTertiary,
+                            size: AppSpacing.iconSm,
+                          ),
+                        ),
+                      )
+                    : Container(color: AppColors.surface),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (categoryName.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.$1,
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusFull),
+                      ),
+                      child: Text(
+                        categoryName.toUpperCase(),
+                        style: AppTypography.labelSm
+                            .copyWith(color: colors.$2),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    article.title,
+                    style:
+                        AppTypography.body.copyWith(fontWeight: FontWeight.w600),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (article.authorName.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      article.authorName,
+                      style: AppTypography.caption
+                          .copyWith(color: AppColors.textSecondary),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

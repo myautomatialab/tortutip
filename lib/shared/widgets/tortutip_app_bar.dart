@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/routes/app_routes.dart';
 import '../../config/theme/app_colors.dart';
 import '../../config/theme/app_spacing.dart';
 import '../../config/theme/app_typography.dart';
+import '../../features/bookmarks/presentation/bloc/bookmarks_cubit.dart';
+import '../../features/bookmarks/presentation/bloc/bookmarks_state.dart';
 
 class TortuAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
@@ -12,6 +15,7 @@ class TortuAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showTitle;
   final String? avatarUrl;
   final bool? centerTitle; 
+  
 
 
   const TortuAppBar({
@@ -21,7 +25,7 @@ class TortuAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.showTitle = true,
     this.avatarUrl,
-    this.centerTitle,
+    this.centerTitle = true,
   });
 
   factory TortuAppBar.main({List<Widget>? actions, String? avatarUrl}) {
@@ -47,25 +51,30 @@ class TortuAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: AppColors.background,
       elevation: 0,
       scrolledUnderElevation: 0,
-      centerTitle: centerTitle ?? _isMain, 
+      centerTitle: centerTitle,
       titleSpacing: _isMain ? AppSpacing.md : NavigationToolbar.kMiddleSpacing,
       leading: _isMain
           ? Center(
-              child: GestureDetector(
-                onTap: () => context.push(AppRoutes.bookmarks),
-                child: Container(
-                  width: AppSpacing.avatarSizeSm,
-                  height: AppSpacing.avatarSizeSm,
-                  decoration: const BoxDecoration(
-                    color: AppColors.surface,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.bookmark_outline,
-                    color: AppColors.textPrimary,
-                    size: AppSpacing.iconMd,
-                  ),
-                ),
+              child: BlocBuilder<BookmarksCubit, BookmarksState>(
+                builder: (context, bookmarksState) {
+                  final hasSaved = bookmarksState is BookmarksLoaded;
+                  return GestureDetector(
+                    onTap: () => context.push(AppRoutes.bookmarks),
+                    child: Container(
+                      width: AppSpacing.avatarSizeSm,
+                      height: AppSpacing.avatarSizeSm,
+                      decoration: const BoxDecoration(
+                        color: AppColors.surface,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        hasSaved ? Icons.bookmark : Icons.bookmark_outline,
+                        color: AppColors.textPrimary,
+                        size: AppSpacing.iconMd,
+                      ),
+                    ),
+                  );
+                },
               ),
             )
           : leading,

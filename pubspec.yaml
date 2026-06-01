@@ -54,7 +54,7 @@ dependencies:
   flutter_native_splash: ^2.4.8
   shared_preferences: ^2.3.5
   
-  font_awesome_flutter: ^10.8.0
+  font_awesome_flutter: ^11.0.0
 
 flutter_native_splash:
   color: "#F5F0E8"

@@ -25,7 +25,9 @@ class PublishedArticleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return GestureDetector(
+      onTap: onTapView,
+      child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         ClipRRect(
@@ -94,6 +96,7 @@ class PublishedArticleRow extends StatelessWidget {
           ],
         ),
       ],
+      ),
     );
   }
 

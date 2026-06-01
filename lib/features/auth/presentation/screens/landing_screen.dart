@@ -17,9 +17,9 @@ class LandingScreen extends StatelessWidget {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthError && state.message.isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
         }
       },
       builder: (context, state) {
@@ -36,20 +36,6 @@ class LandingScreen extends StatelessWidget {
                 height: double.infinity,
               ),
 
-              // Layer 0.5: WELLNESS text centered over collage
-              Positioned.fill(
-                child: Center(
-                  child: Text(
-                    'WELLNESS ⊙',
-                    style: AppTypography.h2.copyWith(
-                      color: AppColors.white,
-                      letterSpacing: 2.0,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ),
-
               // Layer 1: Gradient overlay bottom to top
               const Positioned.fill(
                 child: DecoratedBox(
@@ -64,25 +50,7 @@ class LandingScreen extends StatelessWidget {
                 ),
               ),
 
-              // Layer 2: Hardcore mode trigger — discrete icon, bottom-right corner
-              Positioned(
-                right: AppSpacing.lg,
-                bottom: AppSpacing.xxl,
-                child: SafeArea(
-                  child: GestureDetector(
-                    onTap: () => context
-                        .read<AuthBloc>()
-                        .add(const EnterHardcoreModeEvent()),
-                    child: Icon(
-                      Icons.developer_mode,
-                      size: AppSpacing.iconSizeMd,
-                      color: AppColors.textTertiary.withValues(alpha: 0.4),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Layer 3: Content
+              // Layer 2: Content
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -97,35 +65,63 @@ class LandingScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        const SizedBox(height: AppSpacing.md),
                         Container(
-                          width: AppSpacing.avatarSizeLg,
-                          height: AppSpacing.avatarSizeLg,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.primary.withValues(alpha: 0.12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.lg,
+                            vertical: AppSpacing.xs,
                           ),
-                          child: const Icon(
-                            Icons.bolt,
-                            color: AppColors.primary,
-                            size: AppSpacing.iconSizeLg,
+                          decoration: BoxDecoration(
+                            color: Colors.pink.withValues(alpha: 0.35),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusFull,
+                            ),
+                            border: Border.all(
+                              color: AppColors.white.withValues(alpha: 0.25),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Text(
+                                'BIENESTAR · CONOCIMIENTO · COMUNIDAD',
+                                style: AppTypography.caption.copyWith(
+                                  color: AppColors.white,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: AppSpacing.md),
-                        const Text(
-                          'Crea una vida que te guste',
-                          style: AppTypography.hero,
+                        const SizedBox(height: AppSpacing.sm),
+
+                        Text(
+                          'Un tip al día.',
+                          style: AppTypography.hero.copyWith(
+                            color: Colors.pink.withValues(alpha: 0.5),
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         const Text(
-                          'Get better, one tip at a time.',
+                          'Una vida mejor.',
                           style: AppTypography.subtitle,
                         ),
                         const SizedBox(height: AppSpacing.xl),
                         TortuGoogleButton(
                           isLoading: state is AuthLoading,
-                          onTap: () => context
-                              .read<AuthBloc>()
-                              .add(const SignInWithGoogleEvent()),
+                          onTap: () => context.read<AuthBloc>().add(
+                            const SignInWithGoogleEvent(),
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         RichText(

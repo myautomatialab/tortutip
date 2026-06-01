@@ -1,0 +1,1 @@
+- [Project Test Coverage](project-test-coverage.md) — 23 mandatory files present, 193 passing / 1 errored (non-mandatory search test) as of 2026-06-01 (branch feature/tortu-feed)
