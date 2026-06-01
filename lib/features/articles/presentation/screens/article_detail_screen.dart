@@ -8,7 +8,6 @@ import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
 import 'package:tortutip/features/articles/presentation/bloc/article_detail/article_detail_cubit.dart';
 import 'package:tortutip/features/articles/presentation/bloc/article_detail/article_detail_state.dart';
-import 'package:tortutip/features/articles/presentation/widgets/article_action_bar.dart';
 import 'package:tortutip/features/articles/presentation/widgets/article_body_renderer.dart';
 import 'package:tortutip/features/articles/presentation/widgets/article_cover_image.dart';
 import 'package:tortutip/features/articles/presentation/widgets/author_row.dart';
@@ -18,6 +17,7 @@ import 'package:tortutip/features/auth/presentation/bloc/auth_state.dart';
 import 'package:tortutip/injection/injection_container.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
+import 'package:tortutip/features/tortu_feed/presentation/widgets/tortu_feed_widget.dart';
 
 class ArticleDetailScreen extends StatelessWidget {
   final String articleId;
@@ -104,7 +104,18 @@ class ArticleDetailScreen extends StatelessWidget {
     }
 
     if (state is ArticleDetailLoaded) {
-      return _buildLoaded(context, state, userId);
+      return Stack(
+        children: [
+          _buildLoaded(context, state, userId),
+          TortuFeedWidget(
+            isSaved: state.isSaved,
+            isDoneToday: state.isDoneToday,
+            userId: userId,
+            articleId: state.article.id,
+            categoryId: state.article.categoryId,
+          ),
+        ],
+      );
     }
 
     return const SizedBox.shrink();
@@ -135,10 +146,6 @@ class ArticleDetailScreen extends StatelessWidget {
               AuthorRow(
                 author: loaded.author,
                 readTimeMinutes: loaded.article.readTimeMinutes,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Divider(color: AppColors.border),
-              ArticleActionBar(
                 isSaved: loaded.isSaved,
                 onToggleSave: () async {
                   final success = await cubit.toggleSave(userId);
@@ -151,6 +158,7 @@ class ArticleDetailScreen extends StatelessWidget {
                   }
                 },
               ),
+              const SizedBox(height: AppSpacing.md),
               Divider(color: AppColors.border),
               const SizedBox(height: AppSpacing.xl),
               ArticleBodyRenderer(body: loaded.article.body),
