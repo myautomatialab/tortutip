@@ -13,6 +13,8 @@ class ArticleEntity extends Equatable {
   final int saveCount;
   final DateTime? publishedAt;
   final DateTime createdAt;
+  final String authorName;
+  final String authorAvatarUrl;
 
   const ArticleEntity({
     required this.id,
@@ -27,6 +29,8 @@ class ArticleEntity extends Equatable {
     required this.saveCount,
     this.publishedAt,
     required this.createdAt,
+    this.authorName = '',
+    this.authorAvatarUrl = '',
   });
 
   @override
@@ -43,5 +47,7 @@ class ArticleEntity extends Equatable {
         saveCount,
         publishedAt,
         createdAt,
+        authorName,
+        authorAvatarUrl,
       ];
 }

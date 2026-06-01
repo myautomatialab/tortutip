@@ -173,6 +173,8 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
       onBookmarkTap: () => context
           .read<CategoryListCubit>()
           .toggleBookmark(article.id, _userId),
+      authorName: article.authorName,
+      authorAvatarUrl: article.authorAvatarUrl,
     );
   }
 

@@ -34,14 +34,15 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
         .map((doc) => ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
         .toList();
     docs.sort((a, b) => (b.publishedAt ?? DateTime(0)).compareTo(a.publishedAt ?? DateTime(0)));
-    return docs;
+    return Future.wait(docs.map(_enrichWithAuthor));
   }
 
   @override
   Future<ArticleModel> getArticleDetail(String articleId) async {
     final doc =
         await _firestore.collection('articles').doc(articleId).get();
-    return ArticleModel.fromRawData({'id': doc.id, ...?doc.data()});
+    final article = ArticleModel.fromRawData({'id': doc.id, ...?doc.data()});
+    return _enrichWithAuthor(article);
   }
 
   @override
@@ -66,7 +67,10 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
 
   @override
   Future<void> saveArticle(String userId, String articleId) async {
-    await _firestore.collection('saved_articles').add({
+    await _firestore
+        .collection('saved_articles')
+        .doc('${userId}_$articleId')
+        .set({
       'user_id': userId,
       'article_id': articleId,
       'saved_at': DateTime.now().toIso8601String(),
@@ -80,10 +84,11 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
         .where('author_id', isEqualTo: userId)
         .orderBy('created_at', descending: true)
         .get();
-    return snapshot.docs
+    final docs = snapshot.docs
         .map((doc) =>
             ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
         .toList();
+    return Future.wait(docs.map(_enrichWithAuthor));
   }
 
   @override
@@ -112,22 +117,27 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
           .where('status', isEqualTo: 'published');
     }
     final snapshot = await query.get();
-    final all = snapshot.docs
+    final raw = snapshot.docs
         .map((doc) => ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
         .toList();
-    all.sort((a, b) => (b.publishedAt ?? DateTime(0)).compareTo(a.publishedAt ?? DateTime(0)));
+    raw.sort((a, b) => (b.publishedAt ?? DateTime(0)).compareTo(a.publishedAt ?? DateTime(0)));
     final start = page * pageSize;
-    if (start >= all.length) return [];
-    final end = (start + pageSize).clamp(0, all.length);
-    return all.sublist(start, end);
+    if (start >= raw.length) return [];
+    final end = (start + pageSize).clamp(0, raw.length);
+    final page_ = raw.sublist(start, end);
+    return Future.wait(page_.map(_enrichWithAuthor));
   }
 
   @override
   Future<void> unsaveArticle(String userId, String articleId) async {
-    await _firestore
+    final snapshot = await _firestore
         .collection('saved_articles')
-        .doc('${userId}_$articleId')
-        .delete();
+        .where('user_id', isEqualTo: userId)
+        .where('article_id', isEqualTo: articleId)
+        .get();
+    for (final doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
   }
 
   @override
@@ -139,11 +149,39 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
         .where('status', isEqualTo: 'published')
         .limit(6)
         .get();
-    return snapshot.docs
+    final docs = snapshot.docs
         .map((doc) => ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
         .where((a) => a.id != excludeArticleId)
         .take(5)
         .toList();
+    return Future.wait(docs.map(_enrichWithAuthor));
+  }
+
+  Future<ArticleModel> _enrichWithAuthor(ArticleModel article) async {
+    try {
+      final userDoc =
+          await _firestore.collection('users').doc(article.authorId).get();
+      final data = userDoc.data();
+      if (data == null) return article;
+      return ArticleModel(
+        id: article.id,
+        authorId: article.authorId,
+        categoryId: article.categoryId,
+        title: article.title,
+        body: article.body,
+        coverVerticalUrl: article.coverVerticalUrl,
+        coverHorizontalUrl: article.coverHorizontalUrl,
+        status: article.status,
+        readTimeMinutes: article.readTimeMinutes,
+        saveCount: article.saveCount,
+        publishedAt: article.publishedAt,
+        createdAt: article.createdAt,
+        authorName: data['name'] ?? '',
+        authorAvatarUrl: data['avatar_url'] ?? '',
+      );
+    } catch (_) {
+      return article;
+    }
   }
 
   @override

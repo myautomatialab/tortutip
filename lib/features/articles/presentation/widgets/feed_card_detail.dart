@@ -44,21 +44,30 @@ class FeedCardDetail extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: _authorAvatarRadius,
                 backgroundColor: AppColors.surface,
-                child: Icon(
-                  Icons.person,
-                  size: AppSpacing.iconMd,
-                  color: AppColors.textSecondary,
-                ),
+                backgroundImage: article.authorAvatarUrl.isNotEmpty
+                    ? NetworkImage(article.authorAvatarUrl)
+                    : null,
+                child: article.authorAvatarUrl.isEmpty
+                    ? Text(
+                        article.authorName.isNotEmpty
+                            ? article.authorName[0].toUpperCase()
+                            : '?',
+                        style: AppTypography.label
+                            .copyWith(color: AppColors.textSecondary),
+                      )
+                    : null,
               ),
               const SizedBox(width: AppSpacing.sm),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Autor',
+                    article.authorName.isNotEmpty
+                        ? article.authorName
+                        : 'Unknown author',
                     style: AppTypography.label.copyWith(
                       color: AppColors.textPrimary,
                     ),

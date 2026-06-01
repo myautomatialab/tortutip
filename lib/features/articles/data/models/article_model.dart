@@ -14,6 +14,8 @@ class ArticleModel extends ArticleEntity {
     required super.saveCount,
     super.publishedAt,
     required super.createdAt,
+    super.authorName,
+    super.authorAvatarUrl,
   });
 
   factory ArticleModel.fromRawData(Map<String, dynamic> data) {
@@ -32,7 +34,8 @@ class ArticleModel extends ArticleEntity {
           ? DateTime.tryParse(data['published_at'])
           : null,
       createdAt: DateTime.tryParse(data['created_at'] ?? '') ?? DateTime.now(),
+      authorName: data['author_name'] ?? '',
+      authorAvatarUrl: data['author_avatar_url'] ?? '',
     );
   }
-
 }
