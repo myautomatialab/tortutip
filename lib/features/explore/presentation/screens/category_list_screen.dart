@@ -45,13 +45,6 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
     return Scaffold(
       appBar: TortuAppBar.detail(
         title: widget.category.name,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined,
-                color: AppColors.textPrimary),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
