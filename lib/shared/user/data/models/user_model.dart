@@ -11,6 +11,9 @@ class UserModel extends UserEntity {
     required super.gender,
     required super.ageRange,
     required super.createdAt,
+    super.streakDays = 0,
+    super.lastFeedDate = '',
+    super.overallProgress = 0.0,
   });
 
   factory UserModel.fromRawData(Map<String, dynamic> data) {
@@ -24,7 +27,9 @@ class UserModel extends UserEntity {
       gender: data['gender'] ?? '',
       ageRange: data['age_range'] ?? '',
       createdAt: DateTime.tryParse(data['created_at'] ?? '') ?? DateTime.now(),
+      streakDays: (data['streak_days'] as int?) ?? 0,
+      lastFeedDate: (data['last_feed_date'] as String?) ?? '',
+      overallProgress: (data['overall_progress'] as num?)?.toDouble() ?? 0.0,
     );
   }
-
 }
