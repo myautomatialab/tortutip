@@ -91,7 +91,7 @@ class _TabIconCenter extends StatelessWidget {
         child: const Icon(
           Icons.edit_outlined,
           color: AppColors.textOnDark,
-          size: 22,
+          size: AppSpacing.iconSizeMd,
         ),
       ),
     );

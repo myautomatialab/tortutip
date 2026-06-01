@@ -1,3 +1,3 @@
 class AppConfig {
-  static const bool kUseMockData = true;
+  static const bool kUseMockData = false;
 }

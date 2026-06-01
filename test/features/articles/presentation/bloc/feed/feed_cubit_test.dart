@@ -9,7 +9,6 @@ import 'package:tortutip/features/articles/domain/use_cases/save_article_use_cas
 import 'package:tortutip/features/articles/domain/use_cases/unsave_article_use_case.dart';
 import 'package:tortutip/features/articles/presentation/bloc/feed/feed_cubit.dart';
 import 'package:tortutip/features/articles/presentation/bloc/feed/feed_state.dart';
-import 'package:tortutip/shared/user/domain/use_cases/get_user_category_ids_use_case.dart';
 
 class MockGetFeedArticlesPagedUseCase extends Mock
     implements GetFeedArticlesPagedUseCase {}
@@ -21,19 +20,14 @@ class MockSaveArticleUseCase extends Mock implements SaveArticleUseCase {}
 
 class MockUnsaveArticleUseCase extends Mock implements UnsaveArticleUseCase {}
 
-class MockGetUserCategoryIdsUseCase extends Mock
-    implements GetUserCategoryIdsUseCase {}
-
 void main() {
   late FeedCubit cubit;
   late MockGetFeedArticlesPagedUseCase mockGetFeedArticlesPaged;
   late MockGetSavedArticleIdsUseCase mockGetSavedArticleIds;
   late MockSaveArticleUseCase mockSaveArticle;
   late MockUnsaveArticleUseCase mockUnsaveArticle;
-  late MockGetUserCategoryIdsUseCase mockGetUserCategoryIds;
 
   const userId = 'user_1';
-  const categoryIds = ['cat_1'];
   final articles = <ArticleEntity>[
     ArticleEntity(
       id: 'art_1',
@@ -55,14 +49,12 @@ void main() {
     mockGetSavedArticleIds = MockGetSavedArticleIdsUseCase();
     mockSaveArticle = MockSaveArticleUseCase();
     mockUnsaveArticle = MockUnsaveArticleUseCase();
-    mockGetUserCategoryIds = MockGetUserCategoryIdsUseCase();
 
     cubit = FeedCubit(
       mockGetFeedArticlesPaged,
       mockGetSavedArticleIds,
       mockSaveArticle,
       mockUnsaveArticle,
-      mockGetUserCategoryIds,
     );
 
     registerFallbackValue(
@@ -72,14 +64,11 @@ void main() {
         const SaveArticleParams(userId: '', articleId: ''));
     registerFallbackValue(
         const UnsaveArticleParams(userId: '', articleId: ''));
-    registerFallbackValue(const GetUserCategoryIdsParams(userId: ''));
   });
 
   tearDown(() => cubit.close());
 
   void stubSuccess() {
-    when(() => mockGetUserCategoryIds(any()))
-        .thenAnswer((_) async => DataSuccess(categoryIds));
     when(() => mockGetFeedArticlesPaged(any()))
         .thenAnswer((_) async => DataSuccess(articles));
     when(() => mockGetSavedArticleIds(any()))
@@ -101,24 +90,8 @@ void main() {
     );
 
     blocTest<FeedCubit, FeedState>(
-      'should_emit_loading_then_error_when_loadFeed_fails_categories',
-      build: () {
-        when(() => mockGetUserCategoryIds(any()))
-            .thenAnswer((_) async => DataFailed(Exception('error')));
-        return cubit;
-      },
-      act: (c) => c.loadFeed(userId),
-      expect: () => [
-        isA<FeedLoading>(),
-        isA<FeedError>(),
-      ],
-    );
-
-    blocTest<FeedCubit, FeedState>(
       'should_emit_loading_then_error_when_loadFeed_fails_articles',
       build: () {
-        when(() => mockGetUserCategoryIds(any()))
-            .thenAnswer((_) async => DataSuccess(categoryIds));
         when(() => mockGetFeedArticlesPaged(any()))
             .thenAnswer((_) async => DataFailed(Exception('error')));
         when(() => mockGetSavedArticleIds(any()))
@@ -147,7 +120,7 @@ void main() {
       expect: () => [
         isA<FeedLoading>(),
         isA<FeedLoaded>(),
-        // no further emit because index >= articles.length after swipe
+        isA<FeedLoaded>(),
       ],
     );
   });
@@ -178,8 +151,6 @@ void main() {
     blocTest<FeedCubit, FeedState>(
       'should_remove_articleId_from_savedArticleIds_when_toggleBookmark_on_saved',
       build: () {
-        when(() => mockGetUserCategoryIds(any()))
-            .thenAnswer((_) async => DataSuccess(categoryIds));
         when(() => mockGetFeedArticlesPaged(any()))
             .thenAnswer((_) async => DataSuccess(articles));
         when(() => mockGetSavedArticleIds(any()))

@@ -3,7 +3,6 @@ import 'package:tortutip/features/articles/domain/use_cases/get_feed_articles_pa
 import 'package:tortutip/features/articles/domain/use_cases/get_saved_article_ids_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/save_article_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/unsave_article_use_case.dart';
-import 'package:tortutip/shared/user/domain/use_cases/get_user_category_ids_use_case.dart';
 import 'feed_state.dart';
 
 class FeedCubit extends Cubit<FeedState> {
@@ -11,7 +10,6 @@ class FeedCubit extends Cubit<FeedState> {
   final GetSavedArticleIdsUseCase _getSavedArticleIds;
   final SaveArticleUseCase _saveArticle;
   final UnsaveArticleUseCase _unsaveArticle;
-  final GetUserCategoryIdsUseCase _getUserCategoryIds;
 
   String? _userId;
   List<String> _categoryIds = [];
@@ -23,7 +21,6 @@ class FeedCubit extends Cubit<FeedState> {
     this._getSavedArticleIds,
     this._saveArticle,
     this._unsaveArticle,
-    this._getUserCategoryIds,
   ) : super(const FeedInitial());
 
   Future<void> loadFeed(String userId) async {
@@ -31,14 +28,8 @@ class FeedCubit extends Cubit<FeedState> {
     _userId = userId;
     _currentPage = 0;
 
-    final categoryResult = await _getUserCategoryIds(
-      GetUserCategoryIdsParams(userId: userId),
-    );
-    if (categoryResult.isFailure) {
-      emit(FeedError(_mapErrorToMessage(categoryResult.error!)));
-      return;
-    }
-    _categoryIds = categoryResult.data!;
+    // Feed shows all published articles — no category filter for now
+    _categoryIds = [];
 
     final articlesResultFuture = _getFeedArticlesPaged(GetFeedArticlesPagedParams(
       categoryIds: _categoryIds,
@@ -75,7 +66,7 @@ class FeedCubit extends Cubit<FeedState> {
 
     final newIndex = current.currentIndex + 1;
 
-    if (newIndex >= current.articles.length) return;
+    if (newIndex > current.articles.length) return;
 
     if (newIndex >= current.articles.length - 2 && current.hasMore) {
       _loadMore();
@@ -86,6 +77,41 @@ class FeedCubit extends Cubit<FeedState> {
       currentIndex: newIndex,
       hasMore: current.hasMore,
       savedArticleIds: current.savedArticleIds,
+    ));
+  }
+
+  void shuffleAndRestart() {
+    final current = state;
+    if (current is! FeedLoaded) return;
+    final shuffled = List.of(current.articles)..shuffle();
+    emit(FeedLoaded(
+      articles: shuffled,
+      currentIndex: 0,
+      hasMore: current.hasMore,
+      savedArticleIds: current.savedArticleIds,
+    ));
+  }
+
+  Future<void> refresh() async {
+    if (_userId == null) return;
+    final current = state;
+    // Silent refresh — no spinner, keep current articles visible
+    _currentPage = 0;
+    _categoryIds = [];
+    final articlesResult = await _getFeedArticlesPaged(GetFeedArticlesPagedParams(
+      categoryIds: _categoryIds,
+      page: 0,
+      pageSize: _pageSize,
+    ));
+    if (articlesResult.isFailure) return; // silently ignore on background refresh
+    final savedResult = await _getSavedArticleIds(GetSavedArticleIdsParams(userId: _userId!));
+    final savedIds = savedResult.isSuccess ? savedResult.data!.toSet() : <String>{};
+    final currentIndex = current is FeedLoaded ? current.currentIndex : 0;
+    emit(FeedLoaded(
+      articles: articlesResult.data!,
+      currentIndex: currentIndex.clamp(0, articlesResult.data!.length),
+      hasMore: articlesResult.data!.length == _pageSize,
+      savedArticleIds: savedIds,
     ));
   }
 

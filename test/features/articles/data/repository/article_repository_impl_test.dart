@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tortutip/core/resources/data_state.dart';
@@ -6,6 +8,7 @@ import 'package:tortutip/features/articles/data/models/article_model.dart';
 import 'package:tortutip/features/articles/data/repository/article_repository_impl.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/articles/domain/params/publish_article_params.dart';
+import 'package:tortutip/features/articles/domain/params/upload_article_image_params.dart';
 
 class MockArticleRemoteDataSource extends Mock
     implements ArticleRemoteDataSource {}
@@ -27,6 +30,13 @@ void main() {
     mockDataSource = MockArticleRemoteDataSource();
     repository = ArticleRepositoryImpl(mockDataSource);
     registerFallbackValue(params);
+    registerFallbackValue(
+      UploadArticleImageParams(
+        userId: 'user_1',
+        imageFile: File('test.jpg'),
+        isVertical: true,
+      ),
+    );
   });
 
   group('ArticleRepositoryImpl.getFeedArticles', () {
@@ -185,6 +195,34 @@ void main() {
       final result = await repository.getRelatedArticles('cat_1', 'art_1');
 
       expect(result, isA<DataFailed<List<ArticleEntity>>>());
+    });
+  });
+
+  group('ArticleRepositoryImpl.uploadArticleImage', () {
+    final uploadParams = UploadArticleImageParams(
+      userId: 'user_1',
+      imageFile: File('test.jpg'),
+      isVertical: true,
+    );
+
+    test('should_return_DataSuccess_with_url_when_datasource_succeeds',
+        () async {
+      when(() => mockDataSource.uploadArticleImage(any()))
+          .thenAnswer((_) async => 'https://storage/img.jpg');
+
+      final result = await repository.uploadArticleImage(uploadParams);
+
+      expect(result, isA<DataSuccess<String>>());
+      expect(result.data, equals('https://storage/img.jpg'));
+    });
+
+    test('should_return_DataFailed_when_datasource_throws', () async {
+      when(() => mockDataSource.uploadArticleImage(any()))
+          .thenThrow(Exception('Storage error'));
+
+      final result = await repository.uploadArticleImage(uploadParams);
+
+      expect(result, isA<DataFailed<String>>());
     });
   });
 }

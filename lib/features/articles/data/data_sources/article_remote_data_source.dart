@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:tortutip/features/articles/data/models/article_model.dart';
 import 'package:tortutip/features/articles/domain/params/publish_article_params.dart';
+import 'package:tortutip/features/articles/domain/params/upload_article_image_params.dart';
 
 abstract class ArticleRemoteDataSource {
   Future<List<ArticleModel>> getFeedArticles(List<String> categoryIds);
@@ -13,26 +14,27 @@ abstract class ArticleRemoteDataSource {
   Future<List<ArticleModel>> getFeedArticlesPaged(List<String> categoryIds, int page, int pageSize);
   Future<void> unsaveArticle(String userId, String articleId);
   Future<List<ArticleModel>> getRelatedArticles(String categoryId, String excludeArticleId);
+  Future<String> uploadArticleImage(UploadArticleImageParams params);
 }
 
 class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
   final FirebaseFirestore _firestore;
-  // ignore: unused_field
   final FirebaseStorage _storage;
   ArticleRemoteDataSourceImpl(this._firestore, this._storage);
 
   @override
   Future<List<ArticleModel>> getFeedArticles(List<String> categoryIds) async {
+    if (categoryIds.isEmpty) return [];
     final snapshot = await _firestore
         .collection('articles')
         .where('category_id', whereIn: categoryIds)
         .where('status', isEqualTo: 'published')
-        .orderBy('published_at', descending: true)
         .get();
-    return snapshot.docs
-        .map((doc) =>
-            ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
+    final docs = snapshot.docs
+        .map((doc) => ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
         .toList();
+    docs.sort((a, b) => (b.publishedAt ?? DateTime(0)).compareTo(a.publishedAt ?? DateTime(0)));
+    return docs;
   }
 
   @override
@@ -53,7 +55,7 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
       'cover_vertical_url': params.coverVerticalUrl,
       'cover_horizontal_url': params.coverHorizontalUrl,
       'status': 'published',
-      'read_time_minutes': (params.body.split(' ').length / 200).ceil(),
+      'read_time_minutes': params.readTimeMinutes,
       'save_count': 0,
       'published_at': now,
       'created_at': now,
@@ -98,20 +100,26 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
   @override
   Future<List<ArticleModel>> getFeedArticlesPaged(
       List<String> categoryIds, int page, int pageSize) async {
-    final limit = (page + 1) * pageSize;
-    final snapshot = await _firestore
-        .collection('articles')
-        .where('category_id', whereIn: categoryIds)
-        .where('status', isEqualTo: 'published')
-        .orderBy('published_at', descending: true)
-        .limit(limit)
-        .get();
+    final Query<Map<String, dynamic>> query;
+    if (categoryIds.isEmpty) {
+      query = _firestore
+          .collection('articles')
+          .where('status', isEqualTo: 'published');
+    } else {
+      query = _firestore
+          .collection('articles')
+          .where('category_id', whereIn: categoryIds)
+          .where('status', isEqualTo: 'published');
+    }
+    final snapshot = await query.get();
     final all = snapshot.docs
         .map((doc) => ArticleModel.fromRawData({'id': doc.id, ...doc.data()}))
         .toList();
+    all.sort((a, b) => (b.publishedAt ?? DateTime(0)).compareTo(a.publishedAt ?? DateTime(0)));
     final start = page * pageSize;
     if (start >= all.length) return [];
-    return all.sublist(start);
+    final end = (start + pageSize).clamp(0, all.length);
+    return all.sublist(start, end);
   }
 
   @override
@@ -136,5 +144,18 @@ class ArticleRemoteDataSourceImpl implements ArticleRemoteDataSource {
         .where((a) => a.id != excludeArticleId)
         .take(5)
         .toList();
+  }
+
+  @override
+  Future<String> uploadArticleImage(UploadArticleImageParams params) async {
+    final orientation = params.isVertical ? 'vertical' : 'horizontal';
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final ref = _storage.ref(
+      'articles/${params.userId}/${timestamp}_$orientation.jpg',
+    );
+    final bytes = await params.imageFile.readAsBytes();
+    final metadata = SettableMetadata(contentType: 'image/jpeg');
+    await ref.putData(bytes, metadata);
+    return ref.getDownloadURL();
   }
 }

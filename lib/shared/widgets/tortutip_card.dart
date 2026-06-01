@@ -30,7 +30,7 @@ class TortuArticleCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (coverUrl != null)
+            if (coverUrl != null && coverUrl!.isNotEmpty)
               ClipRRect(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 child: Image.network(
@@ -44,7 +44,7 @@ class TortuArticleCard extends StatelessWidget {
                   ),
                 ),
               ),
-            if (coverUrl != null) const SizedBox(height: AppSpacing.md),
+            if (coverUrl != null && coverUrl!.isNotEmpty) const SizedBox(height: AppSpacing.md),
             Text(title, style: AppTypography.h4),
             if (authorName != null || readTime != null) ...[
               const SizedBox(height: AppSpacing.sm),

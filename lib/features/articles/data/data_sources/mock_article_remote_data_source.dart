@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:tortutip/features/articles/data/data_sources/article_remote_data_source.dart';
 import 'package:tortutip/features/articles/data/models/article_model.dart';
 import 'package:tortutip/features/articles/domain/params/publish_article_params.dart';
+import 'package:tortutip/features/articles/domain/params/upload_article_image_params.dart';
 
 class MockArticleRemoteDataSource implements ArticleRemoteDataSource {
   static final List<ArticleModel> _articles = [
@@ -148,6 +149,11 @@ class MockArticleRemoteDataSource implements ArticleRemoteDataSource {
         .where((a) => a.categoryId == categoryId && a.id != excludeArticleId)
         .take(5)
         .toList();
+  }
+
+  @override
+  Future<String> uploadArticleImage(UploadArticleImageParams params) async {
+    return 'https://mock.storage/article_cover.jpg';
   }
 
   @override

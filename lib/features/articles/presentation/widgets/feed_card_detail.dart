@@ -8,7 +8,8 @@ import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
 
 class FeedCardDetail extends StatelessWidget {
-  static const double _authorAvatarRadius = 18;
+  // Closest token: avatarSizeSm (32) / 2 = 16; accepts minor visual delta from literal 18
+  static const double _authorAvatarRadius = AppSpacing.avatarSizeSm / 2;
 
   final ArticleEntity article;
 
@@ -17,9 +18,9 @@ class FeedCardDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.white,
-        borderRadius: const BorderRadius.vertical(
+        borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusXl),
         ),
       ),

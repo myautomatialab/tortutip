@@ -39,9 +39,12 @@ class _FeedScreenState extends State<FeedScreen> {
     });
   }
 
+  // Llamado por AppShell cuando este tab vuelve a ser visible
+  void refreshIfNeeded() => _cubit.refresh();
+
   @override
   void dispose() {
-    _cubit.close();
+    // FeedCubit es singleton — no se cierra aquí
     super.dispose();
   }
 
@@ -81,13 +84,44 @@ class _FeedScreenState extends State<FeedScreen> {
                     }
 
                     if (state is FeedLoaded) {
-                      if (state.articles.isEmpty ||
-                          state.currentIndex >= state.articles.length) {
+                      if (state.articles.isEmpty) {
                         return Center(
                           child: Text(
-                            'No hay más artículos',
+                            'No hay artículos disponibles',
                             style: AppTypography.body
                                 .copyWith(color: AppColors.textSecondary),
+                          ),
+                        );
+                      }
+                      if (state.currentIndex >= state.articles.length) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.screenHorizontal,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '¡Has leído todo!',
+                                  style: AppTypography.h3,
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                Text(
+                                  'Empieza de nuevo con un orden aleatorio',
+                                  style: AppTypography.body.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: AppSpacing.xl),
+                                TortuPrimaryButton(
+                                  label: 'Iniciar de nuevo',
+                                  onTap: _cubit.shuffleAndRestart,
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       }
@@ -126,11 +160,16 @@ class _FeedScreenState extends State<FeedScreen> {
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: AppSpacing.md),
-                            TortuSecondaryButton(
-                              label: 'Reintentar',
-                              onTap: _userId != null
-                                  ? () => _cubit.loadFeed(_userId!)
-                                  : null,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.screenHorizontal,
+                              ),
+                              child: TortuSecondaryButton(
+                                label: 'Reintentar',
+                                onTap: _userId != null
+                                    ? () => _cubit.loadFeed(_userId!)
+                                    : null,
+                              ),
                             ),
                           ],
                         ),

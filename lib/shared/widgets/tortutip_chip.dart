@@ -34,7 +34,7 @@ class TortuCategoryChip extends StatelessWidget {
       );
 
   factory TortuCategoryChip.fromName(String name) {
-    final colors = _chipColorForName(name);
+    final colors = chipColorForCategoryName(name);
     return TortuCategoryChip(
       label: name,
       backgroundColor: colors.$1,
@@ -86,19 +86,34 @@ class TortuOutlineChip extends StatelessWidget {
   }
 }
 
-(Color, Color) _chipColorForName(String name) {
+(Color, Color) chipColorForCategoryName(String name) {
   final lower = name.toLowerCase();
-  if (lower.contains('food') || lower.contains('comida')) {
+  if (lower.contains('food') || lower.contains('comida') ||
+      lower.contains('aliment') || lower.contains('nutrici') ||
+      lower.contains('healthy') || lower.contains('saludable')) {
     return (AppColors.categoryHealthyFood, AppColors.textOnYellow);
   }
-  if (lower.contains('fitness') || lower.contains('ejercicio')) {
+  if (lower.contains('fitness') || lower.contains('ejercicio') ||
+      lower.contains('deporte') || lower.contains('entren') ||
+      lower.contains('activ') || lower.contains('gym')) {
     return (AppColors.categoryFitness, AppColors.textOnGreen);
   }
-  if (lower.contains('mental') || lower.contains('salud')) {
+  if (lower.contains('mental') || lower.contains('salud') ||
+      lower.contains('health') || lower.contains('mente') ||
+      lower.contains('bienestar') || lower.contains('wellbeing')) {
     return (AppColors.categoryMentalHealth, AppColors.textOnPurple);
   }
-  if (lower.contains('sueño') || lower.contains('bienestar')) {
+  if (lower.contains('sueño') || lower.contains('sleep') ||
+      lower.contains('descanso') || lower.contains('rest')) {
     return (AppColors.categorySueno, AppColors.textOnBlue);
   }
-  return (AppColors.surface, AppColors.textPrimary);
+  // Fallback: color determinista basado en el nombre para que siempre haya color
+  final palette = [
+    (AppColors.categoryHealthyFood, AppColors.textOnYellow),
+    (AppColors.categoryFitness, AppColors.textOnGreen),
+    (AppColors.categoryMentalHealth, AppColors.textOnPurple),
+    (AppColors.categorySueno, AppColors.textOnBlue),
+  ];
+  final index = name.codeUnits.fold(0, (a, b) => a + b) % palette.length;
+  return palette[index];
 }

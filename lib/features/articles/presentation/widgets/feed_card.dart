@@ -31,7 +31,8 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
   static const double _swipeVelocityThreshold = 800;
   bool _isExpanded = false;
   late AnimationController _expandController;
-  late Animation<double> _imageHeightFactor;
+  late Animation<double> _imageScale;
+  late Animation<double> _overlayOpacity;
   late AnimationController _swipeController;
   double _dragOffset = 0.0;
   double _dragAngle = 0.0;
@@ -41,11 +42,14 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
     super.initState();
     _expandController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 380),
     );
-    _imageHeightFactor = Tween<double>(begin: 1.0, end: 0.6).animate(
-      CurvedAnimation(parent: _expandController, curve: Curves.easeInOut),
+    final curve = CurvedAnimation(
+      parent: _expandController,
+      curve: Curves.easeInOut,
     );
+    _imageScale = Tween<double>(begin: 1.0, end: 1.08).animate(curve);
+    _overlayOpacity = Tween<double>(begin: 0.0, end: 0.45).animate(curve);
     _swipeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 250),
@@ -141,25 +145,33 @@ class _FeedCardState extends State<FeedCard> with TickerProviderStateMixin {
   }
 
   Widget _buildBackground() {
+    final imageWidget = widget.article.coverVerticalUrl.isNotEmpty
+        ? Image.network(
+            widget.article.coverVerticalUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => _buildPlaceholderImage(),
+          )
+        : _buildPlaceholderImage();
+
     return AnimatedBuilder(
-      animation: _imageHeightFactor,
+      animation: _expandController,
       builder: (context, child) {
-        return Align(
-          alignment: Alignment.topCenter,
-          child: FractionallySizedBox(
-            heightFactor: _imageHeightFactor.value,
-            widthFactor: 1.0,
-            child: child,
-          ),
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            Transform.scale(
+              scale: _imageScale.value,
+              child: child,
+            ),
+            // Overlay oscuro que aparece al expandir
+            Opacity(
+              opacity: _overlayOpacity.value,
+              child: const ColoredBox(color: AppColors.dark),
+            ),
+          ],
         );
       },
-      child: widget.article.coverVerticalUrl.isNotEmpty
-          ? Image.network(
-              widget.article.coverVerticalUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => _buildPlaceholderImage(),
-            )
-          : _buildPlaceholderImage(),
+      child: imageWidget,
     );
   }
 
