@@ -14,7 +14,6 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   final SaveArticleUseCase _saveArticle;
   final UnsaveArticleUseCase _unsaveArticle;
 
-  CategoryEntity? _category;
   int _currentPage = 0;
   static const int _pageSize = 10;
 
@@ -26,7 +25,6 @@ class CategoryListCubit extends Cubit<CategoryListState> {
   ) : super(const CategoryListInitial());
 
   Future<void> loadCategory(CategoryEntity category, String userId) async {
-    _category = category;
     _currentPage = 0;
     emit(const CategoryListLoading());
 

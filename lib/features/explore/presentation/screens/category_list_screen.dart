@@ -117,7 +117,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
         vertical: AppSpacing.md,
       ),
       itemCount: articles.length + (state.hasMore ? 1 : 0),
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.lg),
+      separatorBuilder: (context, _) => const SizedBox(height: AppSpacing.lg),
       itemBuilder: (context, index) {
         if (index == articles.length) {
           return Padding(
@@ -149,7 +149,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
         vertical: AppSpacing.md,
       ),
       itemCount: state.articles.length + 1,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.lg),
+      separatorBuilder: (context, _) => const SizedBox(height: AppSpacing.lg),
       itemBuilder: (context, index) {
         if (index == state.articles.length) {
           return const Padding(
