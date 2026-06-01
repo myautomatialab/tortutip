@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:tortutip/features/auth/domain/use_cases/delete_account_use_case.dart';
+import 'package:tortutip/features/categories/domain/use_cases/get_all_categories_use_case.dart';
 import 'package:tortutip/features/profile/data/data_sources/profile_remote_data_source.dart';
 import 'package:tortutip/features/profile/data/repository/profile_repository_impl.dart';
 import 'package:tortutip/features/profile/domain/repository/profile_repository.dart';
@@ -39,10 +41,10 @@ void initProfileDependencies() {
   );
 
   sl.registerFactory<ProfileCubit>(
-    () => ProfileCubit(sl(), sl(), sl(), sl()),
+    () => ProfileCubit(sl(), sl(), sl(), sl(), sl<GetAllCategoriesUseCase>()),
   );
 
   sl.registerFactory<EditProfileCubit>(
-    () => EditProfileCubit(sl(), sl()),
+    () => EditProfileCubit(sl(), sl(), sl<DeleteAccountUseCase>()),
   );
 }

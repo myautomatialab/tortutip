@@ -7,6 +7,7 @@ import '../features/auth/data/data_sources/auth_remote_data_source.dart';
 import '../features/auth/data/repository/auth_repository_impl.dart';
 import '../features/auth/domain/repository/auth_repository.dart';
 import '../features/auth/domain/use_cases/check_auth_use_case.dart';
+import '../features/auth/domain/use_cases/delete_account_use_case.dart';
 import '../features/auth/domain/use_cases/sign_in_with_google_use_case.dart';
 import '../features/auth/domain/use_cases/sign_out_use_case.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
@@ -32,6 +33,7 @@ void initAuthDependencies() {
   sl.registerLazySingleton(() => CheckAuthUseCase(sl()));
   sl.registerLazySingleton(() => SignInWithGoogleUseCase(sl()));
   sl.registerLazySingleton(() => SignOutUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteAccountUseCase(sl()));
 
   // Bloc — factory porque cada pantalla necesita estado limpio
   sl.registerFactory(() => AuthBloc(sl(), sl(), sl()));

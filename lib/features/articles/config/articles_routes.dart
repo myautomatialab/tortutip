@@ -14,6 +14,12 @@ class ArticlesRoutes {
       path: AppRoutes.create,
       builder: (_, _) => const CreateArticleScreen(),
     ),
+    GoRoute(
+      path: '/article/:articleId',
+      builder: (_, state) => ArticleDetailScreen(
+        articleId: state.pathParameters['articleId']!,
+      ),
+    ),
   ];
 
   // Dentro del shell — con TabBar

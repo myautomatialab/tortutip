@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:tortutip/core/resources/data_state.dart';
+import 'package:tortutip/features/articles/data/models/article_model.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/profile/data/data_sources/profile_remote_data_source.dart';
 import 'package:tortutip/features/profile/domain/repository/profile_repository.dart';
@@ -16,7 +17,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
     int limit,
   ) async {
     try {
-      final models = await _dataSource.getSavedArticles(userId, limit);
+      final rawMaps = await _dataSource.getSavedArticles(userId, limit);
+      final models = rawMaps.map((m) => ArticleModel.fromRawData(m)).toList();
       return DataSuccess(List<ArticleEntity>.from(models));
     } catch (e) {
       return DataFailed(e is Exception ? e : Exception(e.toString()));
@@ -29,7 +31,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
     int limit,
   ) async {
     try {
-      final models = await _dataSource.getPublishedArticles(authorId, limit);
+      final rawMaps = await _dataSource.getPublishedArticles(authorId, limit);
+      final models = rawMaps.map((m) => ArticleModel.fromRawData(m)).toList();
       return DataSuccess(List<ArticleEntity>.from(models));
     } catch (e) {
       return DataFailed(e is Exception ? e : Exception(e.toString()));

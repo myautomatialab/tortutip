@@ -1,7 +1,8 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tortutip/core/usecase/usecase.dart';
+import 'package:tortutip/features/auth/domain/use_cases/delete_account_use_case.dart';
 import 'package:tortutip/features/profile/domain/use_cases/upload_avatar_use_case.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 import 'package:tortutip/shared/user/domain/use_cases/update_user_profile_use_case.dart';
@@ -10,9 +11,13 @@ import 'edit_profile_state.dart';
 class EditProfileCubit extends Cubit<EditProfileState> {
   final UpdateUserProfileUseCase _updateUserProfile;
   final UploadAvatarUseCase _uploadAvatar;
+  final DeleteAccountUseCase _deleteAccount;
 
-  EditProfileCubit(this._updateUserProfile, this._uploadAvatar)
-      : super(const EditProfileInitial());
+  EditProfileCubit(
+    this._updateUserProfile,
+    this._uploadAvatar,
+    this._deleteAccount,
+  ) : super(const EditProfileInitial());
 
   Future<void> uploadAvatar(File imageFile, String userId) async {
     emit(const EditProfileImageUploading());
@@ -57,14 +62,17 @@ class EditProfileCubit extends Cubit<EditProfileState> {
     }
   }
 
-  String _mapErrorToMessage(Exception error) {
-    if (error is FirebaseException) {
-      return switch (error.code) {
-        'permission-denied' => 'No tienes permiso para actualizar tu perfil',
-        'unavailable' => 'Sin conexión. Inténtalo de nuevo',
-        _ => 'Algo salió mal. Inténtalo de nuevo',
-      };
+  Future<void> deleteAccount() async {
+    emit(const EditProfileLoading());
+    final result = await _deleteAccount(const NoParams());
+    if (result.isSuccess) {
+      emit(const EditProfileAccountDeleted());
+    } else {
+      emit(EditProfileError(_mapErrorToMessage(result.error!)));
     }
+  }
+
+  String _mapErrorToMessage(Exception error) {
     return 'Algo salió mal. Inténtalo de nuevo';
   }
 }

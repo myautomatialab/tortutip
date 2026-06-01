@@ -9,14 +9,22 @@ import 'package:tortutip/shared/widgets/tortutip_chip.dart';
 class SavedArticleThumbnail extends StatelessWidget {
   final ArticleEntity article;
   final String categoryName;
+  final String? fallbackImageUrl;
   final VoidCallback onTap;
 
   const SavedArticleThumbnail({
     super.key,
     required this.article,
     required this.categoryName,
+    this.fallbackImageUrl,
     required this.onTap,
   });
+
+  String? get _imageUrl {
+    if (article.coverHorizontalUrl.isNotEmpty) return article.coverHorizontalUrl;
+    if (fallbackImageUrl != null && fallbackImageUrl!.isNotEmpty) return fallbackImageUrl;
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,20 +37,12 @@ class SavedArticleThumbnail extends StatelessWidget {
             aspectRatio: 1,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              child: article.coverHorizontalUrl.isNotEmpty
+              child: _imageUrl != null
                   ? CachedNetworkImage(
-                      imageUrl: article.coverHorizontalUrl,
+                      imageUrl: _imageUrl!,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: AppColors.surface,
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: AppColors.surface,
-                        child: const Icon(
-                          Icons.image_not_supported_outlined,
-                          color: AppColors.textTertiary,
-                        ),
-                      ),
+                      placeholder: (context, url) => Container(color: AppColors.surface),
+                      errorWidget: (context, url, error) => Container(color: AppColors.surface),
                     )
                   : Container(color: AppColors.surface),
             ),

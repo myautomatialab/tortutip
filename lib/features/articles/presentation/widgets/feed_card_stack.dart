@@ -9,6 +9,7 @@ class FeedCardStack extends StatelessWidget {
   final List<ArticleEntity> articles;
   final int currentIndex;
   final Set<String> savedArticleIds;
+  final String Function(String categoryId) categoryNameResolver;
   final VoidCallback onSwipe;
   final void Function(String articleId) onBookmark;
 
@@ -17,6 +18,7 @@ class FeedCardStack extends StatelessWidget {
     required this.articles,
     required this.currentIndex,
     required this.savedArticleIds,
+    required this.categoryNameResolver,
     required this.onSwipe,
     required this.onBookmark,
   });
@@ -44,6 +46,7 @@ class FeedCardStack extends StatelessWidget {
                 scale: _backCardScale,
                 child: FeedCard(
                   article: articles[currentIndex + 1],
+                  categoryName: categoryNameResolver(articles[currentIndex + 1].categoryId),
                   isSaved: savedArticleIds.contains(articles[currentIndex + 1].id),
                   onSwipe: onSwipe,
                   onBookmark: onBookmark,
@@ -52,6 +55,7 @@ class FeedCardStack extends StatelessWidget {
             ),
           FeedCard(
             article: articles[currentIndex],
+            categoryName: categoryNameResolver(articles[currentIndex].categoryId),
             isSaved: savedArticleIds.contains(articles[currentIndex].id),
             onSwipe: onSwipe,
             onBookmark: onBookmark,

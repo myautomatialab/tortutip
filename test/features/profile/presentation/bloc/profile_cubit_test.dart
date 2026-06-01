@@ -10,12 +10,15 @@ import 'package:tortutip/features/profile/domain/use_cases/get_saved_articles_us
 import 'package:tortutip/features/profile/presentation/bloc/profile_cubit.dart';
 import 'package:tortutip/features/profile/presentation/bloc/profile_state.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
+import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
+import 'package:tortutip/features/categories/domain/use_cases/get_all_categories_use_case.dart';
 import 'package:tortutip/shared/user/domain/use_cases/get_current_user_use_case.dart';
 
 class MockGetCurrentUserUseCase extends Mock implements GetCurrentUserUseCase {}
 class MockGetSavedArticlesUseCase extends Mock implements GetSavedArticlesUseCase {}
 class MockGetPublishedArticlesUseCase extends Mock implements GetPublishedArticlesUseCase {}
 class MockDeleteArticleUseCase extends Mock implements DeleteArticleUseCase {}
+class MockGetAllCategoriesUseCase extends Mock implements GetAllCategoriesUseCase {}
 
 class FakeNoParams extends Fake implements NoParams {}
 class FakeGetSavedArticlesParams extends Fake implements GetSavedArticlesParams {}
@@ -27,6 +30,7 @@ void main() {
   late MockGetSavedArticlesUseCase mockGetSavedArticles;
   late MockGetPublishedArticlesUseCase mockGetPublishedArticles;
   late MockDeleteArticleUseCase mockDeleteArticle;
+  late MockGetAllCategoriesUseCase mockGetAllCategories;
 
   setUpAll(() {
     registerFallbackValue(FakeNoParams());
@@ -66,6 +70,9 @@ void main() {
     mockGetSavedArticles = MockGetSavedArticlesUseCase();
     mockGetPublishedArticles = MockGetPublishedArticlesUseCase();
     mockDeleteArticle = MockDeleteArticleUseCase();
+    mockGetAllCategories = MockGetAllCategoriesUseCase();
+    when(() => mockGetAllCategories(any()))
+        .thenAnswer((_) async => const DataSuccess(<CategoryEntity>[]));
   });
 
   ProfileCubit buildCubit() => ProfileCubit(
@@ -73,6 +80,7 @@ void main() {
         mockGetSavedArticles,
         mockGetPublishedArticles,
         mockDeleteArticle,
+        mockGetAllCategories,
       );
 
   group('ProfileCubit', () {

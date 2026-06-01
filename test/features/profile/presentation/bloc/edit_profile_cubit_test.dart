@@ -4,16 +4,20 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tortutip/core/resources/data_state.dart';
+import 'package:tortutip/features/auth/domain/use_cases/delete_account_use_case.dart';
 import 'package:tortutip/features/profile/domain/use_cases/upload_avatar_use_case.dart';
 import 'package:tortutip/features/profile/presentation/bloc/edit_profile_cubit.dart';
 import 'package:tortutip/features/profile/presentation/bloc/edit_profile_state.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 import 'package:tortutip/shared/user/domain/use_cases/update_user_profile_use_case.dart';
+import 'package:tortutip/core/usecase/usecase.dart';
 
 class MockUpdateUserProfileUseCase extends Mock
     implements UpdateUserProfileUseCase {}
 
 class MockUploadAvatarUseCase extends Mock implements UploadAvatarUseCase {}
+
+class MockDeleteAccountUseCase extends Mock implements DeleteAccountUseCase {}
 
 class FakeFile extends Fake implements File {}
 
@@ -22,9 +26,12 @@ class FakeUploadAvatarParams extends Fake implements UploadAvatarParams {}
 class FakeUpdateUserProfileParams extends Fake
     implements UpdateUserProfileParams {}
 
+class FakeNoParams extends Fake implements NoParams {}
+
 void main() {
   late MockUpdateUserProfileUseCase mockUpdateProfile;
   late MockUploadAvatarUseCase mockUploadAvatar;
+  late MockDeleteAccountUseCase mockDeleteAccount;
 
   final testUser = UserEntity(
     id: 'user_1',
@@ -41,15 +48,17 @@ void main() {
   setUpAll(() {
     registerFallbackValue(FakeUploadAvatarParams());
     registerFallbackValue(FakeUpdateUserProfileParams());
+    registerFallbackValue(FakeNoParams());
   });
 
   setUp(() {
     mockUpdateProfile = MockUpdateUserProfileUseCase();
     mockUploadAvatar = MockUploadAvatarUseCase();
+    mockDeleteAccount = MockDeleteAccountUseCase();
   });
 
   EditProfileCubit buildCubit() =>
-      EditProfileCubit(mockUpdateProfile, mockUploadAvatar);
+      EditProfileCubit(mockUpdateProfile, mockUploadAvatar, mockDeleteAccount);
 
   group('EditProfileCubit', () {
     blocTest<EditProfileCubit, EditProfileState>(

@@ -5,4 +5,5 @@ abstract class AuthRepository {
   Future<DataState<UserEntity>> signInWithGoogle();
   Future<DataState<bool>> signOut();
   Future<DataState<UserEntity>> checkCurrentAuth();
+  Future<DataState<bool>> deleteAccount();
 }

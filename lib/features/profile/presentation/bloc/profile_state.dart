@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
+import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 
 abstract class ProfileState extends Equatable {
@@ -22,13 +23,23 @@ class ProfileLoaded extends ProfileState {
   final List<ArticleEntity> savedArticles;
   final List<ArticleEntity> publishedArticles;
   final int totalPublishedCount;
+  final List<CategoryEntity> categories;
 
   const ProfileLoaded({
     required this.user,
     required this.savedArticles,
     required this.publishedArticles,
     required this.totalPublishedCount,
+    this.categories = const [],
   });
+
+  CategoryEntity? categoryById(String id) {
+    try {
+      return categories.firstWhere((c) => c.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   List<Object?> get props => [
@@ -36,6 +47,7 @@ class ProfileLoaded extends ProfileState {
         savedArticles,
         publishedArticles,
         totalPublishedCount,
+        categories,
       ];
 }
 

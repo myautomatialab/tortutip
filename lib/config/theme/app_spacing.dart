@@ -33,6 +33,7 @@ class AppSpacing {
   static const double avatarSizeLg = 72;
 
   // ── Tamaños de componentes de artículo ──────────────────────
+  static const double thumbnailSm = 60.0;
   static const double coverImageHeight = 260;
   static const double relatedCardImageWidth = 120;
   static const double relatedCardImageHeight = 80;

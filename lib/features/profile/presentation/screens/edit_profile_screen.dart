@@ -6,10 +6,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:tortutip/config/theme/app_colors.dart';
 import 'package:tortutip/config/theme/app_spacing.dart';
 import 'package:tortutip/config/theme/app_typography.dart';
+import 'package:tortutip/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:tortutip/features/auth/presentation/bloc/auth_event.dart';
 import 'package:tortutip/features/profile/presentation/bloc/edit_profile_cubit.dart';
 import 'package:tortutip/features/profile/presentation/bloc/edit_profile_state.dart';
 import 'package:tortutip/shared/user/domain/entities/user_entity.dart';
 import 'package:tortutip/shared/widgets/tortutip_button.dart';
+import 'package:tortutip/shared/widgets/tortutip_input.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final UserEntity user;
@@ -90,6 +93,55 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  void _onSignOut(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cerrar sesión'),
+        content: const Text('¿Estás seguro de que quieres cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.read<AuthBloc>().add(const SignOutEvent());
+            },
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onDeleteAccount(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar cuenta'),
+        content: const Text(
+          '¿Estás seguro? Esta acción es irreversible y eliminará todos tus datos permanentemente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.read<EditProfileCubit>().deleteAccount();
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _onSave() {
     final name = _nameController.text.trim();
     if (name.length < 2) {
@@ -111,6 +163,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       listener: (context, state) {
         if (state is EditProfileImageUploaded) {
           setState(() => _currentAvatarUrl = state.avatarUrl);
+        } else if (state is EditProfileAccountDeleted) {
+          context.read<AuthBloc>().add(const SignOutEvent());
+        } else if (state is EditProfileError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: AppColors.error,
+            ),
+          );
         }
       },
       child: Container(
@@ -120,14 +181,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             top: Radius.circular(AppSpacing.radiusXl),
           ),
         ),
-        padding: EdgeInsets.only(
-          left: AppSpacing.screenHorizontal,
-          right: AppSpacing.screenHorizontal,
-          top: AppSpacing.md,
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.xxl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: AppSpacing.screenHorizontal,
+            right: AppSpacing.screenHorizontal,
+            top: AppSpacing.md,
+            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.xxl,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 40,
@@ -146,41 +208,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               onTap: _onTapAvatar,
             ),
             const SizedBox(height: AppSpacing.xl),
-            TextField(
+            TortuTextField(
+              hint: 'Tu nombre',
               controller: _nameController,
-              style: AppTypography.body,
               onChanged: (_) {
                 if (_nameError) setState(() => _nameError = false);
               },
-              decoration: InputDecoration(
-                labelText: 'Nombre',
-                hintText: 'Tu nombre',
-                hintStyle: AppTypography.body
-                    .copyWith(color: AppColors.textTertiary),
-                errorText: _nameError
-                    ? 'El nombre debe tener al menos 2 caracteres'
-                    : null,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-              ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: _bioController,
-              style: AppTypography.body,
-              maxLines: 4,
-              decoration: InputDecoration(
-                labelText: 'Bio',
-                hintText: 'Cuéntanos sobre ti',
-                hintStyle: AppTypography.body
-                    .copyWith(color: AppColors.textTertiary),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
+            if (_nameError)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs, left: AppSpacing.lg),
+                child: Text(
+                  'El nombre debe tener al menos 2 caracteres',
+                  style: AppTypography.caption.copyWith(color: AppColors.error),
                 ),
               ),
+            const SizedBox(height: AppSpacing.md),
+            TortuTextField(
+              hint: 'Cuéntanos sobre ti',
+              controller: _bioController,
+              maxLines: 4,
             ),
             const SizedBox(height: AppSpacing.xxl),
             BlocBuilder<EditProfileCubit, EditProfileState>(
@@ -201,11 +248,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ? null
                           : () => Navigator.of(context).pop(),
                     ),
+                    const SizedBox(height: AppSpacing.lg),
+                    const Divider(),
+                    const SizedBox(height: AppSpacing.xs),
+                    TextButton(
+                      onPressed: isLoading ? null : () => _onSignOut(context),
+                      child: Text(
+                        'Cerrar sesión',
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: isLoading
+                          ? null
+                          : () => _onDeleteAccount(context),
+                      child: Text(
+                        'Eliminar cuenta',
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ),
                   ],
                 );
               },
             ),
           ],
+        ),
         ),
       ),
     );

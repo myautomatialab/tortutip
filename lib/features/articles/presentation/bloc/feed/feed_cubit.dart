@@ -1,8 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tortutip/core/usecase/usecase.dart';
 import 'package:tortutip/features/articles/domain/use_cases/get_feed_articles_paged_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/get_saved_article_ids_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/save_article_use_case.dart';
 import 'package:tortutip/features/articles/domain/use_cases/unsave_article_use_case.dart';
+import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
+import 'package:tortutip/features/categories/domain/use_cases/get_all_categories_use_case.dart';
 import 'feed_state.dart';
 
 class FeedCubit extends Cubit<FeedState> {
@@ -10,9 +13,11 @@ class FeedCubit extends Cubit<FeedState> {
   final GetSavedArticleIdsUseCase _getSavedArticleIds;
   final SaveArticleUseCase _saveArticle;
   final UnsaveArticleUseCase _unsaveArticle;
+  final GetAllCategoriesUseCase _getAllCategories;
 
   String? _userId;
   List<String> _categoryIds = [];
+  List<CategoryEntity> _categories = [];
   int _currentPage = 0;
   static const int _pageSize = 10;
 
@@ -21,6 +26,7 @@ class FeedCubit extends Cubit<FeedState> {
     this._getSavedArticleIds,
     this._saveArticle,
     this._unsaveArticle,
+    this._getAllCategories,
   ) : super(const FeedInitial());
 
   Future<void> loadFeed(String userId) async {
@@ -39,13 +45,19 @@ class FeedCubit extends Cubit<FeedState> {
     final savedResultFuture = _getSavedArticleIds(
       GetSavedArticleIdsParams(userId: userId),
     );
+    final categoriesResultFuture = _getAllCategories(const NoParams());
 
     final articlesResult = await articlesResultFuture;
     final savedResult = await savedResultFuture;
+    final categoriesResult = await categoriesResultFuture;
 
     if (articlesResult.isFailure) {
       emit(FeedError(_mapErrorToMessage(articlesResult.error!)));
       return;
+    }
+
+    if (categoriesResult.isSuccess) {
+      _categories = categoriesResult.data ?? [];
     }
 
     final savedIds = savedResult.isSuccess
@@ -57,6 +69,7 @@ class FeedCubit extends Cubit<FeedState> {
       currentIndex: 0,
       hasMore: articlesResult.data!.length == _pageSize,
       savedArticleIds: savedIds,
+      categories: _categories,
     ));
   }
 
@@ -77,6 +90,7 @@ class FeedCubit extends Cubit<FeedState> {
       currentIndex: newIndex,
       hasMore: current.hasMore,
       savedArticleIds: current.savedArticleIds,
+      categories: _categories,
     ));
   }
 
@@ -89,6 +103,7 @@ class FeedCubit extends Cubit<FeedState> {
       currentIndex: 0,
       hasMore: current.hasMore,
       savedArticleIds: current.savedArticleIds,
+      categories: _categories,
     ));
   }
 
@@ -112,6 +127,7 @@ class FeedCubit extends Cubit<FeedState> {
       currentIndex: currentIndex.clamp(0, articlesResult.data!.length),
       hasMore: articlesResult.data!.length == _pageSize,
       savedArticleIds: savedIds,
+      categories: _categories,
     ));
   }
 
@@ -133,6 +149,7 @@ class FeedCubit extends Cubit<FeedState> {
       currentIndex: current.currentIndex,
       hasMore: current.hasMore,
       savedArticleIds: optimisticSet,
+      categories: _categories,
     ));
 
     if (_userId == null) return;
@@ -151,6 +168,7 @@ class FeedCubit extends Cubit<FeedState> {
           currentIndex: afterOptimistic.currentIndex,
           hasMore: afterOptimistic.hasMore,
           savedArticleIds: originalSet,
+          categories: _categories,
         ));
       }
     }
@@ -180,6 +198,7 @@ class FeedCubit extends Cubit<FeedState> {
         currentIndex: current.currentIndex,
         hasMore: result.data!.length == _pageSize,
         savedArticleIds: current.savedArticleIds,
+        categories: _categories,
       ));
     } else {
       emit(FeedLoaded(
@@ -187,6 +206,7 @@ class FeedCubit extends Cubit<FeedState> {
         currentIndex: current.currentIndex,
         hasMore: false,
         savedArticleIds: current.savedArticleIds,
+        categories: _categories,
       ));
     }
   }

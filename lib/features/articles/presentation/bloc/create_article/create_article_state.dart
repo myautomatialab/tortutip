@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 import 'package:tortutip/features/articles/domain/entities/article_entity.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
@@ -43,11 +45,23 @@ class CreateArticleFormUpdated extends CreateArticleState {
   });
 
   bool get isValid =>
-      coverVerticalUrl != null &&
-      coverHorizontalUrl != null &&
+      (coverVerticalUrl != null || coverHorizontalUrl != null) &&
       title.trim().length >= 3 &&
       categoryId.isNotEmpty &&
-      bodyJson.length >= 50;
+      _plainTextLength > 10;
+
+  int get _plainTextLength {
+    try {
+      final ops = jsonDecode(bodyJson) as List<dynamic>;
+      return ops
+          .map((op) => op is Map && op['insert'] is String ? op['insert'] as String : '')
+          .join()
+          .trim()
+          .length;
+    } catch (_) {
+      return bodyJson.trim().length;
+    }
+  }
 
   CreateArticleFormUpdated copyWith({
     String? coverVerticalUrl,

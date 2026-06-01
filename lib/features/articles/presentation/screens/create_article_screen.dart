@@ -500,6 +500,9 @@ class _BottomBar extends StatelessWidget {
     return BlocBuilder<CreateArticleCubit, CreateArticleState>(
       builder: (ctx, state) {
         final isPublishing = state is CreateArticlePublishing;
+        final canPublish = !isPublishing &&
+            state is CreateArticleFormUpdated &&
+            state.isValid;
         return SafeArea(
           child: Container(
             padding: const EdgeInsets.symmetric(
@@ -522,7 +525,7 @@ class _BottomBar extends StatelessWidget {
                 Expanded(
                   child: TortuPrimaryButton(
                     label: 'Publish',
-                    onTap: isPublishing ? null : onPublish,
+                    onTap: canPublish ? onPublish : null,
                     isLoading: isPublishing,
                   ),
                 ),

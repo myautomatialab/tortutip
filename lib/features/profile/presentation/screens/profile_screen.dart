@@ -17,6 +17,7 @@ import 'package:tortutip/features/profile/presentation/widgets/published_article
 import 'package:tortutip/features/profile/presentation/widgets/saved_article_thumbnail.dart';
 import 'package:tortutip/injection/injection_container.dart';
 import 'package:tortutip/shared/widgets/tortutip_app_bar.dart';
+import 'package:tortutip/shared/widgets/tortutip_button.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -26,35 +27,34 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late final ProfileCubit _profileCubit;
   String? _userId;
 
   @override
   void initState() {
     super.initState();
-    _profileCubit = sl<ProfileCubit>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authState = context.read<AuthBloc>().state;
       if (authState is AuthAuthenticated) {
         _userId = authState.user.id;
-        _profileCubit.loadProfile(_userId!);
+        context.read<ProfileCubit>().loadProfile(_userId!);
       }
     });
   }
 
   void _openEditProfile(BuildContext context, ProfileLoaded state) {
-    final editCubit = sl<EditProfileCubit>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider.value(
-        value: editCubit,
+      backgroundColor: AppColors.transparent,
+      builder: (_) => BlocProvider(
+        create: (_) => sl<EditProfileCubit>(),
         child: BlocListener<EditProfileCubit, EditProfileState>(
           listener: (ctx, editState) {
             if (editState is EditProfileSuccess) {
               Navigator.of(ctx).pop();
-              if (_userId != null) _profileCubit.loadProfile(_userId!);
+              if (_userId != null) {
+                context.read<ProfileCubit>().loadProfile(_userId!);
+              }
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Perfil actualizado'),
@@ -78,75 +78,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _profileCubit,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: TortuAppBar(
-          title: 'Mi Perfil',
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.pop(),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: TortuAppBar(
+        title: 'Mi Perfil',
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+        actions: [
+          BlocBuilder<ProfileCubit, ProfileState>(
+            builder: (ctx, state) {
+              if (state is ProfileLoaded) {
+                return IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  onPressed: () => _openEditProfile(context, state),
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
-          actions: [
-            BlocBuilder<ProfileCubit, ProfileState>(
-              builder: (ctx, state) {
-                if (state is ProfileLoaded) {
-                  return IconButton(
-                    icon: const Icon(Icons.edit_outlined),
-                    onPressed: () => _openEditProfile(ctx, state),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-          ],
-        ),
-        body: BlocBuilder<ProfileCubit, ProfileState>(
-          builder: (context, state) {
-            if (state is ProfileInitial || state is ProfileLoading) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              );
-            }
+        ],
+      ),
+      body: BlocBuilder<ProfileCubit, ProfileState>(
+        builder: (context, state) {
+          if (state is ProfileInitial || state is ProfileLoading) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            );
+          }
 
-            if (state is ProfileError) {
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      state.message,
-                      style: AppTypography.body
-                          .copyWith(color: AppColors.textSecondary),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    TextButton(
-                      onPressed: _userId != null
-                          ? () => _profileCubit.loadProfile(_userId!)
-                          : null,
-                      child: const Text('Reintentar'),
-                    ),
-                  ],
-                ),
-              );
-            }
+          if (state is ProfileError) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    state.message,
+                    style: AppTypography.body
+                        .copyWith(color: AppColors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  TortuSecondaryButton(
+                    label: 'Reintentar',
+                    onTap: _userId != null
+                        ? () => context.read<ProfileCubit>().loadProfile(_userId!)
+                        : null,
+                  ),
+                ],
+              ),
+            );
+          }
 
-            if (state is ProfileLoaded) {
-              return _ProfileBody(
-                state: state,
-                userId: _userId ?? '',
-                onDeleteArticle: (articleId) =>
-                    _profileCubit.deleteArticle(articleId, _userId ?? ''),
-                onViewArticle: (articleId) =>
-                    context.push(AppRoutes.articleDetailPath(articleId)),
-              );
-            }
+          if (state is ProfileLoaded) {
+            return _ProfileBody(
+              state: state,
+              userId: _userId ?? '',
+              onDeleteArticle: (articleId) =>
+                  context.read<ProfileCubit>().deleteArticle(articleId, _userId ?? ''),
+              onViewArticle: (articleId) =>
+                  context.push(AppRoutes.articlePath(articleId)),
+            );
+          }
 
-            return const SizedBox.shrink();
-          },
-        ),
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
@@ -196,14 +193,16 @@ class _ProfileBody extends StatelessWidget {
                   crossAxisCount: 2,
                   crossAxisSpacing: AppSpacing.md,
                   mainAxisSpacing: AppSpacing.lg,
-                  childAspectRatio: 0.75,
+                  childAspectRatio: 0.62,
                 ),
                 itemCount: state.savedArticles.length,
                 itemBuilder: (_, index) {
                   final article = state.savedArticles[index];
+                  final category = state.categoryById(article.categoryId);
                   return SavedArticleThumbnail(
                     article: article,
-                    categoryName: article.categoryId,
+                    categoryName: category?.name ?? article.categoryId,
+                    fallbackImageUrl: category?.iconUrl,
                     onTap: () => onViewArticle(article.id),
                   );
                 },
@@ -230,9 +229,10 @@ class _ProfileBody extends StatelessWidget {
                   const SizedBox(height: AppSpacing.md),
               itemBuilder: (context, index) {
                 final article = state.publishedArticles[index];
+                final category = state.categoryById(article.categoryId);
                 return PublishedArticleRow(
                   article: article,
-                  categoryName: article.categoryId,
+                  categoryName: category?.name ?? article.categoryId,
                   onTapView: () => onViewArticle(article.id),
                   onTapEdit: () {},
                   onTapDelete: () => onDeleteArticle(article.id),

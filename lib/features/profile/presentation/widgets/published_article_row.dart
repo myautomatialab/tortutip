@@ -30,8 +30,8 @@ class PublishedArticleRow extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           child: SizedBox(
-            width: 60,
-            height: 60,
+            width: AppSpacing.thumbnailSm,
+            height: AppSpacing.thumbnailSm,
             child: article.coverHorizontalUrl.isNotEmpty
                 ? CachedNetworkImage(
                     imageUrl: article.coverHorizontalUrl,

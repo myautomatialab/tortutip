@@ -46,3 +46,7 @@ class EditProfileError extends EditProfileState {
   @override
   List<Object?> get props => [message];
 }
+
+class EditProfileAccountDeleted extends EditProfileState {
+  const EditProfileAccountDeleted();
+}
