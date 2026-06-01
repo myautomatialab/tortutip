@@ -7,6 +7,7 @@ class PublishArticleParams extends Equatable {
   final String body;
   final String coverVerticalUrl;
   final String coverHorizontalUrl;
+  final int readTimeMinutes;
 
   const PublishArticleParams({
     required this.authorId,
@@ -15,6 +16,7 @@ class PublishArticleParams extends Equatable {
     required this.body,
     required this.coverVerticalUrl,
     required this.coverHorizontalUrl,
+    this.readTimeMinutes = 1,
   });
 
   @override
@@ -25,5 +27,6 @@ class PublishArticleParams extends Equatable {
         body,
         coverVerticalUrl,
         coverHorizontalUrl,
+        readTimeMinutes,
       ];
 }
