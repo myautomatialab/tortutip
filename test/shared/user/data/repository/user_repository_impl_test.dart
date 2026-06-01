@@ -22,6 +22,9 @@ void main() {
     gender: '',
     ageRange: '',
     createdAt: DateTime(2024),
+    streakDays: 0,
+    lastFeedDate: '',
+    overallProgress: 0.0,
   );
 
   setUp(() {
@@ -131,6 +134,27 @@ void main() {
           .thenThrow(Exception('not found'));
 
       final result = await repository.getUserById('user_1');
+
+      expect(result, isA<DataFailed<UserEntity>>());
+    });
+  });
+
+  group('UserRepositoryImpl.recordFeedSwipe', () {
+    test('should_return_DataSuccess_with_entity_when_datasource_succeeds',
+        () async {
+      when(() => mockDataSource.recordFeedSwipe(any()))
+          .thenAnswer((_) async => userModel);
+
+      final result = await repository.recordFeedSwipe('user_1');
+
+      expect(result, isA<DataSuccess<UserEntity>>());
+    });
+
+    test('should_return_DataFailed_when_datasource_throws', () async {
+      when(() => mockDataSource.recordFeedSwipe(any()))
+          .thenThrow(Exception('Firestore error'));
+
+      final result = await repository.recordFeedSwipe('user_1');
 
       expect(result, isA<DataFailed<UserEntity>>());
     });
