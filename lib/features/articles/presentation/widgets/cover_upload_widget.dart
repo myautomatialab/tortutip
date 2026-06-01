@@ -1,0 +1,168 @@
+import 'package:flutter/material.dart';
+import 'package:tortutip/config/theme/app_colors.dart';
+import 'package:tortutip/config/theme/app_spacing.dart';
+import 'package:tortutip/config/theme/app_typography.dart';
+
+class CoverUploadWidget extends StatelessWidget {
+  final String? coverVerticalUrl;
+  final String? coverHorizontalUrl;
+  final bool isUploadingVertical;
+  final bool isUploadingHorizontal;
+  final VoidCallback onTapVertical;
+  final VoidCallback onTapHorizontal;
+
+  const CoverUploadWidget({
+    super.key,
+    this.coverVerticalUrl,
+    this.coverHorizontalUrl,
+    this.isUploadingVertical = false,
+    this.isUploadingHorizontal = false,
+    required this.onTapVertical,
+    required this.onTapHorizontal,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.screenHorizontal,
+        vertical: AppSpacing.lg,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 3,
+            child: _CoverZone(
+              label: 'VERTICAL COVER\n(FEED)',
+              aspectRatio: 3 / 4,
+              imageUrl: coverVerticalUrl,
+              isUploading: isUploadingVertical,
+              onTap: onTapVertical,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            flex: 4,
+            child: _CoverZone(
+              label: 'HORIZONTAL COVER\n(ARTICLE)',
+              aspectRatio: 16 / 9,
+              imageUrl: coverHorizontalUrl,
+              isUploading: isUploadingHorizontal,
+              onTap: onTapHorizontal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CoverZone extends StatelessWidget {
+  final String label;
+  final double aspectRatio;
+  final String? imageUrl;
+  final bool isUploading;
+  final VoidCallback onTap;
+
+  const _CoverZone({
+    required this.label,
+    required this.aspectRatio,
+    this.imageUrl,
+    required this.isUploading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: isUploading ? null : onTap,
+      child: AspectRatio(
+        aspectRatio: aspectRatio,
+        child: ClipRRect(
+          borderRadius:
+              BorderRadius.circular(AppSpacing.radiusMd),
+          child: CustomPaint(
+            painter: _DashedBorderPainter(),
+            child: _buildContent(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    if (isUploading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.primary,
+          strokeWidth: 2,
+        ),
+      );
+    }
+
+    if (imageUrl != null) {
+      return Image.network(
+        imageUrl!,
+        fit: BoxFit.cover,
+        errorBuilder: (ctx, err, st) => _emptyZone(),
+      );
+    }
+
+    return _emptyZone();
+  }
+
+  Widget _emptyZone() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.add_photo_alternate_outlined,
+            color: AppColors.textSecondary,
+            size: AppSpacing.iconLg,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: AppTypography.caption,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DashedBorderPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.borderStrong
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    const dashWidth = 6.0;
+    const dashSpace = 4.0;
+    final radius = const Radius.circular(AppSpacing.radiusMd);
+    final rrect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      radius,
+    );
+
+    final path = Path()..addRRect(rrect);
+    final metrics = path.computeMetrics();
+
+    for (final metric in metrics) {
+      double distance = 0;
+      while (distance < metric.length) {
+        final end = (distance + dashWidth).clamp(0.0, metric.length);
+        canvas.drawPath(metric.extractPath(distance, end), paint);
+        distance += dashWidth + dashSpace;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
