@@ -11,7 +11,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<DataState<UserEntity>> signInWithGoogle() async {
     try {
       final user = await _dataSource.signInWithGoogle();
-      return DataSuccess(user.toEntity());
+      return DataSuccess(user);
     } on Exception catch (e) {
       return DataFailed(e);
     }
@@ -28,10 +28,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<DataState<UserEntity?>> checkCurrentAuth() async {
+  Future<DataState<bool>> deleteAccount() async {
+    try {
+      await _dataSource.deleteCurrentUser();
+      return const DataSuccess(true);
+    } catch (e) {
+      return DataFailed(e is Exception ? e : Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<DataState<UserEntity>> checkCurrentAuth() async {
     try {
       final user = await _dataSource.checkCurrentUser();
-      return DataSuccess(user?.toEntity());
+      if (user == null) return DataFailed(Exception('No active session'));
+      return DataSuccess(user);
     } on Exception catch (e) {
       return DataFailed(e);
     }

@@ -1,17 +1,33 @@
+import 'package:equatable/equatable.dart';
 import 'package:tortutip/features/categories/domain/entities/category_entity.dart';
 
-abstract class CategoryState {}
+abstract class CategoryState extends Equatable {
+  const CategoryState();
 
-class CategoryInitial extends CategoryState {}
+  @override
+  List<Object?> get props => [];
+}
 
-class CategoryLoading extends CategoryState {}
+class CategoryInitial extends CategoryState {
+  const CategoryInitial();
+}
+
+class CategoryLoading extends CategoryState {
+  const CategoryLoading();
+}
 
 class CategoryLoaded extends CategoryState {
   final List<CategoryEntity> categories;
-  CategoryLoaded(this.categories);
+  const CategoryLoaded(this.categories);
+
+  @override
+  List<Object?> get props => [categories];
 }
 
 class CategoryError extends CategoryState {
   final String message;
-  CategoryError(this.message);
+  const CategoryError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

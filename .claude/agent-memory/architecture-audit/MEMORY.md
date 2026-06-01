@@ -1,0 +1,3 @@
+- [DataState fire-and-forget violation](feedback-datastate-signout.md) — AuthBloc._onSignOut discards DataState result; recurring Rule 8 risk in fire-and-forget use cases
+- [FeedCubit singleton decision](project-feedcubit-singleton.md) — FeedCubit uses registerLazySingleton (not registerFactory) to enable AppShell.refresh(); known Rule 5 violation pending team decision
+- [Cross-feature DataSource import pattern](project-datasource-cross-layer-import.md) — ExploreRemoteDataSource imports ArticleModel from articles/data; Rule 2 cross-feature violation pattern to watch

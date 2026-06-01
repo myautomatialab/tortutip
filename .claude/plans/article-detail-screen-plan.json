@@ -1,0 +1,537 @@
+{
+  "plan_id": "article-detail-screen-v2",
+  "feature": "ArticleDetailScreen",
+  "scope_note": "Likes, comentarios y seguir-autor eliminados del scope. Solo bookmark, compartir y 'Más como esto'.",
+  "created": "2026-05-31",
+
+  "pubspec_changes": {
+    "add_dependencies": [
+      {
+        "package": "share_plus",
+        "version": "^10.1.4",
+        "reason": "Botón compartir en AppBar. Ya presente o a añadir."
+      },
+      {
+        "package": "cached_network_image",
+        "version": "^3.4.1",
+        "reason": "Imagen de portada hero con placeholder y fade-in."
+      }
+    ],
+    "no_new_dev_dependencies": true
+  },
+
+  "domain_changes": {
+    "new_use_cases": [
+      {
+        "file": "lib/features/articles/domain/use_cases/get_related_articles_use_case.dart",
+        "class": "GetRelatedArticlesUseCase",
+        "implements": "UseCase<DataState<List<ArticleEntity>>, GetRelatedArticlesParams>",
+        "params_class": {
+          "name": "GetRelatedArticlesParams",
+          "fields": [
+            { "name": "categoryId", "type": "String" },
+            { "name": "excludeArticleId", "type": "String" }
+          ]
+        },
+        "delegates_to": "ArticleRepository.getRelatedArticles(categoryId, excludeArticleId)"
+      }
+    ],
+    "existing_use_cases_reused": [
+      "GetArticleDetailUseCase",
+      "SaveArticleUseCase",
+      "UnsaveArticleUseCase",
+      "GetSavedArticleIdsUseCase"
+    ],
+    "use_cases_NOT_to_create": [
+      "LikeArticleUseCase — eliminado del scope"
+    ],
+    "repository_interface_additions": {
+      "file": "lib/features/articles/domain/repository/article_repository.dart",
+      "add_methods": [
+        {
+          "signature": "Future<DataState<List<ArticleEntity>>> getRelatedArticles(String categoryId, String excludeArticleId)",
+          "note": "Devuelve hasta 5 artículos del mismo categoryId excluyendo el actual."
+        }
+      ],
+      "do_NOT_add": [
+        "likeArticle",
+        "getLikedArticleIds"
+      ]
+    },
+    "new_user_use_case": {
+      "note": "GetUserByIdUseCase no existe aún. La sección autor carga el perfil del autor por su authorId.",
+      "file": "lib/shared/user/domain/use_cases/get_user_by_id_use_case.dart",
+      "class": "GetUserByIdUseCase",
+      "implements": "UseCase<DataState<UserEntity>, String>",
+      "delegates_to": "UserRepository.getUserById(userId)",
+      "user_repository_addition": {
+        "file": "lib/shared/user/domain/repository/user_repository.dart",
+        "add_method": "Future<DataState<UserEntity>> getUserById(String userId)"
+      }
+    }
+  },
+
+  "data_changes": {
+    "article_repository_impl": {
+      "file": "lib/features/articles/data/repository/article_repository_impl.dart",
+      "add_method": {
+        "name": "getRelatedArticles",
+        "pattern": "try { final models = await _dataSource.getRelatedArticles(categoryId, excludeArticleId); return DataSuccess(models); } catch (e) { return DataFailed(e is Exception ? e : Exception(e.toString())); }"
+      }
+    },
+    "article_remote_data_source": {
+      "file": "lib/features/articles/data/data_sources/article_remote_data_source.dart",
+      "add_to_abstract": "Future<List<ArticleModel>> getRelatedArticles(String categoryId, String excludeArticleId)",
+      "impl_note": "Firestore: collection('articles').where('category_id', isEqualTo: categoryId).where('status', isEqualTo: 'published').limit(6) → filtra excludeArticleId en memoria → toma 5."
+    },
+    "mock_article_remote_data_source": {
+      "file": "lib/features/articles/data/data_sources/mock_article_remote_data_source.dart",
+      "add_method": "getRelatedArticles → devuelve los primeros 5 artículos mock del mismo categoryId excluyendo el actual."
+    },
+    "user_repository_impl": {
+      "file": "lib/shared/user/data/repository/user_repository_impl.dart",
+      "add_method": {
+        "name": "getUserById",
+        "pattern": "try { final model = await _dataSource.getUserById(userId); return DataSuccess(model); } catch (e) { return DataFailed(e is Exception ? e : Exception(e.toString())); }"
+      }
+    },
+    "user_remote_data_source": {
+      "file": "lib/shared/user/data/data_sources/user_remote_data_source.dart",
+      "add_to_abstract": "Future<UserModel> getUserById(String userId)",
+      "impl_note": "Firestore: collection('users').doc(userId).get()"
+    },
+    "mock_user_remote_data_source": {
+      "file": "lib/shared/user/data/data_sources/mock_user_remote_data_source.dart",
+      "add_method": "getUserById → devuelve un UserModel con datos mock basados en el userId."
+    }
+  },
+
+  "presentation_bloc": {
+    "state_file": "lib/features/articles/presentation/bloc/article_detail/article_detail_state.dart",
+    "states": [
+      {
+        "class": "ArticleDetailInitial",
+        "extends": "ArticleDetailState",
+        "fields": [],
+        "note": "Estado inicial del cubit."
+      },
+      {
+        "class": "ArticleDetailLoading",
+        "extends": "ArticleDetailState",
+        "fields": [],
+        "note": "Mientras carga el artículo principal."
+      },
+      {
+        "class": "ArticleDetailLoaded",
+        "extends": "ArticleDetailState",
+        "fields": [
+          { "name": "article", "type": "ArticleEntity", "nullable": false },
+          { "name": "author", "type": "UserEntity", "nullable": false },
+          { "name": "isSaved", "type": "bool", "nullable": false },
+          { "name": "relatedArticles", "type": "List<ArticleEntity>", "nullable": false }
+        ],
+        "props": ["article", "author", "isSaved", "relatedArticles"],
+        "fields_NOT_included": ["isLiked", "isFollowingAuthor", "likeCount"],
+        "note": "Estado de éxito. isSaved es mutable por toggleSave."
+      },
+      {
+        "class": "ArticleDetailError",
+        "extends": "ArticleDetailState",
+        "fields": [
+          { "name": "message", "type": "String", "nullable": false }
+        ],
+        "props": ["message"],
+        "note": "Error recuperable con mensaje legible para el usuario."
+      },
+      {
+        "class": "ArticleDetailSaving",
+        "extends": "ArticleDetailState",
+        "fields": [
+          { "name": "article", "type": "ArticleEntity", "nullable": false },
+          { "name": "author", "type": "UserEntity", "nullable": false },
+          { "name": "isSaved", "type": "bool", "nullable": false },
+          { "name": "relatedArticles", "type": "List<ArticleEntity>", "nullable": false }
+        ],
+        "props": ["article", "author", "isSaved", "relatedArticles"],
+        "note": "Opcional — se puede usar para mostrar spinner en el icono bookmark mientras se persiste."
+      }
+    ],
+
+    "cubit_file": "lib/features/articles/presentation/bloc/article_detail/article_detail_cubit.dart",
+    "cubit_class": "ArticleDetailCubit",
+    "constructor_use_cases": [
+      "GetArticleDetailUseCase",
+      "GetRelatedArticlesUseCase",
+      "SaveArticleUseCase",
+      "UnsaveArticleUseCase",
+      "GetUserByIdUseCase"
+    ],
+    "methods": [
+      {
+        "name": "loadArticle",
+        "params": ["String articleId", "String currentUserId"],
+        "steps": [
+          "emit(ArticleDetailLoading())",
+          "await _getArticleDetail(articleId) → DataState<ArticleEntity>",
+          "Si falla → emit(ArticleDetailError(_mapErrorToMessage(error)))",
+          "await _getUserById(article.authorId) → DataState<UserEntity>",
+          "Si falla → emit(ArticleDetailError(...))",
+          "await _getSavedArticleIds(currentUserId) → DataState<List<String>>",
+          "isSaved = ids.contains(articleId)",
+          "await _getRelatedArticles(GetRelatedArticlesParams(categoryId: article.categoryId, excludeArticleId: articleId))",
+          "emit(ArticleDetailLoaded(article, author, isSaved, relatedArticles))"
+        ],
+        "note": "Todas las llamadas se hacen en paralelo con Future.wait donde no hay dependencia entre sí."
+      },
+      {
+        "name": "toggleSave",
+        "params": ["String userId"],
+        "steps": [
+          "Guard: si state no es ArticleDetailLoaded, return",
+          "final loaded = state as ArticleDetailLoaded",
+          "Optimistic update: emit(ArticleDetailLoaded(..., isSaved: !loaded.isSaved))",
+          "Si isSaved era true → await _unsaveArticle(UnsaveArticleParams(...))",
+          "Si isSaved era false → await _saveArticle(SaveArticleParams(...))",
+          "Si falla → revertir emit con isSaved original + mostrar snackbar desde la Screen"
+        ],
+        "note": "Actualización optimista. El método no emite error directamente — retorna bool success para que la Screen decida."
+      }
+    ],
+    "methods_NOT_to_add": [
+      "toggleLike — eliminado del scope",
+      "toggleFollowAuthor — eliminado del scope"
+    ],
+    "error_mapper": {
+      "method": "_mapErrorToMessage",
+      "cases": {
+        "permission-denied": "No tienes permiso para ver este artículo",
+        "not-found": "El artículo no existe",
+        "unavailable": "Sin conexión. Inténtalo de nuevo",
+        "_": "Algo salió mal. Inténtalo de nuevo"
+      }
+    }
+  },
+
+  "presentation_widgets": [
+    {
+      "file": "lib/features/articles/presentation/widgets/article_cover_image.dart",
+      "class": "ArticleCoverImage",
+      "type": "StatelessWidget",
+      "props": [
+        { "name": "imageUrl", "type": "String" },
+        { "name": "height", "type": "double", "default": "260" }
+      ],
+      "description": "Imagen de portada con CachedNetworkImage. BoxFit.cover, fade-in. Placeholder con color AppColors.surface.",
+      "tokens": ["AppColors.surface", "AppSpacing.radiusLg"],
+      "note": "Usar coverHorizontalUrl del ArticleEntity."
+    },
+    {
+      "file": "lib/features/articles/presentation/widgets/author_row.dart",
+      "class": "AuthorRow",
+      "type": "StatelessWidget",
+      "props": [
+        { "name": "author", "type": "UserEntity" },
+        { "name": "readTimeMinutes", "type": "int" }
+      ],
+      "description": "Fila con CircleAvatar del autor (avatarUrl), nombre (AppTypography.labelLg, AppColors.textPrimary), bio en una línea (AppTypography.caption, AppColors.textSecondary) y chip de tiempo de lectura.",
+      "fields_NOT_to_include": ["followButton", "isFollowing"],
+      "tokens": ["AppSpacing.sm", "AppSpacing.md", "AppColors.textPrimary", "AppColors.textSecondary"],
+      "note": "No hay botón Seguir. Solo información del autor."
+    },
+    {
+      "file": "lib/features/articles/presentation/widgets/article_body_renderer.dart",
+      "class": "ArticleBodyRenderer",
+      "type": "StatelessWidget",
+      "props": [
+        { "name": "body", "type": "String" }
+      ],
+      "description": "Renderiza el body del artículo. En MVP, body es texto plano — usar Text con AppTypography.body, AppColors.textPrimary, height: 1.6. Cuando se integre Quill, este widget se reemplaza sin tocar ArticleDetailScreen.",
+      "tokens": ["AppTypography.body", "AppColors.textPrimary", "AppSpacing.screenHorizontal"]
+    },
+    {
+      "file": "lib/features/articles/presentation/widgets/article_action_bar.dart",
+      "class": "ArticleActionBar",
+      "type": "StatelessWidget",
+      "props": [
+        { "name": "isSaved", "type": "bool" },
+        { "name": "onToggleSave", "type": "VoidCallback" }
+      ],
+      "description": "Barra de acción con un único botón: bookmark (🔖). Si isSaved → icono filled AppColors.primary; si no → icono outline AppColors.textSecondary. Sin likes (♥), sin comentarios (💬).",
+      "actions_NOT_to_include": ["likeButton", "likeCount", "commentButton", "commentCount"],
+      "tokens": ["AppSpacing.md", "AppColors.primary", "AppColors.textSecondary"],
+      "note": "Solo 1 acción. Se mantiene como widget separado para no contaminar ArticleDetailScreen con estado de gestos."
+    },
+    {
+      "file": "lib/features/articles/presentation/widgets/related_articles_section.dart",
+      "class": "RelatedArticlesSection",
+      "type": "StatelessWidget",
+      "props": [
+        { "name": "articles", "type": "List<ArticleEntity>" },
+        { "name": "onArticleTap", "type": "void Function(String articleId)" }
+      ],
+      "description": "Sección 'Más como esto' con título (AppTypography.titleSm) y ListView horizontal de ArticleCard. Si articles.isEmpty → SizedBox.shrink().",
+      "tokens": ["AppTypography.titleSm", "AppColors.textPrimary", "AppSpacing.screenHorizontal", "AppSpacing.md"],
+      "reuses": "ArticleCard existente en lib/features/articles/presentation/widgets/article_card.dart"
+    }
+  ],
+
+  "presentation_screen": {
+    "file": "lib/features/articles/presentation/screens/article_detail_screen.dart",
+    "class": "ArticleDetailScreen",
+    "type": "StatelessWidget",
+    "constructor": {
+      "params": [
+        { "name": "articleId", "type": "String", "required": true }
+      ]
+    },
+    "bloc_provider": "BlocProvider(create: (_) => sl<ArticleDetailCubit>()..loadArticle(articleId, currentUserId))",
+    "current_user_source": "context.read<AuthBloc>().state — obtener userId del AuthAuthenticated state",
+    "app_bar": {
+      "widget": "TortuAppBar.detail()",
+      "actions": [
+        {
+          "icon": "Icons.share_outlined",
+          "tooltip": "Compartir",
+          "onPressed": "Share.share(article.title + '\\n' + AppRoutes.feedDetail(articleId))",
+          "requires": "share_plus package",
+          "only_visible_when": "state is ArticleDetailLoaded"
+        }
+      ]
+    },
+    "body_structure": {
+      "layout": "CustomScrollView con Slivers",
+      "slivers": [
+        "SliverToBoxAdapter → ArticleCoverImage(imageUrl: article.coverHorizontalUrl)",
+        "SliverPadding(screenHorizontal) → SliverList con:",
+        "  - SizedBox(height: AppSpacing.xl)",
+        "  - Text(article.title, style: AppTypography.titleLg)",
+        "  - SizedBox(height: AppSpacing.lg)",
+        "  - AuthorRow(author: author, readTimeMinutes: article.readTimeMinutes)",
+        "  - Divider(color: AppColors.border)",
+        "  - ArticleActionBar(isSaved: loaded.isSaved, onToggleSave: () => cubit.toggleSave(userId))",
+        "  - Divider(color: AppColors.border)",
+        "  - SizedBox(height: AppSpacing.xl)",
+        "  - ArticleBodyRenderer(body: article.body)",
+        "  - SizedBox(height: AppSpacing.huge)",
+        "  - RelatedArticlesSection(articles: loaded.relatedArticles, onArticleTap: (id) => context.push(AppRoutes.feedDetail(id)))",
+        "  - SizedBox(height: AppSpacing.huge)"
+      ]
+    },
+    "states_handling": {
+      "ArticleDetailLoading": "Center(child: CircularProgressIndicator(color: AppColors.primary))",
+      "ArticleDetailLoaded": "CustomScrollView descrito arriba",
+      "ArticleDetailError": "Center con Column: icono error, Text(message, AppTypography.body), TextButton('Reintentar', onPressed: () => cubit.loadArticle(articleId, userId))",
+      "ArticleDetailInitial": "SizedBox.shrink()"
+    },
+    "save_error_handling": "BlocListener que reacciona cuando toggleSave falla → ScaffoldMessenger.of(context).showSnackBar(...)"
+  },
+
+  "injection_changes": {
+    "file": "lib/injection/articles_injection.dart",
+    "add_use_cases": [
+      "sl.registerLazySingleton(() => GetRelatedArticlesUseCase(sl()));"
+    ],
+    "update_article_detail_cubit_factory": {
+      "before": "sl.registerFactory(() => ArticleDetailCubit(sl()));",
+      "after": "sl.registerFactory(() => ArticleDetailCubit(sl<GetArticleDetailUseCase>(), sl<GetRelatedArticlesUseCase>(), sl<SaveArticleUseCase>(), sl<UnsaveArticleUseCase>(), sl<GetUserByIdUseCase>()));"
+    },
+    "do_NOT_register": ["LikeArticleUseCase"]
+  },
+  "user_injection_changes": {
+    "file": "lib/injection/user_injection.dart",
+    "add_use_case": "sl.registerLazySingleton(() => GetUserByIdUseCase(sl()));"
+  },
+
+  "tests": {
+    "new_test_files": [
+      {
+        "file": "test/features/articles/domain/use_cases/get_related_articles_use_case_test.dart",
+        "class_under_test": "GetRelatedArticlesUseCase",
+        "mock": "MockArticleRepository",
+        "cases": [
+          "should_return_DataSuccess_with_articles_when_repository_succeeds",
+          "should_return_DataFailed_when_repository_throws"
+        ]
+      },
+      {
+        "file": "test/shared/user/domain/use_cases/get_user_by_id_use_case_test.dart",
+        "class_under_test": "GetUserByIdUseCase",
+        "mock": "MockUserRepository",
+        "cases": [
+          "should_return_DataSuccess_with_user_when_repository_succeeds",
+          "should_return_DataFailed_when_repository_throws"
+        ]
+      }
+    ],
+    "update_existing_test_files": [
+      {
+        "file": "test/features/articles/presentation/bloc/article_detail/article_detail_cubit_test.dart",
+        "note": "El cubit actual recibe solo GetArticleDetailUseCase. Actualizar setUp para inyectar los 5 use cases nuevos.",
+        "add_mocks": [
+          "MockGetRelatedArticlesUseCase",
+          "MockSaveArticleUseCase",
+          "MockUnsaveArticleUseCase",
+          "MockGetUserByIdUseCase"
+        ],
+        "cases_to_add": [
+          "should_emit_Loading_then_Loaded_with_isSaved_true_when_article_is_in_saved_ids",
+          "should_emit_Loading_then_Loaded_with_isSaved_false_when_article_not_in_saved_ids",
+          "should_emit_Loaded_with_relatedArticles_when_getRelatedArticles_succeeds",
+          "should_emit_Loaded_with_empty_relatedArticles_when_getRelatedArticles_fails",
+          "should_optimistically_toggle_isSaved_to_true_when_toggleSave_called_and_was_false",
+          "should_optimistically_toggle_isSaved_to_false_when_toggleSave_called_and_was_true",
+          "should_revert_isSaved_when_saveArticle_fails",
+          "should_revert_isSaved_when_unsaveArticle_fails"
+        ],
+        "cases_NOT_to_add": [
+          "toggleLike — eliminado del scope",
+          "revert like — eliminado del scope",
+          "toggleFollowAuthor — eliminado del scope"
+        ]
+      },
+      {
+        "file": "test/features/articles/data/repository/article_repository_impl_test.dart",
+        "cases_to_add": [
+          "should_return_DataSuccess_with_entities_when_getRelatedArticles_datasource_succeeds",
+          "should_return_DataFailed_when_getRelatedArticles_datasource_throws"
+        ]
+      },
+      {
+        "file": "test/shared/user/data/repository/user_repository_impl_test.dart",
+        "cases_to_add": [
+          "should_return_DataSuccess_with_user_when_getUserById_datasource_succeeds",
+          "should_return_DataFailed_when_getUserById_datasource_throws"
+        ]
+      }
+    ],
+    "test_files_NOT_to_create": [
+      "like_article_use_case_test.dart — use case eliminado del scope"
+    ]
+  },
+
+  "implementation_order": [
+    {
+      "step": 1,
+      "title": "pubspec.yaml — añadir share_plus y cached_network_image",
+      "files": ["pubspec.yaml"],
+      "run_after": "flutter pub get"
+    },
+    {
+      "step": 2,
+      "title": "UserRepository — añadir getUserById",
+      "files": [
+        "lib/shared/user/domain/repository/user_repository.dart",
+        "lib/shared/user/data/data_sources/user_remote_data_source.dart",
+        "lib/shared/user/data/data_sources/mock_user_remote_data_source.dart",
+        "lib/shared/user/data/repository/user_repository_impl.dart"
+      ]
+    },
+    {
+      "step": 3,
+      "title": "GetUserByIdUseCase — domain puro",
+      "files": [
+        "lib/shared/user/domain/use_cases/get_user_by_id_use_case.dart"
+      ]
+    },
+    {
+      "step": 4,
+      "title": "ArticleRepository — añadir getRelatedArticles",
+      "files": [
+        "lib/features/articles/domain/repository/article_repository.dart",
+        "lib/features/articles/data/data_sources/article_remote_data_source.dart",
+        "lib/features/articles/data/data_sources/mock_article_remote_data_source.dart",
+        "lib/features/articles/data/repository/article_repository_impl.dart"
+      ]
+    },
+    {
+      "step": 5,
+      "title": "GetRelatedArticlesUseCase — domain puro",
+      "files": [
+        "lib/features/articles/domain/use_cases/get_related_articles_use_case.dart"
+      ]
+    },
+    {
+      "step": 6,
+      "title": "ArticleDetailState — ampliar con author, isSaved, relatedArticles",
+      "files": [
+        "lib/features/articles/presentation/bloc/article_detail/article_detail_state.dart"
+      ]
+    },
+    {
+      "step": 7,
+      "title": "ArticleDetailCubit — reescribir con 5 use cases, loadArticle + toggleSave",
+      "files": [
+        "lib/features/articles/presentation/bloc/article_detail/article_detail_cubit.dart"
+      ]
+    },
+    {
+      "step": 8,
+      "title": "Injection — registrar GetRelatedArticlesUseCase, GetUserByIdUseCase, actualizar factory",
+      "files": [
+        "lib/injection/articles_injection.dart",
+        "lib/injection/user_injection.dart"
+      ]
+    },
+    {
+      "step": 9,
+      "title": "Widgets de presentación",
+      "files": [
+        "lib/features/articles/presentation/widgets/article_cover_image.dart",
+        "lib/features/articles/presentation/widgets/author_row.dart",
+        "lib/features/articles/presentation/widgets/article_body_renderer.dart",
+        "lib/features/articles/presentation/widgets/article_action_bar.dart",
+        "lib/features/articles/presentation/widgets/related_articles_section.dart"
+      ]
+    },
+    {
+      "step": 10,
+      "title": "ArticleDetailScreen — implementar UI completa",
+      "files": [
+        "lib/features/articles/presentation/screens/article_detail_screen.dart"
+      ]
+    },
+    {
+      "step": 11,
+      "title": "Tests — nuevos y actualizados",
+      "files": [
+        "test/features/articles/domain/use_cases/get_related_articles_use_case_test.dart",
+        "test/shared/user/domain/use_cases/get_user_by_id_use_case_test.dart",
+        "test/features/articles/presentation/bloc/article_detail/article_detail_cubit_test.dart",
+        "test/features/articles/data/repository/article_repository_impl_test.dart",
+        "test/shared/user/data/repository/user_repository_impl_test.dart"
+      ],
+      "run_after": "flutter test && flutter analyze"
+    }
+  ],
+
+  "design_tokens_reference": {
+    "colors": {
+      "primary": "AppColors.primary",
+      "background": "AppColors.background",
+      "surface": "AppColors.surface",
+      "textPrimary": "AppColors.textPrimary",
+      "textSecondary": "AppColors.textSecondary",
+      "border": "AppColors.border"
+    },
+    "spacing": {
+      "screen_horizontal": "AppSpacing.screenHorizontal",
+      "between_sections": "AppSpacing.huge",
+      "between_elements": "AppSpacing.xl",
+      "small_gap": "AppSpacing.sm"
+    },
+    "typography": "AppTypography.titleLg (título), AppTypography.labelLg (nombre autor), AppTypography.caption (bio, meta), AppTypography.body (body artículo), AppTypography.titleSm (sección más como esto)"
+  },
+
+  "constraints": {
+    "no_hardcoded_colors": true,
+    "no_hardcoded_font_sizes": true,
+    "no_hardcoded_paddings": true,
+    "layers": {
+      "domain": "cero imports del proyecto excepto core/",
+      "data": "solo importa domain/ y Firebase",
+      "presentation": "solo importa domain/use_cases/ — nunca RepositoryImpl ni DataSource"
+    },
+    "bloc_in_cubit_only": "ArticleDetailScreen no importa ningún UseCase directamente",
+    "shared_user_repository_not_modified_for_articles": "getUserById se añade a UserRepository porque es una operación de usuario, no de artículo"
+  }
+}

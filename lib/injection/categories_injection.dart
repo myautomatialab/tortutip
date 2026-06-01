@@ -10,19 +10,15 @@ import '../features/categories/presentation/bloc/category_cubit.dart';
 final sl = GetIt.instance;
 
 void initCategoriesDependencies() {
-  // DataSource
   sl.registerLazySingleton<CategoryRemoteDataSource>(
     () => CategoryRemoteDataSourceImpl(sl<FirebaseFirestore>()),
   );
 
-  // Repository
   sl.registerLazySingleton<CategoryRepository>(
     () => CategoryRepositoryImpl(sl()),
   );
 
-  // Use case
   sl.registerLazySingleton(() => GetAllCategoriesUseCase(sl()));
 
-  // Cubit
   sl.registerFactory(() => CategoryCubit(sl()));
 }

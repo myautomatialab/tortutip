@@ -39,10 +39,55 @@ dependencies:
   # Utilidades
   equatable: ^2.0.7
 
+  # Editor de texto enriquecido
+  flutter_quill: ^11.5.1
+
+  # Selección de imágenes
+  image_picker: ^1.1.2
+
+  # Crop de imágenes de portada
+  image_cropper: ^12.2.1
+
+  # Imágenes de red con caché
+  cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
+  flutter_native_splash: ^2.4.8
+  shared_preferences: ^2.3.5
+  
+  font_awesome_flutter: ^11.0.0
+
+  # Localización
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+
+flutter_native_splash:
+  color: "#F5F0E8"
+  image: assets/images/splash_logo.png
+  android: true
+  ios: true
+  android_gravity: fill
+  ios_content_mode: scaleAspectFill
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/icon.png"
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  mocktail: ^1.0.0
+  bloc_test: ^10.0.0
+  flutter_launcher_icons: ^0.14.3
 
 flutter:
+  generate: true
   uses-material-design: true
+
+  assets:
+    - assets/images/
+
+
+

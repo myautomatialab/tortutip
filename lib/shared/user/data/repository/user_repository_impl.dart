@@ -11,8 +11,8 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<DataState<UserEntity>> getCurrentUser() async {
     try {
-      final user = await _dataSource.getCurrentUser('current_user_id');
-      return DataSuccess(user.toEntity());
+      final user = await _dataSource.getCurrentUser();
+      return DataSuccess(user);
     } on Exception catch (e) {
       return DataFailed(e);
     }
@@ -54,7 +54,37 @@ class UserRepositoryImpl implements UserRepository {
         createdAt: user.createdAt,
       );
       final updated = await _dataSource.updateUserProfile(model);
-      return DataSuccess(updated.toEntity());
+      return DataSuccess(updated);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<List<String>>> getUserCategoryIds(String userId) async {
+    try {
+      final ids = await _dataSource.getUserCategoryIds(userId);
+      return DataSuccess(ids);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<UserEntity>> getUserById(String userId) async {
+    try {
+      final model = await _dataSource.getUserById(userId);
+      return DataSuccess(model);
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
+  }
+
+  @override
+  Future<DataState<UserEntity>> recordFeedSwipe(String userId) async {
+    try {
+      final model = await _dataSource.recordFeedSwipe(userId);
+      return DataSuccess(model);
     } on Exception catch (e) {
       return DataFailed(e);
     }
