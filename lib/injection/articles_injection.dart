@@ -16,9 +16,11 @@ import '../features/articles/domain/use_cases/get_user_articles_use_case.dart';
 import '../features/articles/domain/use_cases/publish_article_use_case.dart';
 import '../features/articles/domain/use_cases/save_article_use_case.dart';
 import '../features/articles/domain/use_cases/unsave_article_use_case.dart';
+import '../features/articles/domain/use_cases/upload_article_image_use_case.dart';
 import '../features/articles/presentation/bloc/article_detail/article_detail_cubit.dart';
 import '../features/articles/presentation/bloc/create_article/create_article_cubit.dart';
 import '../features/articles/presentation/bloc/feed/feed_cubit.dart';
+import '../features/categories/domain/use_cases/get_all_categories_use_case.dart';
 import '../shared/user/domain/use_cases/get_user_category_ids_use_case.dart';
 import '../shared/user/domain/use_cases/get_user_by_id_use_case.dart';
 
@@ -54,6 +56,7 @@ void initArticlesDependencies() {
   sl.registerLazySingleton(() => GetSavedArticleIdsUseCase(sl()));
   sl.registerLazySingleton(() => UnsaveArticleUseCase(sl()));
   sl.registerLazySingleton(() => GetRelatedArticlesUseCase(sl()));
+  sl.registerLazySingleton(() => UploadArticleImageUseCase(sl()));
 
   // Cubits — factory, uno nuevo por pantalla
   sl.registerFactory(() => FeedCubit(
@@ -71,5 +74,9 @@ void initArticlesDependencies() {
         sl<GetUserByIdUseCase>(),
         sl<GetSavedArticleIdsUseCase>(),
       ));
-  sl.registerFactory(() => CreateArticleCubit(sl()));
+  sl.registerFactory(() => CreateArticleCubit(
+        sl<PublishArticleUseCase>(),
+        sl<UploadArticleImageUseCase>(),
+        sl<GetAllCategoriesUseCase>(),
+      ));
 }
