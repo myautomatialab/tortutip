@@ -48,6 +48,9 @@ dependencies:
   # Selección de imágenes
   image_picker: ^1.1.2
 
+  # Crop de imágenes de portada
+  image_cropper: ^12.2.1
+
   # Imágenes de red con caché
   cached_network_image: ^3.4.1
 
